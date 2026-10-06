@@ -1,0 +1,542 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:microduck-hatchery:protocol:hatchery-shell-0",
+  "title": "Microduck Hatchery sample-only shell contract",
+  "description": "Non-production draft. Describes a localhost sample shell, not the upstream servo-web/robotd protocol or measured hardware state. Joint-ID uniqueness, cross-index consistency and missing-value semantics must also be checked by the backend.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/info"
+    },
+    {
+      "$ref": "#/$defs/state"
+    },
+    {
+      "$ref": "#/$defs/hello"
+    },
+    {
+      "$ref": "#/$defs/ws_write_error"
+    },
+    {
+      "$ref": "#/$defs/http_write_error"
+    },
+    {
+      "$ref": "#/$defs/sample_fixture"
+    },
+    {
+      "$ref": "#/$defs/joint_mapping"
+    }
+  ],
+  "$defs": {
+    "mapping_joint": {
+      "type": "object",
+      "properties": {
+        "joint_id": {
+          "type": "integer",
+          "enum": [
+            20,
+            21,
+            22,
+            23,
+            24,
+            10,
+            11,
+            12,
+            13,
+            14,
+            30,
+            31,
+            32,
+            33,
+            34
+          ]
+        },
+        "name_en": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name_zh": {
+          "type": "string",
+          "minLength": 1
+        },
+        "group": {
+          "enum": [
+            "left_leg",
+            "right_leg",
+            "head"
+          ]
+        },
+        "display_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 14
+        },
+        "runtime_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 14
+        },
+        "policy_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 13
+        }
+      },
+      "required": [
+        "joint_id",
+        "name_en",
+        "name_zh",
+        "group",
+        "display_index",
+        "runtime_index",
+        "policy_index"
+      ],
+      "additionalProperties": false
+    },
+    "joint_state": {
+      "type": "object",
+      "properties": {
+        "joint_id": {
+          "type": "integer",
+          "enum": [
+            20,
+            21,
+            22,
+            23,
+            24,
+            10,
+            11,
+            12,
+            13,
+            14,
+            30,
+            31,
+            32,
+            33,
+            34
+          ]
+        },
+        "status": {
+          "enum": [
+            "sample",
+            "missing"
+          ]
+        },
+        "position_ticks": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "goal_ticks": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "load_raw": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "voltage_v": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "temperature_c": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "joint_id",
+        "status",
+        "position_ticks",
+        "goal_ticks",
+        "load_raw",
+        "voltage_v",
+        "temperature_c"
+      ],
+      "additionalProperties": false
+    },
+    "joint_mapping": {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": "hatchery-shell/0"
+        },
+        "imu_bus_id": {
+          "const": 200
+        },
+        "joints": {
+          "type": "array",
+          "minItems": 15,
+          "maxItems": 15,
+          "items": {
+            "$ref": "#/$defs/mapping_joint"
+          }
+        }
+      },
+      "required": [
+        "protocol_version",
+        "imu_bus_id",
+        "joints"
+      ],
+      "additionalProperties": false
+    },
+    "sample_fixture": {
+      "type": "object",
+      "properties": {
+        "sample": {
+          "const": true
+        },
+        "fake": {
+          "const": true
+        },
+        "simulated": {
+          "const": false
+        },
+        "source": {
+          "const": "sample"
+        },
+        "joints": {
+          "type": "array",
+          "minItems": 15,
+          "maxItems": 15,
+          "items": {
+            "$ref": "#/$defs/joint_state"
+          }
+        }
+      },
+      "required": [
+        "sample",
+        "fake",
+        "simulated",
+        "source",
+        "joints"
+      ],
+      "additionalProperties": false
+    },
+    "info": {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": "hatchery-shell/0"
+        },
+        "sample": {
+          "const": true
+        },
+        "fake": {
+          "const": true
+        },
+        "simulated": {
+          "const": false
+        },
+        "source": {
+          "const": "sample"
+        },
+        "device_id": {
+          "type": "null"
+        },
+        "session_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "read_only": {
+          "const": true
+        },
+        "mode": {
+          "const": "sample_read_only"
+        },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "telemetry": {
+              "const": true
+            },
+            "control": {
+              "const": false
+            },
+            "calibration": {
+              "const": false
+            },
+            "recording": {
+              "const": false
+            },
+            "runtime": {
+              "const": false
+            }
+          },
+          "required": [
+            "telemetry",
+            "control",
+            "calibration",
+            "recording",
+            "runtime"
+          ],
+          "additionalProperties": false
+        },
+        "joint_mapping": {
+          "type": "array",
+          "minItems": 15,
+          "maxItems": 15,
+          "items": {
+            "$ref": "#/$defs/mapping_joint"
+          }
+        }
+      },
+      "required": [
+        "protocol_version",
+        "sample",
+        "fake",
+        "simulated",
+        "source",
+        "device_id",
+        "session_id",
+        "read_only",
+        "mode",
+        "capabilities",
+        "joint_mapping"
+      ],
+      "additionalProperties": false
+    },
+    "hello": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "hello"
+        },
+        "protocol_version": {
+          "const": "hatchery-shell/0"
+        },
+        "sample": {
+          "const": true
+        },
+        "fake": {
+          "const": true
+        },
+        "simulated": {
+          "const": false
+        },
+        "source": {
+          "const": "sample"
+        },
+        "device_id": {
+          "type": "null"
+        },
+        "session_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "read_only": {
+          "const": true
+        },
+        "mode": {
+          "const": "sample_read_only"
+        },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "telemetry": {
+              "const": true
+            },
+            "control": {
+              "const": false
+            },
+            "calibration": {
+              "const": false
+            },
+            "recording": {
+              "const": false
+            },
+            "runtime": {
+              "const": false
+            }
+          },
+          "required": [
+            "telemetry",
+            "control",
+            "calibration",
+            "recording",
+            "runtime"
+          ],
+          "additionalProperties": false
+        },
+        "joint_mapping": {
+          "type": "array",
+          "minItems": 15,
+          "maxItems": 15,
+          "items": {
+            "$ref": "#/$defs/mapping_joint"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "protocol_version",
+        "sample",
+        "fake",
+        "simulated",
+        "source",
+        "device_id",
+        "session_id",
+        "read_only",
+        "mode",
+        "capabilities",
+        "joint_mapping"
+      ],
+      "additionalProperties": false
+    },
+    "state": {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": "hatchery-shell/0"
+        },
+        "type": {
+          "const": "state"
+        },
+        "sample": {
+          "const": true
+        },
+        "fake": {
+          "const": true
+        },
+        "simulated": {
+          "const": false
+        },
+        "source": {
+          "const": "sample"
+        },
+        "session_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "read_only": {
+          "const": true
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sampled_at_unix_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Sample message generation time in Unix seconds; not a hardware measurement time."
+        },
+        "monotonic_elapsed_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Seconds since this controller session started; never used as Unix time."
+        },
+        "age_ms": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Sample age when the backend serializes the message; browser receipt time does not replace it."
+        },
+        "joints": {
+          "type": "array",
+          "minItems": 15,
+          "maxItems": 15,
+          "items": {
+            "$ref": "#/$defs/joint_state"
+          }
+        }
+      },
+      "required": [
+        "protocol_version",
+        "type",
+        "sample",
+        "fake",
+        "simulated",
+        "source",
+        "session_id",
+        "read_only",
+        "sequence",
+        "sampled_at_unix_s",
+        "monotonic_elapsed_s",
+        "age_ms",
+        "joints"
+      ],
+      "additionalProperties": false
+    },
+    "ws_write_error": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "error"
+        },
+        "protocol_version": {
+          "const": "hatchery-shell/0"
+        },
+        "code": {
+          "const": "read_only"
+        },
+        "sample": {
+          "const": true
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command_id": {
+          "type": "null"
+        },
+        "operation": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "type",
+        "protocol_version",
+        "code",
+        "sample",
+        "message",
+        "command_id",
+        "operation"
+      ],
+      "additionalProperties": false
+    },
+    "http_write_error": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "read_only"
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "additionalProperties": false
+        },
+        "sample": {
+          "const": true
+        },
+        "read_only": {
+          "const": true
+        }
+      },
+      "required": [
+        "error",
+        "sample",
+        "read_only"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

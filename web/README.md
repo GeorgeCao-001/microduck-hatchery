@@ -1,91 +1,57 @@
-# Microduck Lab · Web
+# Microduck Hatchery Web
 
-Microduck 复刻项目的 Web 工作区：展示实物与实验，整理制作教程，并为 Radxa Zero 3W 上的设备调试提供统一界面。
+Hatchery 的开发、调试、展示和教程前端。当前是原生 HTML/CSS/JS 原型，数据为样例，实机控件禁用；关节联调样例已实现，七章教程仍待方案审查，生产前端栈尚未冻结。
 
-Web 是整个复刻项目的一部分。现阶段已确定初版视觉与交互原型，下一步逐步接入实际设备、补充教程和团队实验记录。
+## 本地运行
 
-## 功能与页面
-
-| 模块 | 内容 |
-| --- | --- |
-| 介绍 | 项目目标、实物照片、复刻路线和主要入口 |
-| 实验展示 | 实机视频、实验条件、二维曲线和结果记录 |
-| 教程 | 从硬件准备、装配到系统部署、连接和舵机调试；章节与本章目录放在同一栏，阅读标记随正文位置更新 |
-| 调试台 | 设备状态、15 个关节、选中关节详情、目标/实际曲线及事件日志 |
-| 记录 | 数据曲线、实验元信息、事件时间线和 CSV 导出 |
-
-调试台的关节按 **左腿 → 右腿 → 头颈** 排列。左右腿均采用髋偏航、髋侧倾、髋俯仰、膝、踝的顺序，方便对称关节对照。关节列表独立滚动，桌面切换关节时保留列表位置与焦点，右侧详情同步更新；没有回读的关节仍保留，数值显示为 `—`。
-
-## 当前状态
-
-- 初版原型包含介绍、展示、教程、调试台、记录与连接说明，并提供桌面和手机布局。
-- 调试台可预览示例、未连接、数据陈旧、只读四种状态。
-- 设备值、曲线和日志目前为生成样例；控制按钮禁用，原型不会连接或操作设备。示例 CSV 带有 `sample=true` 标记。
-- 教程目前包含六章路线、连接章草稿和其他章节提纲。后续逐章补充操作、预期现象、检查点与排错记录。
-- 实机视频、团队照片、真实回读与 Windows / Linux / macOS 兼容性记录待补。交互逻辑已检查，完整浏览器验收与硬件验收仍待进行。
-
-## 预览初版
-
-取得当前设计包后，将其中的文件放入本目录；源码与设计文件会逐步入库。
-
-**直接预览：** 用桌面浏览器打开 `Microduck-Lab-Visual-Prototype.html`。图片与拉丁/代码字体已内嵌，无需安装 Node.js 或启动开发板服务。
-
-**查看分离源码：** 在本目录启动静态文件服务，再打开 <http://localhost:8080>。
-
-```bash
-# Linux / macOS
-python3 -m http.server 8080 --directory prototype
-```
+在仓库根目录执行，无需安装第三方依赖：
 
 ```powershell
-# Windows（已安装 Python）
-py -m http.server 8080 --directory prototype
+python web/tools/preview.py
 ```
 
-此服务仅用于预览静态原型。
+打开 <http://127.0.0.1:5173/>，用 `Ctrl+C` 停止；端口占用可加 `--port 5174`。脚本依据自身位置定位原型，仅提供 loopback 静态预览。
 
-## 源码与设计资料
+[单文件原型](Microduck-Hatchery-Visual-Prototype.html) 也可直接打开。已有 [Python 只读样例工具](../tools/hatchery-shell/README.md) 使用 `python scripts/hatchery-shell.py --port 8080`；诊断页 `shell/` 缺少 `app.js`，尚未完整可用。
 
-设计包中的文件将按以下结构放入 `web/`：
+打开 `#console` 默认进入联调，可切换单关节调试。15 个关节在一个大面板内按左腿、右腿、头颈与嘴部分组三组，每组五张卡片；保留目标滑块、数字输入与步进，联调面板不设内部列表滚动。支持范围选择、反馈填充、姿态保存/加载和逐项样例检查，单关节列表继续独立滚动。
 
-| 路径 | 用途 |
-| --- | --- |
-| `README.md` | 本模块说明 |
-| `Microduck-Lab-Visual-Prototype.html` | 可独立打开的单文件原型 |
-| `prototype/` | 分离的 HTML、CSS、JavaScript、图片和字体 |
-| `scripts/` | Figma 构建记录与待执行页面脚本 |
-| `review/` | 已取得的设计截图 |
-| `Microduck-Lab-Visual-Design.md` | 视觉规则、交互规格与验证记录 |
-| `SOURCE_FREEZE.md` | 参考源码版本与接口边界 |
-| `Microduck-Lab-Execution-Plan.md` | 实现顺序、任务进度与验收要求 |
-| `Microduck-Lab-Handoff.md` | 项目续接说明 |
-| `tokens.json`、`design-state.json` | 设计变量与当前状态 |
-| `licenses/` | 随包素材的许可证 |
+大曲线面板可选择关节与数据，图表选择独立于草稿应用范围；位置、误差、raw load、电压和温度按单位分图。默认收起的曲线设置显示选择摘要；导航可收起。当前仅左膝有浏览器生成的连续样例，其他关节与 raw load 保留缺测；目标草稿不替代目标回读，页面未连接设备。使用与暂停边界见 [联调说明](docs/JOINT_COORDINATION.md)。
 
-## 设备接入计划
+修改拆分源码后，用 `python web/tools/build_standalone.py` 同步两份单文件入口；草稿与曲线模型用 `node --test web/tests/joint-drafts.test.cjs web/tests/joint-charts.test.cjs` 检查，无新增运行依赖。
 
-设备端以 **Radxa Zero 3W** 为基线，电脑端面向 Windows、Linux 和 macOS。
+## 目录与文档
 
-| 路径 | 计划方式 |
-| --- | --- |
-| Wi-Fi | 电脑访问开发板提供的网页与 API |
-| USB-C | USB-C 1 / OTG 配置虚拟网卡后，复用板端网页与 API；具体配置及主机枚举需实测 |
-| BLE | 优先复用官方 `duckctl` / `btd`，由电脑本地桥接提供网页入口 |
+```text
+web/
+├─ README.md          模块入口与运行方法
+├─ NEXT_STEPS.md      官方 Web 参考、后续优先级与提交前事项
+├─ docs/              状态、审查方案、视觉规范与源码参考
+├─ prototype/         原型 HTML/CSS/JS、图片与字体
+├─ shell/             尚未完成的样例诊断页
+├─ tools/             静态预览与单文件生成
+├─ tests/             草稿与曲线模型的 Node 原生测试
+├─ scripts/           设计包中的 Figma 脚本
+├─ review/            来源作者的 Figma 截图
+├─ licenses/          字体与图标许可
+├─ tokens.json        视觉 token
+└─ design-state.json  设计包生成元数据
+```
 
-介绍、教程、展示和记录阅读可在公开网站提供；设备调试进入开发板或本地桥接提供的同源网页。后续优先复用现有 `servo-web` 与飞特舵机工具，再补齐项目需要的设备身份、状态和操作回执。
+详细分类见 [文档索引](docs/README.md)：
 
-## 后续工作
+- [后续建议与提交前事项](NEXT_STEPS.md)。
+- [当前状态与验证范围](docs/LOCAL_STATUS.md)。
+- [七章教程与关节联调审查稿](docs/LOCAL_REVIEW_PROPOSAL.md)。
+- [视觉规范与素材署名](docs/Microduck-Hatchery-Visual-Design.md)。
+- [冻结来源](docs/SOURCE_FREEZE.md)、[设备协议源码审核](docs/PROTOCOL_SOURCE_AUDIT.md)。
 
-- [ ] 将原型源码和设计资料整理入库，确定正式工程结构。
-- [ ] 接入设备发现、真实回读、关节映射和二维曲线。
-- [ ] 在校准与限位核对后接入台架控制，记录实际操作结果。
-- [ ] 逐章完善制作教程，补充团队实物、视频和复现记录。
-- [ ] 完成浏览器、离线使用及三系统连接验收。
+旧 Web 交接与执行计划已删除；全栈工作按 [根本地交接](../Microduck-Hatchery-Local-Development-Handoff.md)、[架构 v2](../docs/microduck-hatchery-architecture-v2.md) 和 [阶段计划](../docs/PLAN.md) 推进。项目记录在 [logs/PROJECT_LOG.md](../logs/PROJECT_LOG.md)。
 
-## 参考与设计来源
+## 前端边界
 
-- [Pollen Robotics / Microduck](https://github.com/pollen-robotics/microduck)：官方项目与工具。
-- [fanhao375 / microduck-replica](https://github.com/fanhao375/microduck-replica)：复刻方案、飞特版工具与参考照片。
-- [Microduck Lab 设计稿](https://www.figma.com/design/1UFU4X1u0kT6j5DfzviosN)：品牌、组件与页面设计记录。
+`web/` 管理页面、目标草稿、展示缓存与只读回放。正式控制关系为 Browser / Hatchery Web → 板端 Web / media gateway → shared protocol / RPC → robotd → duck-control / safety → motor bus；设备端裁定控制权、校准、限位、动作时序、确认与失联处置。
 
-这是独立复刻项目的 Web 模块。复用的代码、照片、字体与图标保留各自来源和许可说明；团队实测结果会与参考素材、示例数据分别标注。
+当前目录只预留了正式设备模块，尚未引入官方源码或连通上述链路。静态预览和 Python 样例工具都不充当权威控制器。实际平台为 Radxa Zero 3W / FT，设备路径与能力按配置核对。
+
+保留全部 15 个物理关节和嘴部，显示顺序为左腿 → 右腿 → 头颈嘴，运行时与 14 维策略顺序独立。保留纸白、深绿黑、芥末黄、真实照片与技术文档方向；Web 不加入 3D、浏览器仿真或策略导入、转换、推理，RL 仍属于整机和教程主线。

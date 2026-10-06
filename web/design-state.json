@@ -1,0 +1,875 @@
+{
+  "project": "Microduck Hatchery",
+  "updated": "2026-10-04",
+  "figma": {
+    "fileKey": "1UFU4X1u0kT6j5DfzviosN",
+    "url": "https://www.figma.com/design/1UFU4X1u0kT6j5DfzviosN",
+    "plan": "Starter / View",
+    "quotaBlocked": true,
+    "pages": {
+      "screens": "0:1",
+      "components": "2:2"
+    },
+    "components": {
+      "Button": {
+        "id": "5:60",
+        "variants": [
+          {
+            "id": "5:48",
+            "name": "Tone=Primary, State=Default",
+            "x": 24,
+            "y": 24,
+            "width": 184,
+            "height": 48
+          },
+          {
+            "id": "5:49",
+            "name": "Tone=Primary, State=Hover",
+            "x": 224,
+            "y": 24,
+            "width": 184,
+            "height": 48
+          },
+          {
+            "id": "5:50",
+            "name": "Tone=Primary, State=Focus",
+            "x": 424,
+            "y": 24,
+            "width": 184,
+            "height": 48
+          },
+          {
+            "id": "5:51",
+            "name": "Tone=Primary, State=Disabled",
+            "x": 624,
+            "y": 24,
+            "width": 184,
+            "height": 48
+          },
+          {
+            "id": "5:52",
+            "name": "Tone=Secondary, State=Default",
+            "x": 24,
+            "y": 88,
+            "width": 184,
+            "height": 48
+          },
+          {
+            "id": "5:53",
+            "name": "Tone=Secondary, State=Hover",
+            "x": 224,
+            "y": 88,
+            "width": 184,
+            "height": 48
+          },
+          {
+            "id": "5:54",
+            "name": "Tone=Secondary, State=Focus",
+            "x": 424,
+            "y": 88,
+            "width": 184,
+            "height": 48
+          },
+          {
+            "id": "5:55",
+            "name": "Tone=Secondary, State=Disabled",
+            "x": 624,
+            "y": 88,
+            "width": 184,
+            "height": 48
+          },
+          {
+            "id": "5:56",
+            "name": "Tone=Ghost, State=Default",
+            "x": 24,
+            "y": 152,
+            "width": 184,
+            "height": 48
+          },
+          {
+            "id": "5:57",
+            "name": "Tone=Ghost, State=Hover",
+            "x": 224,
+            "y": 152,
+            "width": 184,
+            "height": 48
+          },
+          {
+            "id": "5:58",
+            "name": "Tone=Ghost, State=Focus",
+            "x": 424,
+            "y": 152,
+            "width": 184,
+            "height": 48
+          },
+          {
+            "id": "5:59",
+            "name": "Tone=Ghost, State=Disabled",
+            "x": 624,
+            "y": 152,
+            "width": 184,
+            "height": 48
+          }
+        ],
+        "properties": {
+          "Label#5:0": {
+            "type": "TEXT",
+            "defaultValue": "开始复刻"
+          },
+          "Show icon#5:13": {
+            "type": "BOOLEAN",
+            "defaultValue": true
+          },
+          "Icon#5:26": {
+            "type": "INSTANCE_SWAP",
+            "defaultValue": "5:6",
+            "preferredValues": []
+          },
+          "Tone": {
+            "type": "VARIANT",
+            "defaultValue": "Primary",
+            "variantOptions": [
+              "Primary",
+              "Secondary",
+              "Ghost"
+            ]
+          },
+          "State": {
+            "type": "VARIANT",
+            "defaultValue": "Default",
+            "variantOptions": [
+              "Default",
+              "Hover",
+              "Focus",
+              "Disabled"
+            ]
+          }
+        }
+      },
+      "NavItem": {
+        "id": "5:123",
+        "variants": [
+          {
+            "id": "5:121",
+            "name": "State=Default",
+            "x": 24,
+            "y": 24,
+            "width": 76,
+            "height": 44
+          },
+          {
+            "id": "5:122",
+            "name": "State=Active",
+            "x": 116,
+            "y": 24,
+            "width": 76,
+            "height": 44
+          }
+        ],
+        "properties": {
+          "Label#5:39": {
+            "type": "TEXT",
+            "defaultValue": "介绍"
+          },
+          "State": {
+            "type": "VARIANT",
+            "defaultValue": "Default",
+            "variantOptions": [
+              "Default",
+              "Active"
+            ]
+          }
+        }
+      },
+      "Badge": {
+        "id": "5:133",
+        "variants": [
+          {
+            "id": "5:126",
+            "name": "State=Source",
+            "x": 24,
+            "y": 24,
+            "width": 128,
+            "height": 28
+          },
+          {
+            "id": "5:127",
+            "name": "State=Draft",
+            "x": 168,
+            "y": 24,
+            "width": 128,
+            "height": 28
+          },
+          {
+            "id": "5:128",
+            "name": "State=Example",
+            "x": 312,
+            "y": 24,
+            "width": 128,
+            "height": 28
+          },
+          {
+            "id": "5:129",
+            "name": "State=Online",
+            "x": 456,
+            "y": 24,
+            "width": 128,
+            "height": 28
+          },
+          {
+            "id": "5:130",
+            "name": "State=Stale",
+            "x": 600,
+            "y": 24,
+            "width": 128,
+            "height": 28
+          },
+          {
+            "id": "5:131",
+            "name": "State=Offline",
+            "x": 744,
+            "y": 24,
+            "width": 128,
+            "height": 28
+          },
+          {
+            "id": "5:132",
+            "name": "State=ReadOnly",
+            "x": 888,
+            "y": 24,
+            "width": 128,
+            "height": 28
+          }
+        ],
+        "properties": {
+          "Label#5:42": {
+            "type": "TEXT",
+            "defaultValue": "状态"
+          },
+          "State": {
+            "type": "VARIANT",
+            "defaultValue": "Source",
+            "variantOptions": [
+              "Source",
+              "Draft",
+              "Example",
+              "Online",
+              "Stale",
+              "Offline",
+              "ReadOnly"
+            ]
+          }
+        }
+      },
+      "Input": {
+        "id": "5:152",
+        "variants": [
+          {
+            "id": "5:148",
+            "name": "State=Default",
+            "x": 24,
+            "y": 24,
+            "width": 280,
+            "height": 48
+          },
+          {
+            "id": "5:149",
+            "name": "State=Focus",
+            "x": 320,
+            "y": 24,
+            "width": 280,
+            "height": 48
+          },
+          {
+            "id": "5:150",
+            "name": "State=Error",
+            "x": 616,
+            "y": 24,
+            "width": 280,
+            "height": 48
+          },
+          {
+            "id": "5:151",
+            "name": "State=Disabled",
+            "x": 912,
+            "y": 24,
+            "width": 280,
+            "height": 48
+          }
+        ],
+        "properties": {
+          "Value#5:50": {
+            "type": "TEXT",
+            "defaultValue": "输入开发板 IP"
+          },
+          "State": {
+            "type": "VARIANT",
+            "defaultValue": "Default",
+            "variantOptions": [
+              "Default",
+              "Focus",
+              "Error",
+              "Disabled"
+            ]
+          }
+        }
+      },
+      "ChapterRow": {
+        "id": "5:159",
+        "variants": [
+          {
+            "id": "5:157",
+            "name": "State=Default",
+            "x": 24,
+            "y": 24,
+            "width": 224,
+            "height": 48
+          },
+          {
+            "id": "5:158",
+            "name": "State=Active",
+            "x": 264,
+            "y": 24,
+            "width": 224,
+            "height": 48
+          }
+        ],
+        "properties": {
+          "Number#5:55": {
+            "type": "TEXT",
+            "defaultValue": "03"
+          },
+          "Title#5:58": {
+            "type": "TEXT",
+            "defaultValue": "三种连接"
+          },
+          "State": {
+            "type": "VARIANT",
+            "defaultValue": "Default",
+            "variantOptions": [
+              "Default",
+              "Active"
+            ]
+          }
+        }
+      },
+      "ServoRow": {
+        "id": "5:167",
+        "variants": [
+          {
+            "id": "5:164",
+            "name": "State=Default",
+            "x": 24,
+            "y": 24,
+            "width": 520,
+            "height": 48
+          },
+          {
+            "id": "5:165",
+            "name": "State=Selected",
+            "x": 560,
+            "y": 24,
+            "width": 520,
+            "height": 48
+          },
+          {
+            "id": "5:166",
+            "name": "State=Missing",
+            "x": 1096,
+            "y": 24,
+            "width": 520,
+            "height": 48
+          }
+        ],
+        "properties": {
+          "ID#5:61": {
+            "type": "TEXT",
+            "defaultValue": "23"
+          },
+          "Joint#5:65": {
+            "type": "TEXT",
+            "defaultValue": "左膝"
+          },
+          "Actual#5:69": {
+            "type": "TEXT",
+            "defaultValue": "17.8"
+          },
+          "Goal#5:73": {
+            "type": "TEXT",
+            "defaultValue": "18.0"
+          },
+          "Temp#5:77": {
+            "type": "TEXT",
+            "defaultValue": "—"
+          },
+          "Enable#5:81": {
+            "type": "TEXT",
+            "defaultValue": "只读"
+          },
+          "State": {
+            "type": "VARIANT",
+            "defaultValue": "Default",
+            "variantOptions": [
+              "Default",
+              "Selected",
+              "Missing"
+            ]
+          }
+        }
+      },
+      "CodeBlock": {
+        "id": "5:188",
+        "variants": [
+          {
+            "id": "5:186",
+            "name": "Device=Desktop",
+            "x": 24,
+            "y": 24,
+            "width": 720,
+            "height": 141
+          },
+          {
+            "id": "5:187",
+            "name": "Device=Mobile",
+            "x": 760,
+            "y": 24,
+            "width": 342,
+            "height": 138
+          }
+        ],
+        "properties": {
+          "Location#5:85": {
+            "type": "TEXT",
+            "defaultValue": "在 Radxa 执行"
+          },
+          "Command#5:88": {
+            "type": "TEXT",
+            "defaultValue": "hostname -I\npython3 server.py \\\n  --port /dev/ttyS2"
+          },
+          "Device": {
+            "type": "VARIANT",
+            "defaultValue": "Desktop",
+            "variantOptions": [
+              "Desktop",
+              "Mobile"
+            ]
+          }
+        }
+      },
+      "Callout": {
+        "id": "5:206",
+        "variants": [
+          {
+            "id": "5:203",
+            "name": "Kind=Info",
+            "x": 24,
+            "y": 24,
+            "width": 720,
+            "height": 90
+          },
+          {
+            "id": "5:204",
+            "name": "Kind=Attention",
+            "x": 760,
+            "y": 24,
+            "width": 720,
+            "height": 90
+          },
+          {
+            "id": "5:205",
+            "name": "Kind=Example",
+            "x": 1496,
+            "y": 24,
+            "width": 720,
+            "height": 90
+          }
+        ],
+        "properties": {
+          "Title#5:91": {
+            "type": "TEXT",
+            "defaultValue": "本步验证点"
+          },
+          "Body#5:95": {
+            "type": "TEXT",
+            "defaultValue": "确认服务的真实模式，再读取设备状态。"
+          },
+          "Kind": {
+            "type": "VARIANT",
+            "defaultValue": "Info",
+            "variantOptions": [
+              "Info",
+              "Attention",
+              "Example"
+            ]
+          }
+        }
+      },
+      "Photo": {
+        "id": "5:215",
+        "variants": [
+          {
+            "id": "5:213",
+            "name": "Image=Product",
+            "x": 24,
+            "y": 24,
+            "width": 480,
+            "height": 640
+          },
+          {
+            "id": "5:214",
+            "name": "Image=Assembly",
+            "x": 520,
+            "y": 24,
+            "width": 480,
+            "height": 640
+          }
+        ],
+        "properties": {
+          "Image": {
+            "type": "VARIANT",
+            "defaultValue": "Product",
+            "variantOptions": [
+              "Product",
+              "Assembly"
+            ]
+          }
+        }
+      },
+      "Logo": {
+        "id": "5:218",
+        "variants": [
+          {
+            "id": "5:216",
+            "name": "Size=Desktop",
+            "x": 24,
+            "y": 24,
+            "width": 224,
+            "height": 40
+          },
+          {
+            "id": "5:217",
+            "name": "Size=Mobile",
+            "x": 264,
+            "y": 24,
+            "width": 190,
+            "height": 36
+          }
+        ],
+        "properties": {
+          "Size": {
+            "type": "VARIANT",
+            "defaultValue": "Desktop",
+            "variantOptions": [
+              "Desktop",
+              "Mobile"
+            ]
+          }
+        }
+      },
+      "LessonRow": {
+        "id": "5:227",
+        "variants": [
+          {
+            "id": "5:225",
+            "name": "State=Default",
+            "x": 24,
+            "y": 24,
+            "width": 790,
+            "height": 88
+          },
+          {
+            "id": "5:226",
+            "name": "State=Active",
+            "x": 830,
+            "y": 24,
+            "width": 790,
+            "height": 88
+          }
+        ],
+        "properties": {
+          "Number#5:99": {
+            "type": "TEXT",
+            "defaultValue": "01"
+          },
+          "Title#5:102": {
+            "type": "TEXT",
+            "defaultValue": "准备与机械装配"
+          },
+          "Summary#5:105": {
+            "type": "TEXT",
+            "defaultValue": "核对物料、装配版本与关键紧固位置。"
+          },
+          "Status#5:108": {
+            "type": "TEXT",
+            "defaultValue": "草稿"
+          },
+          "State": {
+            "type": "VARIANT",
+            "defaultValue": "Default",
+            "variantOptions": [
+              "Default",
+              "Active"
+            ]
+          }
+        }
+      },
+      "Metric": {
+        "id": "5:239",
+        "variants": [
+          {
+            "id": "5:238",
+            "name": "Format=Default",
+            "x": 24,
+            "y": 24,
+            "width": 156,
+            "height": 82
+          }
+        ],
+        "properties": {
+          "Label#5:111": {
+            "type": "TEXT",
+            "defaultValue": "实际角度"
+          },
+          "Value#5:113": {
+            "type": "TEXT",
+            "defaultValue": "17.8°"
+          },
+          "Format": {
+            "type": "VARIANT",
+            "defaultValue": "Default",
+            "variantOptions": [
+              "Default"
+            ]
+          }
+        }
+      }
+    },
+    "icons": {
+      "arrow-up-right": "5:6",
+      "arrow-right": "5:10",
+      "menu": "5:14",
+      "chevron-down": "5:19",
+      "search": "5:22",
+      "copy": "5:26",
+      "wifi": "5:30",
+      "usb": "5:36",
+      "bluetooth": "5:45"
+    },
+    "wrapperFrames": {
+      "home": {
+        "id": "6:2",
+        "name": "01 / Introduction · Desktop",
+        "width": 1440,
+        "x": 160,
+        "y": 160
+      },
+      "showcase": {
+        "id": "6:3",
+        "name": "02 / Showcase · Desktop",
+        "width": 1440,
+        "x": 1780,
+        "y": 160
+      },
+      "learn": {
+        "id": "6:4",
+        "name": "03 / Learn index · Desktop",
+        "width": 1440,
+        "x": 3400,
+        "y": 160
+      },
+      "article": {
+        "id": "6:5",
+        "name": "04 / Tutorial article · Desktop",
+        "width": 1440,
+        "x": 160,
+        "y": 2700
+      },
+      "console": {
+        "id": "6:6",
+        "name": "05 / Console · Desktop",
+        "width": 1440,
+        "x": 1780,
+        "y": 2700
+      },
+      "records": {
+        "id": "6:7",
+        "name": "06 / Records · Desktop",
+        "width": 1440,
+        "x": 3400,
+        "y": 2700
+      },
+      "homeMobile": {
+        "id": "6:8",
+        "name": "07 / Introduction · Mobile",
+        "width": 390,
+        "x": 160,
+        "y": 5400
+      },
+      "showcaseMobile": {
+        "id": "6:9",
+        "name": "08 / Showcase · Mobile",
+        "width": 390,
+        "x": 750,
+        "y": 5400
+      },
+      "articleMobile": {
+        "id": "6:10",
+        "name": "09 / Tutorial article · Mobile",
+        "width": 390,
+        "x": 1340,
+        "y": 5400
+      },
+      "consoleMobile": {
+        "id": "6:11",
+        "name": "10 / Console · Mobile",
+        "width": 390,
+        "x": 1930,
+        "y": 5400
+      },
+      "learnMobile": {
+        "id": "6:12",
+        "name": "11 / Learn index · Mobile",
+        "width": 390,
+        "x": 2520,
+        "y": 5400
+      },
+      "connect": {
+        "id": "6:13",
+        "name": "12 / Connection dialog",
+        "width": 640,
+        "x": 3400,
+        "y": 4200
+      },
+      "states": {
+        "id": "6:14",
+        "name": "13 / Device state examples",
+        "width": 1440,
+        "x": 1780,
+        "y": 4200
+      }
+    },
+    "builtScreens": [
+      {
+        "id": "6:2",
+        "name": "01 / Introduction · Desktop",
+        "width": 1440,
+        "height": 2295,
+        "totalDescendants": 145,
+        "counts": {
+          "FRAME": 42,
+          "INSTANCE": 19,
+          "TEXT": 59,
+          "VECTOR": 10,
+          "ELLIPSE": 2,
+          "RECTANGLE": 13
+        },
+        "fonts": [
+          "Manrope",
+          "Noto Sans SC",
+          "IBM Plex Mono"
+        ],
+        "fontCheck": true,
+        "images": [
+          {
+            "id": "8:71",
+            "name": "Photo / Product",
+            "type": "INSTANCE",
+            "width": 512,
+            "height": 680,
+            "imageHash": "51fcb4e92d35765704a4cd168cf1ee84692a9a2b"
+          },
+          {
+            "id": "8:79",
+            "name": "Photo / Assembly",
+            "type": "INSTANCE",
+            "width": 544,
+            "height": 408,
+            "imageHash": "cb6613be4d50927eb04a196a9cbde6b19e1fe098"
+          }
+        ]
+      },
+      {
+        "id": "6:8",
+        "name": "07 / Introduction · Mobile",
+        "width": 390,
+        "height": 2588,
+        "totalDescendants": 98,
+        "counts": {
+          "FRAME": 19,
+          "INSTANCE": 14,
+          "TEXT": 45,
+          "ELLIPSE": 2,
+          "VECTOR": 6,
+          "RECTANGLE": 12
+        },
+        "fonts": [
+          "Manrope",
+          "Noto Sans SC",
+          "IBM Plex Mono"
+        ],
+        "fontCheck": true,
+        "images": [
+          {
+            "id": "8:185",
+            "name": "Photo / Product",
+            "type": "INSTANCE",
+            "width": 342,
+            "height": 456,
+            "imageHash": "51fcb4e92d35765704a4cd168cf1ee84692a9a2b"
+          }
+        ]
+      }
+    ],
+    "prototypeLinks": 24
+  },
+  "prototype": {
+    "file": "Microduck-Hatchery-Visual-Prototype.html",
+    "routes": [
+      "home",
+      "showcase",
+      "learn",
+      "article",
+      "case",
+      "console",
+      "records"
+    ],
+    "responsiveWidths": [
+      390,
+      1280,
+      1440
+    ],
+    "deviceOperationsEnabled": false,
+    "sampleDataOnly": true,
+    "jointCount": 15,
+    "jointGroups": {
+      "左腿": 5,
+      "右腿": 5,
+      "头颈": 5
+    },
+    "missingJointData": "show —; retain all joints",
+    "jointSelection": "replace selected detail only; no left-knee data under a different joint; mobile scrolls to detail",
+    "jointGroupOrder": [
+      "左腿",
+      "右腿",
+      "头颈"
+    ],
+    "legJointOrder": [
+      "髋偏航",
+      "髋侧倾",
+      "髋俯仰",
+      "膝",
+      "踝"
+    ],
+    "jointListScroll": "independent bounded scrolling; sticky table header; desktop selection retains scroll position and focus",
+    "tutorialNavigation": "one sidebar containing six chapters and current chapter sections; active yellow marker follows reading position in both directions; same-chapter anchors retain page"
+  },
+  "verification": {
+    "figmaIntroductionScreenshots": "desktop + mobile visually inspected",
+    "figmaComponentScreenshot": "visually inspected before two text fixes; final screenshot blocked",
+    "remainingFigmaScripts": "syntax checked; not executed",
+    "browserQA": "blocked by preview browser tab creation timeout; not passed",
+    "hardware": "not performed",
+    "windowsLinuxMacOS": "not performed",
+    "interactionLogic": "passed one DOM/geometry fixture check: 15 joints in four states, order, selection/scroll/focus retention, chapter/section routes, reading marker, listener cleanup; no real browser layout"
+  }
+}

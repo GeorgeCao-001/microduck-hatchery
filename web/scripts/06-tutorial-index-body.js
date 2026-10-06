@@ -1,0 +1,16 @@
+// 尚未在 Figma 执行：与 shared-layout.js 依次合并后作为一次 use_figma 调用。
+// 前置：文件 1UFU4X1u0kT6j5DfzviosN 中的基础变量、组件和空白 wrapper。
+const chapters=[['准备一套可复现的硬件','确认板卡、机械件、舵机版本与供电条件。'],['装配与布线','逐步装配，保留方向、线序和检查照片。'],['板端系统与服务','记录镜像、内核与服务版本，明确总线归属。'],['连接到开发板','选择 Wi-Fi、USB 网络或 BLE 桥接路径。'],['校准与第一次回读','核对身份、在线舵机、单位和安全范围。'],['测试、导出与团队案例','保存数据、事件与条件，让下次测量可比较。']];
+for(const mobile of [false,true]){
+ const f=await openFrame(mobile?'learnMobile':'learn'),w=mobile?390:1440,iw=mobile?342:1296,pad=mobile?24:72;
+ header(f,'learn',mobile);const hero=auto(f,'Tutorial editorial opening',w,'VERTICAL',32,null,pad);eyebrow(hero,'FIELD GUIDE / BUILD · CONNECT · MEASURE',iw);
+ const lead=auto(hero,'Opening layout',iw,mobile?'VERTICAL':'HORIZONTAL',mobile?24:64);
+ const copy=auto(lead,'Introduction',mobile?342:688,'VERTICAL',24);text(copy,'Title','一颗螺丝，\n一条清楚的路线。',mobile?342:688,mobile?'Mobile / Display':'Heading / 1');text(copy,'Deck','从准备到调试，把复刻过程写成可跟随的教程。每一章保留适用版本、来源和待验证项。',mobile?342:580,'Body / Reading','color/text/secondary');button(copy,'阅读连接章节',mobile?'articleMobile':'article','Primary',184);
+ const visual=auto(lead,'Assembly reference',mobile?342:544,'VERTICAL',12);photo(visual,'Assembly',mobile?342:544,mobile?260:344);text(visual,'Image credit','来源照片 / microduck-replica contributors\nCC BY-NC-SA 4.0 · 非本团队验收照片',mobile?342:544,'UI / Small','color/text/secondary');
+ divider(hero,iw);text(hero,'Route metadata','6 个章节 · Radxa Zero 3W · Windows / Linux / macOS · 文稿待验证',iw,'UI / Label','color/text/secondary');
+ const body=auto(f,'Curriculum',w,mobile?'VERTICAL':'HORIZONTAL',mobile?32:64,null,pad);const side=auto(body,'Environment selection',mobile?342:240,'VERTICAL',20);eyebrow(side,'CHOOSE YOUR PATH');text(side,'Environment title','按自己的环境阅读',mobile?342:240,'Heading / 3');text(side,'Environment note','系统选择只调整阅读提示。兼容性以对应硬件测试为准。',mobile?342:240,'UI / Label','color/text/secondary');
+ const systems=auto(side,'Host systems',0,'VERTICAL',8);for(const os of ['Windows','Linux','macOS'])button(systems,os,null,'Secondary',mobile?342:240,'Default',false);callout(side,'环境待补','镜像、内核、机械版本与实际连接路径待团队提供。','Info',mobile?342:240);
+ const list=auto(body,'Numbered chapters',mobile?342:992,'VERTICAL',0);for(let i=0;i<chapters.length;i++){divider(list,mobile?342:992);const row=auto(list,'Chapter '+(i+1),mobile?342:992,'VERTICAL',12,null,16);text(row,'Chapter number',String(i+1).padStart(2,'0'),0,'Meta / Latin','color/text/secondary');text(row,'Chapter title',chapters[i][0],mobile?310:960,'Heading / 3');text(row,'Chapter summary',chapters[i][1],mobile?310:960,'Body / Base','color/text/secondary');const meta=auto(row,'Chapter status',mobile?310:960,'HORIZONTAL',16);badge(meta,i===3?'草稿已整理':'内容待补','Draft',128);if(i===3)button(meta,'阅读草稿',mobile?'articleMobile':'article','Ghost',144,'Default',false);}
+ const close=auto(f,'Case writing invitation',w,'VERTICAL',24,'color/bg/dark',pad);eyebrow(close,'WRITE THE NEXT CHAPTER',iw,true);text(close,'Invitation title','把遇到的问题，\n写成下一位同伴的线索。',iw,mobile?'Heading / 2':'Heading / 1','color/text/on-dark');text(close,'Invitation description','没有测量支持的判断，保留为待验证。团队案例从现象开始，留下环境、证据、调整和结果。',iw,'Body / Base','color/text/dark-secondary');footer(f,mobile);
+}
+return await finish();

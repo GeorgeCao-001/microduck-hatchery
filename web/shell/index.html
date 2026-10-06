@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>工程壳诊断 · Microduck Hatchery</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到诊断内容</a>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Microduck Hatchery 首页"><span class="brand-mark" aria-hidden="true">μd</span><span>Microduck <span class="brand-sub">Hatchery</span></span></a>
+    <a class="prototype-link" href="/#console">返回视觉原型 <span aria-hidden="true">↗</span></a>
+  </header>
+  <main id="main" class="wrap">
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">ENGINEERING SHELL / 只读诊断</p><h1 id="page-title">先确认工程链路。</h1><p class="intro-copy">验证前端、协议与仓库设备后端能否一起运行。当前数据来自本地样例适配器，尚未连接机器人。</p></div>
+      <span class="tag tag-sample">SAMPLE · FAKE</span>
+    </section>
+    <div class="sample-note"><strong>样例模式，不是实机反馈。</strong><span>控制、校准、策略运行与正式记录尚未实现。浏览器只读取状态，不发送控制指令。</span></div>
+    <section class="connection-bar" aria-labelledby="connection-heading">
+      <div><p class="eyebrow" id="connection-heading">LOCAL BACKEND</p><p class="connection-status" id="connection-status" role="status" aria-live="polite">正在检查本地样例后端…</p><p id="connection-detail" class="muted">等待 HTTP 信息与 WebSocket 样例流。</p></div>
+      <button class="button" id="retry-button" type="button">重新检查连接</button>
+    </section>
+    <div class="diagnostic-layout">
+      <section class="panel joint-panel" aria-labelledby="joint-heading">
+        <div class="panel-heading"><div><p class="eyebrow">15 PHYSICAL JOINTS</p><h2 id="joint-heading">关节样例状态</h2></div><span id="joint-count" class="tag">等待映射</span></div>
+        <p class="panel-copy">按设备后端提供的显示索引排列：左腿 → 右腿 → 头颈与嘴部。未知值显示 <span class="mono">—</span>，不会补零或换算为角度。</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="15 个物理关节样例表，可独立滚动">
+          <table><caption class="sr-only">关节值均为样例。位置与目标单位为 ticks，负载是未换算的 raw load。索引来自后端协议。</caption><thead><tr><th scope="col">ID / 物理关节</th><th scope="col">样例位置<br><span>ticks</span></th><th scope="col">样例目标<br><span>ticks</span></th><th scope="col">样例负载<br><span>raw load</span></th><th scope="col">样例电压 / 温度<br><span>V / °C</span></th><th scope="col">数据状态</th></tr></thead><tbody id="joint-rows"><tr class="waiting-row"><td colspan="6">等待设备后端的完整关节映射…</td></tr></tbody></table>
+        </div>
+        <p id="mapping-note" class="mapping-note">显示索引、物理运行时索引与策略索引分别读取；不会将三种顺序混用。</p>
+      </section>
+      <aside class="detail-rail" aria-label="连接与协议详情">
+        <section class="panel details-panel" aria-labelledby="detail-heading">
+          <div class="panel-heading"><div><p class="eyebrow">CONTRACT / SOURCE</p><h2 id="detail-heading">读取详情</h2></div><span class="tag tag-readonly">只读</span></div>
+          <dl class="facts"><div><dt>后端地址</dt><dd id="backend-origin" class="mono">—</dd></div><div><dt>协议版本</dt><dd id="protocol-version" class="mono">—</dd></div><div><dt>来源标记</dt><dd id="source-markers" class="mono">等待校验</dd></div><div><dt>设备 ID</dt><dd id="device-id">无实机设备</dd></div><div><dt>后端会话</dt><dd id="session-id" class="mono">—</dd></div><div><dt>帧序号</dt><dd id="sequence" class="mono">—</dd></div><div><dt>样例帧 Unix 秒</dt><dd id="unix-time" class="mono">—</dd></div><div><dt>后端单调经过秒</dt><dd id="monotonic-time" class="mono">—</dd></div><div><dt>距有效帧约</dt><dd id="frame-age" class="mono">—</dd></div></dl>
+          <p class="clock-note">Unix 秒是样例帧生成时间，不是硬件采样证明。超过 2 秒未收到有效帧会标为陈旧；此阈值仅用于工程壳诊断。</p>
+        </section>
+        <section class="boundary" aria-labelledby="boundary-heading"><p class="eyebrow">AUTHORITY / MODULES</p><h2 id="boundary-heading">前端只负责展示。</h2><p>权威设备后端归属根目录 <code>src/</code>，共享契约归属 <code>protocol/</code>。这个样例适配器没有串口、控制权或机器人运行时。</p><ul id="capability-list"><li><span>只读样例遥测</span><strong>等待校验</strong></li><li><span>运动控制</span><strong>未实现</strong></li><li><span>整机校准</span><strong>未实现</strong></li><li><span>正式记录</span><strong>未实现</strong></li><li><span>FT 策略运行时</span><strong>未实现</strong></li></ul></section>
+        <figure class="reference-photo"><img src="/assets/product.jpg" alt="Microduck 机器人资料照片" width="700" height="460"><figcaption>真实资料照片 · 与当前样例数据无关联</figcaption></figure>
+      </aside>
+    </div>
+  </main>
+  <footer class="site-footer"><span>Microduck Hatchery · 本地工程壳</span><span>HTTP / WebSocket 只读链路 · 尚未进行实机验收</span></footer>
+</body>
+</html>

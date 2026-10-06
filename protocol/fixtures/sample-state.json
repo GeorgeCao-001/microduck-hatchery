@@ -1,0 +1,143 @@
+{
+  "sample": true,
+  "fake": true,
+  "simulated": false,
+  "source": "sample",
+  "joints": [
+    {
+      "joint_id": 20,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 21,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 22,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 23,
+      "status": "sample",
+      "position_ticks": 120,
+      "goal_ticks": 128,
+      "load_raw": 12,
+      "voltage_v": 7.8,
+      "temperature_c": 31
+    },
+    {
+      "joint_id": 24,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 10,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 11,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 12,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 13,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 14,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 30,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 31,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 32,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 33,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    },
+    {
+      "joint_id": 34,
+      "status": "missing",
+      "position_ticks": null,
+      "goal_ticks": null,
+      "load_raw": null,
+      "voltage_v": null,
+      "temperature_c": null
+    }
+  ]
+}

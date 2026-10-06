@@ -1,0 +1,27 @@
+.local/
+__pycache__/
+logs/runtime/
+logs/experiments/raw/
+logs/experiments/artifacts/
+
+# CAD models, drawings and design projects stay local.
+*.[sS][tT][pP]
+*.[sS][tT][eE][pP]
+*.[xX]_[tT]
+*.[xX]_[bB]
+*.[iI][gG][sS]
+*.[iI][gG][eE][sS]
+*.[dD][wW][gG]
+*.[dD][xX][fF]
+*.[sS][tT][lL]
+*.3[mM][fF]
+*.[sS][lL][dD][pP][rR][tT]
+*.[sS][lL][dD][aA][sS][mM]
+*.[sS][lL][dD][dD][rR][wW]
+*.[fF][cC][sS][tT][dD]
+*.[fF]3[dD]
+*.[fF]3[zZ]
+*.[eE][pP][rR][jJ]2
+
+# A CAD-named directory may also contain ordinary documentation.
+!*.[xX]_[tT]/

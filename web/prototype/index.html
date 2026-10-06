@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><title>Microduck Hatchery · 视觉原型</title>
+<meta name="description" content="Microduck Hatchery 介绍、展示、教程、调试台与实验记录的视觉原型。">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23F2B544'/%3E%3Ctext x='7' y='24' font-family='sans-serif' font-size='24' font-weight='bold' fill='%2321251F'%3Em%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="joint-console.css">
+<link rel="stylesheet" href="joint-charts.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<header class="site-header">
+ <a class="brand" href="#home" aria-label="Microduck Hatchery 首页"><span class="brand-mark">m<span>•</span></span><span>microduck<span class="brand-hatchery">HATCHERY</span></span></a>
+ <button class="mobile-menu icon-button" aria-label="打开导航" aria-expanded="false">☰</button>
+ <nav class="site-nav" aria-label="主导航"><a href="#home">介绍</a><a href="#showcase">实验展示</a><a href="#learn">教程</a><a href="#records">记录</a><a class="nav-console" href="#console">打开调试台</a></nav>
+</header>
+<main id="main" tabindex="-1"></main>
+<footer class="site-footer"><div class="footer-top"><a class="brand" href="#home">microduck<span class="brand-hatchery">HATCHERY</span></a><p>从装配到回读，把每一步留下来。</p><div><a href="#learn">阅读教程</a><a href="https://github.com/fanhao375/microduck-replica" target="_blank" rel="noreferrer">复刻仓库</a><a href="https://github.com/pollen-robotics/microduck" target="_blank" rel="noreferrer">官方仓库</a></div></div><div class="footer-bottom"><p>独立项目视觉原型 · 2026.10 · 不代表 Pollen Robotics 官方</p><p>参考照片：microduck-replica contributors · CC BY-NC-SA 4.0<br>视频、团队照片和实测记录待补。示例数据仅供布局与交互审阅。</p></div></footer>
+<dialog id="connection-dialog" aria-labelledby="connection-title"><div class="dialog-top"><span class="eyebrow">DEVICE CONNECTION</span><button class="icon-button close-dialog" aria-label="关闭连接说明">×</button></div><h2 id="connection-title">选择连接路径</h2><p class="muted">设备调试在开发板或电脑本地桥接提供的网页中进行。</p><div class="tabs" role="tablist" aria-label="连接方式"><button role="tab" aria-selected="true" data-connect="wifi">Wi-Fi</button><button role="tab" aria-selected="false" data-connect="usb">USB-C</button><button role="tab" aria-selected="false" data-connect="ble">蓝牙 BLE</button></div><div id="connection-content"></div><div class="callout"><strong>当前是视觉原型</strong><p>不发起网络连接或设备操作。连接步骤须在团队硬件上验证。</p></div><div class="dialog-bottom"><a class="button primary close-on-route" href="#article">查看连接教程</a><button class="button secondary close-dialog">关闭</button></div></dialog>
+<div class="toast" role="status" aria-live="polite"></div>
+<script src="joint-drafts.js"></script>
+<script src="joint-charts.js"></script>
+<script src="joint-console.js"></script>
+<script src="app.js"></script>
+</body></html>

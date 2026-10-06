@@ -1,0 +1,83 @@
+# Microduck Hatchery 当前结构与架构边界
+
+主要依据是用户提供的 [microduck-hatchery-architecture-v2.md](microduck-hatchery-architecture-v2.md)。本文件解释当前落地状态，发生冲突按最新用户决定和 v2 处理。设备模块位于 `src/daemons` 和 `src/libraries`，保留完整 crate 边界。
+
+2026-10-05 本轮范围：建立本地目录、隔离既有样例工具、修正启动和文档路径。未从官方仓库迁入源码，未建立 Cargo workspace、硬件驱动、部署单元或生产通信链路。
+
+## 目录
+
+```text
+microduck-hatchery/
+├─ src/
+│  ├─ daemons/
+│  │  └─ robotd/、updater/、configd/、btd/、padd/、mediad/、tof/
+│  └─ libraries/
+│     └─ duck-control/、robotd-params/、kinematics/、odometry/、
+│        sounds/、pet-detect/、duck-detect/、pad-imu/、uyvy/
+├─ protocol/
+│  ├─ duck-ipc-proto/、duck-ble/
+│  └─ mappings/、fixtures/、schemas/（既有样例 JSON）
+├─ tools/
+│  ├─ robotctl/、duckctl/、xtask/、test-support/、duck-ether/
+│  ├─ hatchery-shell/
+│  └─ check_shell.py
+├─ web/              Hatchery 前端与设计包
+├─ hardware/         实际硬件资料
+├─ training/         保留所选训练源码内部结构的位置
+├─ deploy/           部署说明与未来配置
+├─ hooks/            安装钩子位置
+├─ scripts/          hatchery-shell.py 与未来脚本
+├─ spaces/           hello/、policy-playground/、shared/、vision-demo/
+├─ docs/
+└─ logs/
+```
+
+7 个 daemon、9 个 library、2 个 protocol、5 个官方工具位置目前均只有 README。`hooks/`、`spaces/` 同样只预留职责，不制造空安装钩子、Cargo manifest、Rust 源文件或 systemd unit。`hardware/` 已收录 BOM 与厂商资料；`training/`、`deploy/` 当前为说明入口。
+
+分类只改变所属路径，不拆 crate、不改 crate 名，不创建新的 drivers、runtime、robot_io 或 libs 框架。`duck-control` 后续保持上游平铺模块边界，包括 `bus.rs`、`io.rs`、`obs.rs`、`policy.rs`、`safety.rs`；本轮没有建立这些源码文件。
+
+## 正式控制关系
+
+下图表示目标，尚未接通：
+
+```mermaid
+flowchart TD
+    W[Browser / Hatchery Web] --> G[板端 Web / media gateway]
+    G --> P[shared protocol / RPC]
+    P --> R[robotd]
+    R --> C[duck-control / safety]
+    C --> B[motor bus]
+```
+
+`web/` 只负责前端页面、目标草稿、展示缓存和只读回放。正式板端 gateway 放在对应设备模块，官方 `mediad/webclient` 后续保持在 `mediad` 内，作为控制语义和通信参考；不替代 Hatchery UI。协议库不依赖前端、硬件寄存器或 RL。
+
+`robotd` 与 `duck-control` 保留官方的上层职责：生命周期、模式、状态、执行、控制循环和安全裁决。前端或 gateway 不能成为第二个权威控制器，不能直接写总线。命令接收、应用/读回和物理到位分别定义，逐关节结果由设备端产生。
+
+## 当前可运行样例
+
+Python 只读样例位于 [tools/hatchery-shell/](../tools/hatchery-shell/README.md)，不属于生产设备模块。仓库根 `src/` 按 daemons 与 libraries 分类。
+
+启动入口是 `python scripts/hatchery-shell.py --port 8080`。工具读取根 `protocol/` 的样例 JSON，同源提供 `web/prototype/` 和未完成的 `web/shell/`。它只监听 loopback，明确返回 sample/fake/read-only 标记，不连接硬件、不执行目标，也不是正式 gateway 或 robotd 的实现。
+
+`web/shell/app.js` 尚缺；完整检查无法通过。`--transport-only` 只核验样例服务和资源路径，不验证诊断页交互。现有 schema 与实际样例消息也有字段不一致，且依赖清单尚未列出检查/WS 所用 `websockets`；均保留为已知缺口，本轮不扩展功能或修改协议 JSON。
+
+## 实际硬件边界
+
+- 平台以 Radxa Zero 3W、FT / Feetech 和实际固件配置为准，不默认完整 Robot HAT 或官方设备节点。
+- 后续移动或适配硬件代码前，先核对现有 FT 代码与冻结版本；优先复用 `bus.rs` / `io.rs` 等边界，不另造驱动框架，不让寄存器和串口细节进入 policy、observation 或 Web。
+- UART、I2C、GPIO、Camera、IMU、ToF 的节点、权限和可用性由实物与配置确定。当前样例不证明任何设备可访问。
+- 总线只能由当前活动控制后端占用；robotd 运行时，校准后端及其串口轮询都必须停止。读取同样需要仲裁，不能依靠进程内锁管理两个进程。
+- FT 位置保留 ticks、负载保留 raw load；角度转换要求核对过的校准方向、零位和单位。Unix 与单调时间分开；真实/fake/sim 和 IMU 来源明确表达。
+- `release` 不是停止或急停。失联、期限、取消和重连规则由设备端实现；回放不发送历史目标。
+
+15 个物理关节包含 mouth #34，IMU #200 不计作关节。显示为左腿 → 右腿 → 头颈嘴，物理运行时与 14 维策略索引独立维护；样例映射不是实物校准结果。
+
+## 后续引入源码时
+
+本轮不修改不存在的 workspace / path dependency，也不生成虚假的可编译壳。授权引入源码后先保持 crate 整体，再逐项修正 Cargo workspace、crate 间路径、xtask 查根、脚本、hooks、systemd、CI 和测试资源路径；分类目录不能直接假设等于二进制安装路径。
+
+运行部署需区分源码、发布文件、设备配置/校准、可变状态与临时 socket；具体路径和权限按 Radxa 镜像核对。`logs/` 保存开发记录及日志规则，不替代板端日志系统。
+
+仿真、RL、标准策略导出、FT 运行时和实机验证仍属于必需全栈主线。`training/` 后续保留所选上游内部结构，浏览器不执行训练或策略推理。七章仍按 [共同审查方案](../web/docs/LOCAL_REVIEW_PROPOSAL.md) 推进；[联调](../web/docs/JOINT_COORDINATION.md) 已实现为本地样例，不能替代正式协议、校准或控制。WiFi、USB-C gadget 网络和 BLE 桥均需独立验收，BLE 不默认用于高频运动控制。
+
+实施顺序见 [PLAN.md](PLAN.md)，来源见 [SOURCES.md](SOURCES.md)，实际验证见 [LOCAL_STATUS.md](../web/docs/LOCAL_STATUS.md)。
