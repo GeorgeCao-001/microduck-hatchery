@@ -1,0 +1,43 @@
+{
+  "sourceRevision": "b5381d86b68d2e4f4606170d54d1f3f46d249ffc",
+  "geometryLicense": "CC-BY-NC-SA-4.0",
+  "engineVersion": "three-0.160.0",
+  "files": [
+    {
+      "path": "web/prototype/assets/microduck-reference/model.json",
+      "url": "https://raw.githubusercontent.com/fanhao375/microduck-replica/b5381d86b68d2e4f4606170d54d1f3f46d249ffc/tools/servo-web/model/model.json",
+      "bytes": 17056,
+      "sha256": "4759870326c14f8030393c6ceb9c4c1e9f264a45ef6d604a92df06c2c8d04073"
+    },
+    {
+      "path": "web/prototype/assets/microduck-reference/meshes.bin",
+      "url": "https://raw.githubusercontent.com/fanhao375/microduck-replica/b5381d86b68d2e4f4606170d54d1f3f46d249ffc/tools/servo-web/model/meshes.bin",
+      "bytes": 2856560,
+      "sha256": "d2252354ee5a04367aaf82242e08e52491b02ebbf27d48dc2c20350e6714d1a8"
+    },
+    {
+      "path": "web/prototype/assets/microduck-reference/upstream-NOTICE.md",
+      "url": "https://raw.githubusercontent.com/fanhao375/microduck-replica/b5381d86b68d2e4f4606170d54d1f3f46d249ffc/tools/servo-web/model/NOTICE.md",
+      "bytes": 457,
+      "sha256": "6b0445fa294ae29326509486c642aa489ed47002645e2a268d3b0eff33629db3"
+    },
+    {
+      "path": "web/licenses/microduck-replica-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/fanhao375/microduck-replica/b5381d86b68d2e4f4606170d54d1f3f46d249ffc/LICENSE",
+      "bytes": 4143,
+      "sha256": "d7e6ad94a4e25f8d48db364d050fd3af7d7e2b906ff4e68d249ab1fb5f8bd190"
+    },
+    {
+      "path": "web/prototype/vendor/three-0.160.0.min.js",
+      "url": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+      "bytes": 669884,
+      "sha256": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa"
+    },
+    {
+      "path": "web/licenses/three-MIT-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/mrdoob/three.js/r160/LICENSE",
+      "bytes": 1081,
+      "sha256": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d"
+    }
+  ]
+}

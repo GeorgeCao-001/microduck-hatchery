@@ -1,0 +1,23 @@
+/* Shared navigation and full-width console pages. Joint controls and charts own their styles. */
+.console-navigation{display:flex;flex-direction:column;gap:4px;min-width:0}
+.console-sidebar .console-navigation a{display:block;margin:0;white-space:nowrap;font-size:14px;padding:10px 12px;line-height:1.5}
+.console-navigation>a small{display:block;font-size:12px;color:var(--muted)}
+.console-nav-group{margin:4px 0}
+.console-sidebar .console-nav-parent{font-weight:700}
+.console-nav-group.active-group>.console-nav-parent{color:var(--moss)}
+.console-nav-children{margin:3px 0 0 9px;border-left:2px solid var(--line);padding-left:5px}
+.console-sidebar .console-nav-children a{padding:9px 8px}
+.console-navigation p{margin:18px 0 0;font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+.console-navigation .divider{margin:12px 0}
+.console-grid.console-full-page-grid{grid-template-columns:150px minmax(0,1fr);gap:24px}
+.console-grid.console-full-page-grid.sidebar-collapsed{grid-template-columns:minmax(0,1fr)}
+.console-page-content{min-width:0}
+.console-page-intro{display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px;margin:0 0 16px}
+.console-page-intro h2{font-size:24px}
+.console-page-intro p{font-size:14px;color:var(--muted);margin:0;flex:1}
+.console-page-intro>a{font-size:14px;font-weight:700}
+.console-placeholder .empty-state{margin:0;padding:48px 24px}
+.console-placeholder .empty-state p{max-width:640px;margin:14px auto 24px}
+@media(max-width:1240px){.console-grid.console-full-page-grid{grid-template-columns:minmax(0,1fr)}.console-wrap[data-console-page="single"] .console-sidebar:not([hidden]){grid-column:1/-1;width:auto;border-right:0;border-bottom:1px solid var(--line);padding:0 0 8px}.console-wrap[data-console-page="single"] .console-grid{grid-template-columns:minmax(280px,.75fr) minmax(0,1.25fr)}.console-navigation{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px}.console-navigation .console-nav-group{display:flex;align-items:center;margin:0}.console-nav-children{display:flex;border-left:0;margin:0;padding:0;gap:3px}.console-navigation>a small{display:inline;margin-left:6px}.console-navigation p{flex-basis:100%;margin:6px 0}.console-navigation .divider{display:none}}
+@media(max-width:760px){.console-wrap[data-console-page="single"] .console-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){.console-sidebar .console-navigation a{font-size:14px;padding:8px}.console-navigation .console-nav-group{flex-wrap:wrap;flex-basis:100%}.console-page-intro p{flex-basis:100%}.console-placeholder .empty-state{padding:28px 16px}}

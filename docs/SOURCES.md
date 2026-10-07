@@ -32,3 +32,9 @@
 - 设计包来源版本、照片 blob 与许可线索集中在 [SOURCE_FREEZE.md](../web/docs/SOURCE_FREEZE.md)，不作为设备实测或当前运行依赖锁定。
 - 最新显示顺序、联调、七章和全栈约束以 [本地交接](../Microduck-Hatchery-Local-Development-Handoff.md) 与当前用户决定为准。
 - 匹配 FT 的训练基线、完整 FT robotd 与 IMU 配对仍需单独固定。本次没有把官方 main、FT 分支或两个设备驱动当成可互换组件。
+
+## 只读 3D 显示资源（2026-10-07）
+
+用户明确要求在联调中加入只读姿态展示。仅引入上述固定复刻提交中的网页 `model.json` / `meshes.bin` 与本地 Three.js `0.160.0`，未迁入官方设备或训练代码。原始文件 SHA256 与下载地址见 [资源清单](../web/prototype/assets/microduck-reference/manifest.json)，几何 CC BY-NC-SA 4.0 和引擎 MIT 范围见 [许可说明](../web/licenses/microduck-model-NOTICE.md)。
+
+参考外形、嘴部估计铰链、作者的质量及 Dynamixel 外壳不代表 Hatchery 的实际装配。独立样例角度映射不沿用设备中点/方向，不充当校准。真实资产格式由本地解析测试核验，渲染与交互由本团队浏览器验证，不能当作来源作者的实机结果。

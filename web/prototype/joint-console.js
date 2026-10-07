@@ -41,52 +41,81 @@ window.JointConsole = (() => {
     return compact ? `草稿 v${draft.version}` : `样例草稿 · v${draft.version}`;
   }
 
-  function row(joint, mode, activeId) {
+  function draftNeedsAttention(id) {
+    const previous = store.snapshot().lastBatch?.targets.find(target => target.id === id);
+    return !validity(id) || Boolean(previous && previous.version !== store.getDraft(id).version);
+  }
+
+  function feedbackMarker(id, mode) {
+    const feedback = store.getFeedback(id, mode);
+    const range = model.sampleConfig.ranges[id];
+    const inRange = feedback.available && Number.isFinite(feedback.value)
+      && feedback.value >= range.min && feedback.value <= range.max;
+    return {
+      visible: inRange,
+      percentage: inRange ? (feedback.value - range.min) / (range.max - range.min) * 100 : 0,
+      label: feedback.available ? `样例实测 ${numberText(feedback.value)} ticks${feedback.stale ? ' · 陈旧' : ''}` : '没有实测位置',
+      state: `${feedback.available ? feedback.stale ? '陈旧样例' : '样例反馈' : '缺测'}${feedback.available && !inRange ? ' · 超演示范围' : ''}`
+    };
+  }
+
+  function draftEditor(joint, mode) {
     const { id } = joint;
     const range = model.sampleConfig.ranges[id];
     const draft = store.getDraft(id);
+    const marker = feedbackMarker(id, mode);
+    const slider = validity(id) ? draft.value : range.initial;
+    return `<div class="joint-draft-controls">
+      <div class="joint-slider-track"><input type="range" min="${range.min}" max="${range.max}" step="${range.step}" value="${slider}" data-joint-target-range="${id}" aria-invalid="${!validity(id)}" aria-label="${joint.name}样例目标滑块，ticks"><div class="joint-feedback-meter" aria-hidden="true"><span data-joint-feedback-marker="${id}" class="joint-feedback-marker${store.getFeedback(id, mode).stale ? ' stale' : ''}" style="left:${marker.percentage}%" title="${escape(marker.label)}" ${marker.visible ? '' : 'hidden'}></span></div></div>
+      <div class="joint-number-controls"><button type="button" data-joint-step="${id}" data-delta="-1" aria-label="${joint.name}草稿减少1 tick">−</button><input type="number" min="${range.min}" max="${range.max}" step="${range.step}" value="${escape(draft.value)}" data-joint-target-number="${id}" aria-invalid="${!validity(id)}" aria-label="${joint.name}样例目标数字，ticks"><button type="button" data-joint-step="${id}" data-delta="1" aria-label="${joint.name}草稿增加1 tick">+</button></div>
+    </div>`;
+  }
+
+  function row(joint, mode, activeId) {
+    const { id } = joint;
     const feedback = store.getFeedback(id, mode);
     const result = resultFor(id);
-    const slider = validity(id) ? draft.value : range.initial;
-    return `<div data-joint-row="${id}" class="joint-tile ${id === activeId ? 'selected' : ''}">
-      <div class="joint-tile-heading"><input type="checkbox" data-joint-select="${id}" aria-label="选择${joint.name}" ${selected(id) ? 'checked' : ''}><button class="joint-select" data-joint="${id}" aria-pressed="${id === activeId}" title="${joint.raw}"><strong>${joint.name}</strong><span>#${id}</span></button></div>
-      <div class="joint-draft-controls"><input type="range" min="${range.min}" max="${range.max}" step="${range.step}" value="${slider}" data-joint-target-range="${id}" aria-label="${joint.name}样例目标滑块，ticks"><div><button type="button" data-joint-step="${id}" data-delta="-1" aria-label="${joint.name}草稿减少1 tick">−</button><input type="number" min="${range.min}" max="${range.max}" step="${range.step}" value="${escape(draft.value)}" data-joint-target-number="${id}" aria-label="${joint.name}样例目标数字，ticks"><button type="button" data-joint-step="${id}" data-delta="1" aria-label="${joint.name}草稿增加1 tick">+</button><small>ticks · 演示 ${range.min}–${range.max}</small></div></div>
-      <div class="joint-tile-feedback"><span>反馈 <strong class="mono" data-joint-feedback="${id}">${feedback.available ? numberText(feedback.value) : '—'}</strong></span><small data-joint-age="${id}">${escape(feedback.ageLabel)}</small></div>
-      <div class="joint-tile-state"><span data-joint-draft-state="${id}">${draftStatus(id, true)}</span><small data-joint-feedback-state="${id}">${feedback.valid ? '样例' : feedback.stale ? '陈旧' : '缺测'} · 校准未知</small></div>
-      <div class="joint-tile-result"><span data-joint-result="${id}" class="joint-result ${result?.status || ''}">${result ? compactStatusText[result.status] : '尚未检查'}</span><small data-joint-result-reason="${id}" title="${result ? escape(result.reason) : '不代表命令确认'}">${result ? escape(result.reason) : '不代表命令确认'}</small></div>
+    return `<div data-joint-row="${id}" class="joint-servo-row ${id === activeId ? 'selected' : ''}">
+      <div class="joint-row-heading"><input type="checkbox" data-joint-select="${id}" aria-label="选择${joint.name}" ${selected(id) ? 'checked' : ''}><button class="joint-select" data-joint="${id}" aria-pressed="${id === activeId}" title="${joint.raw}"><strong>${joint.name}</strong><span>#${id}</span></button></div>
+      ${draftEditor(joint, mode)}
+      <div class="joint-row-feedback"><span>实测 <strong class="mono" data-joint-feedback="${id}">${numberText(feedback.value)}</strong></span><span>目标回读 <strong class="mono" data-joint-measurement="goal">${numberText(feedback.goal)}</strong></span><span>raw load <strong class="mono" data-joint-measurement="load">${numberText(feedback.load)}</strong></span><span><strong class="mono" data-joint-measurement="volt">${numberText(feedback.volt)}</strong> V</span><span><strong class="mono" data-joint-measurement="temp">${numberText(feedback.temp)}</strong> °C</span><span data-joint-age="${id}">${escape(feedback.available || mode === 'offline' ? feedback.ageLabel : '')}</span><span data-joint-feedback-state="${id}">${feedbackMarker(id, mode).state}</span><details class="joint-inline-result" data-joint-result-details ${result ? '' : 'hidden'}><summary data-joint-result="${id}" class="joint-result ${result?.status || ''}">${result ? compactStatusText[result.status] : ''}</summary><p data-joint-result-reason="${id}">${escape(result?.reason || '')}</p></details><span data-joint-result-empty ${result ? 'hidden' : ''}>尚未检查</span></div>
+      <div class="joint-row-attention" data-joint-draft-state="${id}" ${draftNeedsAttention(id) ? '' : 'hidden'}>${draftStatus(id, true)}</div>
     </div>`;
   }
 
   function panel(mode, activeId) {
     const rows = ['左腿', '右腿', '头颈'].map(group => `<section class="joint-limb" aria-label="${group}"><h3>${group === '头颈' ? '头颈与嘴部' : group}<span>5 个关节</span></h3>${model.metadata.filter(joint => joint.group === group).map(joint => row(joint, mode, activeId)).join('')}</section>`).join('');
     return `<section class="panel joint-panel coordination-panel" aria-labelledby="coordination-title">
-      <div class="panel-title"><div><h2 id="coordination-title">关节联调</h2><p>15 个物理关节 · 目标草稿与反馈分别保存</p></div><span class="badge example">本地样例</span></div>
+      <div class="panel-title"><div><h2 id="coordination-title">关节联调</h2></div><span class="badge example">本地样例 · 未连接</span></div>
       <div class="joint-toolbar">
         <div class="joint-toolbar-line"><label for="joint-selection-range">应用范围</label><select id="joint-selection-range">${[['all', '全部关节'], ['left', '左腿'], ['right', '右腿'], ['head', '头颈与嘴部'], ['none', '取消全选'], ['custom', '自定义']].map(([value, label]) => `<option value="${value}" ${value === scope ? 'selected' : ''}>${label}</option>`).join('')}</select><span id="joint-selection-count" class="small muted">已选 ${store.selectedIds().length} / 15</span></div>
-        <details class="joint-extra-tools" ${extraToolsExpanded ? 'open' : ''}><summary>更多草稿操作 · 反馈填入、镜像与姿态</summary>
-        <div class="joint-toolbar-line"><button id="joint-fill-feedback" class="button secondary">反馈填入已选草稿</button><button id="joint-refresh-feedback" class="button ghost">刷新样例反馈</button><label class="joint-mirror-label"><input id="joint-mirror" type="checkbox" disabled aria-describedby="joint-mirror-reason">左右镜像</label></div>
+        <div class="joint-toolbar-line joint-apply-controls"><button id="joint-apply-example" class="button primary" ${store.selectedIds().length ? '' : 'disabled'}>样例应用已选草稿</button><button id="joint-fill-feedback" class="button secondary">反馈填入已选草稿</button><button id="joint-apply-hardware" class="button secondary" disabled>实机应用</button></div>
+        <div class="joint-toolbar-line joint-hardware-controls"><button class="button secondary" disabled title="未连接设备，真实使能状态未知">全部使能</button><button class="button secondary" disabled title="未连接设备；关闭使能不等同于停止或急停">全部关闭使能</button><button id="joint-refresh-feedback" class="button ghost">刷新样例反馈</button></div>
+        <details class="joint-extra-tools" ${extraToolsExpanded ? 'open' : ''}><summary>姿态草稿与镜像</summary>
+        <div class="joint-toolbar-line"><label class="joint-mirror-label"><input id="joint-mirror" type="checkbox" disabled aria-describedby="joint-mirror-reason">左右镜像</label></div>
         <p id="joint-mirror-reason" class="joint-toolbar-note">镜像不可用：缺少已验证的方向、零位、比例与镜像符号，不直接复制 ticks。</p>
         <details class="joint-pose-tools" ${poseExpanded ? 'open' : ''}><summary>姿态草稿 · 保存与加载（仅改草稿）</summary>
         <div class="joint-toolbar-line joint-pose-controls"><label for="joint-pose-select">姿态草稿</label><select id="joint-pose-select">${poses.map(item => `<option value="${item.key}" ${item.key === poseKey ? 'selected' : ''}>${escape(item.pose.name)}</option>`).join('')}</select><button id="joint-load-pose" class="button secondary">加载到已选草稿</button></div>
         <div class="joint-toolbar-line joint-pose-controls"><input id="joint-pose-name" type="text" maxlength="60" value="${escape(poseName)}" aria-label="保存姿态名称" placeholder="姿态名称"><button id="joint-save-pose" class="button secondary">保存全部草稿</button></div>
         <p class="joint-toolbar-note">姿态保留映射、单位与样例校准版本；仅存在本页面会话中，刷新后清空。加载只改草稿。</p></details></details>
-        <div class="joint-toolbar-line joint-apply-controls"><button id="joint-apply-example" class="button primary" ${store.selectedIds().length ? '' : 'disabled'}>样例应用已选草稿</button><button id="joint-apply-hardware" class="button secondary" disabled>实机应用（未连接）</button></div>
-        <p class="joint-toolbar-note">样例应用仅做本地逐项检查，不执行动作。编辑范围是演示配置，实机限位未知。</p>
       </div>
-      <div id="joint-coordination-scroll" class="coordination-board" role="region" aria-label="15关节联调大面板，全部展开，无内部滚动">${rows}</div>
+      <div class="joint-edit-legend"><span>滑块：目标草稿</span><span><i class="joint-marker-key" aria-hidden="true"></i>三角：样例实测</span><span>ticks · 使能 / 校准 / 限位未知 · 编辑不发送</span></div>
+      <div id="joint-coordination-scroll" class="coordination-board" role="region" aria-label="15关节联调面板，全部展开，无内部滚动">${rows}</div>
       <div class="joint-batch-box"><p id="joint-batch-result" role="status" aria-live="polite">${escape(store.snapshot().lastBatch?.summary || '尚未应用样例草稿；没有发送设备请求。')}</p><p id="joint-operation-notice" role="status" aria-live="polite">${escape(notice)}</p><details id="joint-operation-details" ${noticeItems.length ? '' : 'hidden'}><summary>逐关节草稿操作结果</summary><ul>${noticeItems.map(item => `<li>${escape(item)}</li>`).join('')}</ul></details></div>
-      <p class="joint-note">左腿 → 右腿 → 头颈与嘴部；未选或缺测关节仍保留。实机反馈待接入；当前仅左膝有生成样例。</p>
+      <div class="joint-panel-footer"><p class="joint-note">15 关节完整保留，样例检查不代表命令确认；实测超范围隐藏标记，完整原因可在逐项结果中展开。</p><a id="joint-open-single" class="button secondary" href="#console/servos/single">查看 <span data-joint-current-name>${escape(model.metadata.find(joint => joint.id === activeId)?.name || '')}</span> · 单舵机详情</a><a class="button secondary" href="#console/charts">打开曲线页</a></div>
     </section>`;
   }
 
-  function detailControls(id) {
+  function detailControls(id, mode) {
     const joint = model.metadata.find(item => item.id === id);
     const draft = store.getDraft(id);
     const result = resultFor(id);
-    return `<div class="command-box"><h3>当前目标草稿</h3><p class="joint-detail-draft"><strong data-detail-draft>${draft.value === null ? '—' : escape(draft.value)} ticks</strong><span data-detail-draft-state>${draftStatus(id)}</span></p><p>实机方向 / 零位 / 限位未知；草稿尚未发送到设备。</p><dl class="joint-index-list"><div><dt>显示序号</dt><dd>${joint.displayOrder}</dd></div><div><dt>物理运行时索引</dt><dd>${joint.runtimeIndex}</dd></div><div><dt>策略索引</dt><dd>${joint.policyIndex === null ? '无 · 嘴部独立控制' : joint.policyIndex}</dd></div></dl><p data-detail-result>${result ? statusText[result.status] + '：' + escape(result.reason) : '尚无样例检查结果；接收、应用、反馈与物理到位待设备端确认。'}</p><div class="button-row"><button class="button primary" disabled>发送目标</button><button class="button secondary" disabled>关闭舵机使能</button><button class="button secondary" disabled>停止序列</button></div><p>关闭使能、停止序列与停止记录分别定义；release 不是停止或硬件急停。</p></div>`;
+    const range = model.sampleConfig.ranges[id];
+    return `<div class="command-box"><h3>当前目标草稿</h3><p class="joint-detail-draft"><strong data-detail-draft>${draft.value === null ? '—' : escape(draft.value)} ticks</strong><span data-detail-draft-state>${draftStatus(id)}</span></p>${draftEditor(joint, mode)}<p class="joint-editor-note">演示编辑范围 ${range.min}–${range.max} ticks；黄色三角为样例实测。实机方向 / 零位 / 限位未知，草稿尚未发送到设备。</p><dl class="joint-index-list"><div><dt>显示序号</dt><dd>${joint.displayOrder}</dd></div><div><dt>物理运行时索引</dt><dd>${joint.runtimeIndex}</dd></div><div><dt>策略索引</dt><dd>${joint.policyIndex === null ? '无 · 嘴部独立控制' : joint.policyIndex}</dd></div></dl><p data-detail-result>${result ? statusText[result.status] + '：' + escape(result.reason) : '尚无样例检查结果；接收、应用、反馈与物理到位待设备端确认。'}</p><div class="button-row"><button class="button primary" disabled>发送目标</button><button class="button secondary" disabled>关闭舵机使能</button><button class="button secondary" disabled>停止序列</button><a class="button secondary" href="#console/charts">打开曲线页</a></div><p>关闭使能、停止序列与停止记录分别定义；release 不是停止或硬件急停。</p></div>`;
   }
 
   function applySidebarLayout(grid, sidebar, button) {
+    if (!grid || !sidebar || !button) return;
     const collapsed = sidebarPreference ?? window.innerWidth <= 1120;
     sidebar.hidden = collapsed;
     grid.classList.toggle('sidebar-collapsed', collapsed);
@@ -95,6 +124,7 @@ window.JointConsole = (() => {
   }
 
   function render(baseMarkup, options) {
+    if (options.view === 'joint' || options.view === 'single') currentMode = options.view;
     const template = document.createElement('template');
     template.innerHTML = baseMarkup;
     const wrap = template.content.querySelector('.console-wrap');
@@ -102,9 +132,8 @@ window.JointConsole = (() => {
     const grid = template.content.querySelector('.console-grid');
     grid.classList.toggle('coordination-grid', currentMode === 'joint');
     const tabs = document.createElement('div');
-    tabs.className = 'joint-view-switch';
-    tabs.setAttribute('aria-label', '关节调试视图');
-    tabs.innerHTML = `<button id="joint-view-joint" data-console-view="joint" aria-pressed="${currentMode === 'joint'}">关节联调</button><button id="joint-view-single" data-console-view="single" aria-pressed="${currentMode === 'single'}">单关节调试</button><button id="console-sidebar-toggle" aria-controls="console-sidebar">收起导航</button><span>草稿保留在本页面会话中 · 实机未连接</span>`;
+    tabs.className = 'console-navigation-tools';
+    tabs.innerHTML = '<button id="console-sidebar-toggle" aria-controls="console-sidebar">收起导航</button><span>草稿保留在本页面会话中 · 实机未连接</span>';
     wrap.insertBefore(tabs, grid);
     const sidebar = grid.querySelector('.console-sidebar');
     sidebar.id = 'console-sidebar';
@@ -113,31 +142,26 @@ window.JointConsole = (() => {
       const replacement = document.createElement('template');
       replacement.innerHTML = panel(options.state, options.jointId);
       grid.querySelector('.joint-panel').replaceWith(replacement.content);
-    }
-    const feedback = store.getFeedback(options.jointId, options.state);
-    const metrics = template.content.querySelectorAll('.metric');
-    metrics[0].innerHTML = `<span>样例位置回读</span><strong>${feedback.available ? numberText(feedback.value) : '—'}<small>ticks</small></strong>`;
-    metrics[1].innerHTML = `<span>样例目标回读</span><strong>${feedback.available ? numberText(feedback.goal) : '—'}<small>ticks</small></strong>`;
-    const controls = document.createElement('template');
-    controls.innerHTML = detailControls(options.jointId);
-    template.content.querySelector('.command-box').replaceWith(controls.content);
-    if (feedback.available) template.content.querySelector('.detail-chart .chart-controls span').textContent = '生成样例曲线 · 不跟随当前草稿';
-    if (currentMode === 'joint') {
-      const workspace = document.createElement('div');
-      workspace.className = 'coordination-workspace';
-      const mainColumn = document.createElement('div');
-      mainColumn.className = 'coordination-controls';
-      mainColumn.append(grid.querySelector('.joint-panel'));
-      const monitor = document.createElement('div');
-      monitor.className = 'coordination-monitor';
-      const charts = document.createElement('div');
-      charts.id = 'joint-charts';
-      charts.innerHTML = window.JointCharts.render({ jointId: options.jointId, state: options.state });
-      const detail = grid.querySelector('.console-detail');
-      detail.querySelector('.detail-chart').remove();
-      monitor.append(charts, detail);
-      workspace.append(mainColumn, monitor);
-      grid.append(workspace);
+      grid.querySelector('.console-detail')?.remove();
+    } else {
+      grid.querySelector('.joint-panel .panel-title h2').textContent = '单舵机调试';
+      for (const button of grid.querySelectorAll('.joint-table [data-joint]')) {
+        const rowElement = button.closest('tr');
+        const id = Number(button.dataset.joint);
+        rowElement.dataset.jointRow = id;
+        rowElement.cells[1].dataset.jointFeedback = id;
+        rowElement.cells[2].dataset.jointTemperature = id;
+        rowElement.cells[3].dataset.jointFeedbackState = id;
+      }
+      const feedback = store.getFeedback(options.jointId, options.state);
+      const metrics = template.content.querySelectorAll('.metric');
+      metrics[0].innerHTML = `<span>样例位置回读</span><strong>${feedback.available ? numberText(feedback.value) : '—'}<small>ticks</small></strong>`;
+      metrics[1].innerHTML = `<span>样例目标回读</span><strong>${feedback.available ? numberText(feedback.goal) : '—'}<small>ticks</small></strong>`;
+      metrics[2].innerHTML = `<span>样例电压</span><strong>${feedback.available ? numberText(feedback.volt) : '—'}<small>V</small></strong>`;
+      const controls = document.createElement('template');
+      controls.innerHTML = detailControls(options.jointId, options.state);
+      template.content.querySelector('.command-box').replaceWith(controls.content);
+      template.content.querySelector('.detail-chart')?.remove();
     }
     return template.innerHTML;
   }
@@ -159,24 +183,51 @@ window.JointConsole = (() => {
       if (!rowElement) continue;
       const draft = store.getDraft(id);
       const feedback = store.getFeedback(id, mode);
-      const number = rowElement.querySelector('[data-joint-target-number]');
-      const slider = rowElement.querySelector('[data-joint-target-range]');
-      if (number !== sourceInput && number !== document.activeElement) number.value = draft.value ?? '';
-      if (slider !== sourceInput && slider !== document.activeElement && validity(id)) slider.value = draft.value;
-      slider.setAttribute('aria-invalid', String(!validity(id)));
-      number.setAttribute('aria-invalid', String(!validity(id)));
-      rowElement.querySelector('[data-joint-select]').checked = selected(id);
-      rowElement.querySelector('[data-joint-feedback]').textContent = feedback.available ? numberText(feedback.value) : '—';
-      rowElement.querySelector('[data-joint-age]').textContent = feedback.ageLabel;
-      rowElement.querySelector('[data-joint-draft-state]').textContent = draftStatus(id, true);
-      rowElement.querySelector('[data-joint-feedback-state]').textContent = `${feedback.valid ? '样例' : feedback.stale ? '陈旧' : '缺测'} · 校准未知`;
+      for (const number of document.querySelectorAll(`[data-joint-target-number="${id}"]`)) {
+        if (number !== sourceInput && number !== document.activeElement) number.value = draft.value ?? '';
+        number.setAttribute('aria-invalid', String(!validity(id)));
+      }
+      for (const slider of document.querySelectorAll(`[data-joint-target-range="${id}"]`)) {
+        if (slider !== sourceInput && slider !== document.activeElement && validity(id)) slider.value = draft.value;
+        slider.setAttribute('aria-invalid', String(!validity(id)));
+      }
+      const marker = feedbackMarker(id, mode);
+      for (const indicator of document.querySelectorAll(`[data-joint-feedback-marker="${id}"]`)) {
+        indicator.hidden = !marker.visible;
+        indicator.style.left = `${marker.percentage}%`;
+        indicator.title = marker.label;
+        indicator.classList.toggle('stale', feedback.stale);
+      }
+      const checkbox = rowElement.querySelector('[data-joint-select]');
+      if (checkbox) checkbox.checked = selected(id);
+      const feedbackValue = rowElement.querySelector('[data-joint-feedback]');
+      if (feedbackValue) feedbackValue.textContent = feedback.available ? numberText(feedback.value) : '—';
+      const temperature = rowElement.querySelector('[data-joint-temperature]');
+      if (temperature) temperature.textContent = feedback.available ? numberText(feedback.temp) : '—';
+      for (const field of ['goal', 'load', 'volt', 'temp']) {
+        const element = rowElement.querySelector(`[data-joint-measurement="${field}"]`);
+        if (element) element.textContent = numberText(feedback[field]);
+      }
+      const age = rowElement.querySelector('[data-joint-age]');
+      if (age) age.textContent = feedback.available || mode === 'offline' ? feedback.ageLabel : '';
+      const draftState = rowElement.querySelector('[data-joint-draft-state]');
+      if (draftState) { draftState.textContent = draftStatus(id, true); draftState.hidden = !draftNeedsAttention(id); }
+      const feedbackState = rowElement.querySelector('[data-joint-feedback-state]');
+      if (feedbackState) feedbackState.textContent = marker.state;
       const result = snapshot.results[id];
       const resultElement = rowElement.querySelector('[data-joint-result]');
-      resultElement.textContent = result ? compactStatusText[result.status] : '尚未检查';
-      resultElement.className = 'joint-result ' + (result?.status || '');
-      rowElement.querySelector('[data-joint-result-reason]').textContent = result?.reason || '不代表命令确认';
-      rowElement.querySelector('[data-joint-result-reason]').title = result?.reason || '不代表命令确认';
+      if (resultElement) {
+        resultElement.textContent = result ? compactStatusText[result.status] : '尚未检查';
+        resultElement.className = 'joint-result ' + (result?.status || '');
+      }
+      const reason = rowElement.querySelector('[data-joint-result-reason]');
+      if (reason) { reason.textContent = result?.reason || ''; reason.title = result?.reason || '不代表命令确认'; }
+      const resultDetails = rowElement.querySelector('[data-joint-result-details]');
+      if (resultDetails) resultDetails.hidden = !result;
+      const resultEmpty = rowElement.querySelector('[data-joint-result-empty]');
+      if (resultEmpty) resultEmpty.hidden = Boolean(result);
       rowElement.classList.toggle('selected', id === activeId);
+      rowElement.querySelector('[data-joint]')?.setAttribute('aria-pressed', String(id === activeId));
     }
     const count = document.querySelector('#joint-selection-count');
     if (count) count.textContent = `已选 ${snapshot.selectedIds.length} / 15`;
@@ -190,6 +241,8 @@ window.JointConsole = (() => {
     if (draftDetail) draftDetail.textContent = `${store.getDraft(activeId).value ?? '—'} ticks`;
     const draftDetailState = document.querySelector('[data-detail-draft-state]');
     if (draftDetailState) draftDetailState.textContent = draftStatus(activeId);
+    const currentName = document.querySelector('[data-joint-current-name]');
+    if (currentName) currentName.textContent = model.metadata.find(joint => joint.id === activeId)?.name || '';
     const detailResult = document.querySelector('[data-detail-result]');
     if (detailResult) {
       const result = snapshot.results[activeId];
@@ -200,6 +253,9 @@ window.JointConsole = (() => {
     [feedback.value, feedback.goal, feedback.volt].forEach((value, index) => {
       if (metricValues[index]) metricValues[index].innerHTML = `${feedback.available ? numberText(value) : '—'}<small>${index === 2 ? 'V' : 'ticks'}</small>`;
     });
+    // A display notification only: viewers read the existing draft/feedback
+    // layers and never use this event to write a target or control hardware.
+    window.dispatchEvent(new CustomEvent('joint-draft-change'));
   }
 
   function showOperation(title, result) {
@@ -223,16 +279,6 @@ window.JointConsole = (() => {
     if (element.id === 'console-sidebar-toggle') {
       sidebarPreference = element.getAttribute('aria-expanded') === 'true';
       applySidebarLayout(document.querySelector('.console-grid'), document.querySelector('#console-sidebar'), element);
-      return true;
-    }
-    if (element.matches('[data-console-view]')) {
-      if (currentMode !== element.dataset.consoleView) {
-        rememberScroll();
-        currentMode = element.dataset.consoleView;
-        options.redraw();
-        restoreScroll();
-        document.querySelector(`#joint-view-${currentMode}`)?.focus({ preventScroll: true });
-      }
       return true;
     }
     if (element.matches('[data-joint-step]')) {

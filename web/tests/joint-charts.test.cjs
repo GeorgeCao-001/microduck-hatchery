@@ -103,3 +103,73 @@ test('render lists all 15 physical joints, independent channel selectors and mis
   assert.match(html, /曲线显示设置 · 1 个关节 · 2 项数据/);
   assert.equal(Charts.snapshot().selectionExpanded, false);
 });
+
+test('curve mounting never owns acquisition and unmount preserves paused settings and growing history', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const vm = require('node:vm');
+  let time = 0, scheduled = 0, cancelled = 0, tick;
+  const window = { JointDrafts: require('../prototype/joint-drafts.js') };
+  const environment = { window, performance: { now: () => time },
+    setInterval(callback) { tick = callback; scheduled++; return 0; },
+    clearInterval() { cancelled++; } };
+  for (const name of ['joint-session.js', 'joint-charts.js']) {
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../prototype', name), 'utf8'), environment);
+  }
+  const charts = window.JointCharts, session = window.JointSession;
+  function panel() {
+    const handlers = {}, plots = { innerHTML: '', getBoundingClientRect: () => ({ width: 1000 }) };
+    const settings = { open: false };
+    const elements = { '[data-chart-plots]': plots, '.chart-selection-tools': settings,
+      '[data-chart-relative-time]': {}, '[data-chart-source-status]': {},
+      '[data-chart-count]': {}, '[data-chart-selection-summary]': {}, '[data-chart-follow]': {} };
+    return { handlers, elements, isConnected: true,
+      querySelector: selector => elements[selector] || null, querySelectorAll: () => [], contains: () => true,
+      addEventListener: (name, handler) => { handlers[name] = handler; },
+      removeEventListener: name => { delete handlers[name]; } };
+  }
+  const first = panel();
+  assert.equal(charts.mount({ container: first }), true);
+  assert.equal(scheduled, 0);
+  charts.setContext({ state: 'offline' });
+  assert.equal(session.snapshot().state, 'example');
+  session.start({ state: 'example' });
+  assert.equal(scheduled, 1);
+  const change = (dataset, value, checked = true) => first.handlers.change({ target: {
+    dataset, value, checked, matches: selector => selector === (dataset.chartJoint
+      ? '[data-chart-joint]' : dataset.chartChannel ? '[data-chart-channel]' : '[data-chart-window]')
+  } });
+  change({ chartJoint: '34' });
+  change({ chartChannel: 'volt' });
+  change({}, '30');
+  const pause = { textContent: '', matches: selector => selector === '[data-chart-pause]' };
+  first.handlers.click({ target: { closest: () => pause } });
+  first.elements['.chart-selection-tools'].open = true;
+  const before = charts.snapshot();
+  charts.unmount();
+  assert.equal(cancelled, 0);
+  assert.equal(session.snapshot().running, true);
+  assert.equal(Object.keys(first.handlers).length, 0);
+  time = 3000; tick();
+  const html = charts.render({ state: 'example' });
+  assert.match(html, /恢复显示/);
+  assert.match(html, /data-chart-joint="34" checked/);
+  assert.match(html, /data-chart-channel="volt" checked/);
+  assert.match(html, /value="30" selected/);
+  assert.match(html, /<details class="chart-selection-tools" open>/);
+  const second = panel();
+  charts.mount({ container: second, state: 'example' });
+  const after = charts.snapshot();
+  assert.deepEqual(Array.from(after.visibleJointIds), Array.from(before.visibleJointIds));
+  assert.deepEqual(Array.from(after.channels), Array.from(before.channels));
+  assert.equal(after.paused, true);
+  assert.equal(after.frames.at(-1).t, 3);
+  assert.equal(second.elements['[data-chart-relative-time]'].textContent, '0.0 s');
+  second.handlers.click({ target: { closest: () => pause } });
+  assert.equal(charts.snapshot().paused, false);
+  time = 3200; tick();
+  assert.equal(second.elements['[data-chart-relative-time]'].textContent, '3.2 s');
+  charts.unmount();
+  session.stop();
+  assert.equal(cancelled, 1);
+});

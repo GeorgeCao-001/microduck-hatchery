@@ -30,6 +30,15 @@ def inline_css(match):
 
 def inline_script(match):
     source = (PROTOTYPE / match.group(1)).read_text(encoding="utf-8-sig")
+    if match.group(1) == "joint-viewer.js":
+        model_dir = PROTOTYPE / "assets" / "microduck-reference"
+        engine = PROTOTYPE / "vendor" / "three-0.160.0.min.js"
+        viewer = {
+            "model": json.loads((model_dir / "model.json").read_text(encoding="utf-8")),
+            "meshesBase64": base64.b64encode((model_dir / "meshes.bin").read_bytes()).decode("ascii"),
+            "engineURL": "data:text/javascript;base64," + base64.b64encode(engine.read_bytes()).decode("ascii"),
+        }
+        source = "window.HatcheryStandaloneViewer=" + json.dumps(viewer, ensure_ascii=True) + ";\n" + source
     if match.group(1) == "app.js":
         photos = {name: data_url(PROTOTYPE / "assets" / f"{name}.jpg") for name in ("product", "assembly")}
         source = source.replace("'use strict';", "'use strict';\nconst standalonePhotos=" + json.dumps(photos) + ";", 1)

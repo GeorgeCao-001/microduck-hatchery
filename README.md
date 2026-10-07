@@ -11,7 +11,7 @@ Microduck 整机复刻项目，覆盖机械与电气、运控、仿真与 RL、�
 | 部分 | 已有内容 | 尚未完成 |
 |---|---|---|
 | 设备软件与协议 | 7 个 daemon、9 个 library、2 个协议、5 个官方工具的 README；样例协议 JSON | 正式源码、Cargo 构建、板端 gateway、robotd 与 FT 适配 |
-| Hatchery Web | 原生原型、15 关节联调大面板与单关节视图、可选关节/数据的连续样例曲线、草稿/姿态/逐项样例检查、样例记录与 CSV | 真实连接、校准镜像、正式记录、生产构建；生产前端栈尚未冻结 |
+| Hatchery Web | 原生原型、左侧只读 3D 参考姿态与右侧 15 关节长滑块、单舵机页、独立曲线页、共享样例会话、草稿/姿态/逐项样例检查、样例记录与 CSV | 总控界面（整机总览与全局操作）、真实连接、校准/实机模型映射、正式记录、生产构建；生产前端栈尚未冻结 |
 | 教程 | 当前原型仍为六章结构，七章全栈方案已整理为审查稿 | 七章页面及完整教程内容，须先共同审查 |
 | 本地工具 | Python 静态预览、独立的只读 HTTP/WS 样例服务与检查脚本 | 诊断页 `app.js`、schema 对齐、完整的新环境依赖清单 |
 | 硬件 | BOM 采购与选型记录、厂商规格书、照片及 CAD | 实际装配与接口配置核实、校准、上电和实机验收 |
@@ -103,7 +103,7 @@ python tools/check_shell.py --transport-only
 - 迁移前先复查已有 FT 代码，优先利用 `bus.rs` / `io.rs` 边界适配；寄存器与串口细节不进入 policy、observation 或 Web。设备节点按 Radxa 实物与镜像核实。
 - 总线只由当前活动后端占用，读操作同样需要仲裁。校准后端与 robotd 不能同时访问总线；`release` 不是急停，回放不发送历史目标。
 - Web 沿用纸白、深绿黑、芥末黄、真实照片和技术文档风格。联调样例保留单关节入口、草稿与反馈分离，加载姿态只改已选草稿；缺校准时镜像禁用，实机动作禁用。
-- 仿真与 RL 属于整机和教程主线；Web 不做 3D、浏览器仿真或策略导入、转换、推理。WiFi、USB-C gadget 网络和 BLE 桥仍是目标能力，BLE 不默认承担高频运动控制。
+- 仿真与 RL 属于整机和教程主线。Web 已按最新要求加入只读 3D 参考姿态，不做浏览器物理仿真或策略导入、转换、推理。模型和角度当前均属参考/演示，未验证实际 Radxa / FT 装配；[模型来源与许可](web/licenses/microduck-model-NOTICE.md)。WiFi、USB-C gadget 网络和 BLE 桥仍是目标能力，BLE 不默认承担高频运动控制。
 
 ## 阅读入口
 
@@ -111,7 +111,7 @@ python tools/check_shell.py --transport-only
 |---|---|
 | 架构依据与当前边界 | [架构 v2](docs/microduck-hatchery-architecture-v2.md)、[ARCHITECTURE](docs/ARCHITECTURE.md) |
 | 接手背景与推进顺序 | [本地开发交接](Microduck-Hatchery-Local-Development-Handoff.md)、[PLAN](docs/PLAN.md) |
-| Web 运行、状态与共同设计 | [Web README](web/README.md)、[Web 文档索引](web/docs/README.md)、[联调说明](web/docs/JOINT_COORDINATION.md)、[七章与后续联调审查稿](web/docs/LOCAL_REVIEW_PROPOSAL.md) |
+| Web 运行、状态与共同设计 | [Web README](web/README.md)、[Web 文档索引](web/docs/README.md)、[联调说明](web/docs/JOINT_COORDINATION.md)、[总控、七章与联调审查稿](web/docs/LOCAL_REVIEW_PROPOSAL.md) |
 | 正式模块与本地样例 | [src](src/README.md)、[protocol](protocol/README.md)、[hatchery-shell](tools/hatchery-shell/README.md) |
 | 来源、冻结与参考范围 | [SOURCES](docs/SOURCES.md)、[设备协议源码审核](web/docs/PROTOCOL_SOURCE_AUDIT.md)、[官方文档快照](docs/official-microduck/README.md) |
 | 开发约束与记录 | [AGENTS](AGENTS.md)、[项目日志](logs/PROJECT_LOG.md)、[日志规则](logs/README.md) |

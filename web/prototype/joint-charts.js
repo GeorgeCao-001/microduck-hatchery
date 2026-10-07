@@ -2,22 +2,25 @@
   'use strict';
   const model = typeof module === 'object' && module.exports
     ? require('./joint-drafts.js') : root.JointDrafts;
-  const api = factory(model);
+  const session = typeof module === 'object' && module.exports
+    ? require('./joint-session.js') : root.JointSession;
+  const api = factory(model, session);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.JointCharts = api;
-})(typeof window !== 'undefined' ? window : globalThis, function (model) {
+})(typeof window !== 'undefined' ? window : globalThis, function (model, session) {
   'use strict';
 
-  // A browser-generated sample stream only: no transport, device clock or command.
+  // A read-only view of the shared browser sample session. DOM ownership never
+  // starts or stops acquisition; the console route owns that session lifecycle.
   const joints = model.metadata;
   const jointIds = new Set(joints.map(function (joint) { return joint.id; }));
   const colors = ['#2e5b42', '#a2711c', '#286879', '#7e486a', '#665294', '#426438', '#ad533a', '#267b75', '#82602f', '#766185', '#385ca0', '#956022', '#78574c', '#546835', '#9d4267'];
   const channels = Object.freeze({
-    position: { title: '位置', unit: 'ticks', height: 300, keys: ['goal', 'actual'] },
-    error: { title: '跟踪误差 · 实测 − 目标回读', unit: 'ticks', height: 160, keys: ['error'] },
-    load: { title: '负载原始读数', unit: 'raw load', height: 180, keys: ['load'] },
-    volt: { title: '电压', unit: 'V', height: 180, keys: ['volt'] },
-    temp: { title: '温度', unit: '°C', height: 180, keys: ['temp'] }
+    position: { title: '位置', unit: 'ticks', height: 420, keys: ['goal', 'actual'] },
+    error: { title: '跟踪误差 · 实测 − 目标回读', unit: 'ticks', height: 280, keys: ['error'] },
+    load: { title: '负载原始读数', unit: 'raw load', height: 300, keys: ['load'] },
+    volt: { title: '电压', unit: 'V', height: 300, keys: ['volt'] },
+    temp: { title: '温度', unit: '°C', height: 300, keys: ['temp'] }
   });
   const finite = function (value) { return typeof value === 'number' && Number.isFinite(value); };
   const escape = function (value) {
@@ -27,83 +30,6 @@
   };
   const colorFor = function (id) { return colors[joints.findIndex(function (joint) { return joint.id === id; })] || colors[0]; };
   const numberText = function (value) { return finite(value) ? Number(value.toFixed(2)).toString() : '—'; };
-
-  function normalizeFrame(frame) {
-    if (!frame || frame.source !== 'sample' || frame.sampleOnly !== true || !jointIds.has(frame.id)
-      || !finite(frame.t) || frame.t < 0) return null;
-    const normalized = { id: frame.id, t: frame.t, source: 'sample', sampleOnly: true };
-    for (const key of ['actual', 'goal', 'load', 'temp', 'volt']) {
-      const value = frame[key];
-      if (value != null && !finite(value)) return null;
-      normalized[key] = finite(value) ? value : null;
-    }
-    return normalized;
-  }
-
-  // Each joint has a bounded ring, so showing more joints does not shorten a window.
-  function createBuffer(capacity) {
-    capacity = capacity == null ? 320 : capacity;
-    if (!Number.isInteger(capacity) || capacity < 2) throw new RangeError('缓冲容量至少为 2');
-    const rings = new Map();
-    let latest = 0;
-    function push(frame) {
-      const next = normalizeFrame(frame);
-      if (!next) return false;
-      let ring = rings.get(next.id);
-      if (!ring) {
-        ring = { values: new Array(capacity), start: 0, length: 0, lastTime: -1 };
-        rings.set(next.id, ring);
-      }
-      if (next.t <= ring.lastTime) return false;
-      const index = (ring.start + ring.length) % capacity;
-      ring.values[index] = next;
-      if (ring.length < capacity) ring.length += 1;
-      else ring.start = (ring.start + 1) % capacity;
-      ring.lastTime = next.t;
-      latest = Math.max(latest, next.t);
-      return true;
-    }
-    function frames(ids) {
-      const requested = ids == null ? Array.from(rings.keys()) : ids;
-      const result = [];
-      requested.forEach(function (id) {
-        const ring = rings.get(id);
-        if (!ring) return;
-        for (let i = 0; i < ring.length; i += 1) {
-          result.push(Object.assign({}, ring.values[(ring.start + i) % capacity]));
-        }
-      });
-      return result.sort(function (a, b) { return a.t - b.t || a.id - b.id; });
-    }
-    return { push: push, frames: frames, latestTime: function () { return latest; }, capacity: capacity };
-  }
-
-  function createRelativeClock(readNow) {
-    readNow = readNow || function () { return performance.now(); };
-    const origin = readNow();
-    let previous = 0;
-    return function () {
-      const delta = (readNow() - origin) / 1000;
-      if (finite(delta)) previous = Math.max(previous, delta, 0);
-      return previous;
-    };
-  }
-
-  function sampleFrame(t, state) {
-    if (!finite(t) || t < 0) throw new RangeError('样例相对时间必须为非负有限值');
-    const available = ['example', 'readonly', 'read-only'].includes(state || 'example');
-    const phase = t % 10;
-    const goal = phase < 1.5 ? 120 : phase < 6.5 ? 128 : 120;
-    const response = phase < 1.5 ? 0 : phase < 6.5
-      ? 8 * (1 - Math.exp(-(phase - 1.5) / 0.6))
-      : 8 * Math.exp(-(phase - 6.5) / 0.7);
-    return {
-      id: 23, t: t, source: 'sample', sampleOnly: true,
-      goal: available ? goal : null,
-      actual: available ? Math.round(120 + response + 0.3 * Math.sin(t * 10 / 3)) : null,
-      load: null, temp: available ? 32 : null, volt: available ? 7.8 : null
-    };
-  }
 
   function seriesFor(frames, id, key, start, end) {
     return frames.filter(function (frame) {
@@ -143,13 +69,13 @@
     return [min - padding, max + padding];
   }
 
-  const buffer = createBuffer();
+  const history = session.history;
   let context = { jointId: 23, state: 'example' };
   let visibleJointIds = new Set([23]);
   let visibleChannels = new Set(['position', 'error']);
   let windowSeconds = 10, paused = false, frozenFrames = null;
   let selectionExpanded = false;
-  let container = null, timer = null, onFrame = null, clock = null;
+  let container = null, unsubscribe = null;
 
   function selectionMarkup() {
     return `<details class="chart-selection-tools" ${selectionExpanded ? 'open' : ''}><summary data-chart-selection-summary>${selectionSummary()}</summary><div class="chart-picker-row"><fieldset class="chart-joint-picker"><legend>显示关节 <span>独立于草稿应用范围</span></legend><div class="chart-joint-groups">${['左腿', '右腿', '头颈'].map(function (group) {
@@ -175,13 +101,13 @@
 
   function render(options) {
     if (options) setContext(options);
-    return `<section class="panel large-chart-panel" aria-labelledby="large-chart-title"><div class="large-chart-heading"><div><h2 id="large-chart-title">实时曲线</h2><p>选择要一起观察的关节和数据。</p></div><span class="badge example">只读样例</span></div>${selectionMarkup()}<div class="large-chart-toolbar"><label>时间窗 <select data-chart-window aria-label="曲线时间窗"><option value="10" ${windowSeconds === 10 ? 'selected' : ''}>最近 10 秒</option><option value="30" ${windowSeconds === 30 ? 'selected' : ''}>最近 30 秒</option></select></label><button type="button" data-chart-pause>${paused ? '恢复显示' : '暂停显示'}</button><span data-chart-follow>${paused ? '显示已暂停，样例继续采集' : '跟随最新样例'}</span><output data-chart-relative-time>0.0 s</output></div><p class="chart-source-status" data-chart-source-status>${contextText()}</p><div data-chart-plots>${plotsMarkup()}</div><p class="large-chart-footnote">仅左膝 #23 有生成的位置样例；温度 32 °C、电压 7.8 V 为常量样例。其他 14 个关节没有反馈，raw load 尚无数据。横轴是本页面单调相对时间，不是设备 Unix 时间；暂停仅暂停显示，不执行任何控制。</p></section>`;
+    return `<section class="panel large-chart-panel" aria-labelledby="large-chart-title"><div class="large-chart-heading"><div><h2 id="large-chart-title">实时曲线</h2><p>选择要一起观察的关节和数据；切换舵机页面后继续采集。</p></div><span class="badge example">只读样例</span></div>${selectionMarkup()}<div class="large-chart-toolbar"><label>时间窗 <select data-chart-window aria-label="曲线时间窗"><option value="10" ${windowSeconds === 10 ? 'selected' : ''}>最近 10 秒</option><option value="30" ${windowSeconds === 30 ? 'selected' : ''}>最近 30 秒</option></select></label><button type="button" data-chart-pause>${paused ? '恢复显示' : '暂停显示'}</button><span data-chart-follow>${paused ? '显示已暂停，样例继续采集' : '跟随最新样例'}</span><output data-chart-relative-time>${displayTime().toFixed(1)} s</output></div><p class="chart-source-status" data-chart-source-status>${contextText()}</p><div data-chart-plots>${plotsMarkup()}</div><p class="large-chart-footnote">仅左膝 #23 有生成的位置样例；温度 32 °C、电压 7.8 V 为常量样例。其他 14 个关节没有反馈，raw load 尚无数据。横轴是本调试台样例会话的单调相对时间，不是设备 Unix 时间；暂停仅暂停显示，不执行任何控制。</p></section>`;
   }
 
   function plotsMarkup() {
     if (!visibleJointIds.size) return '<div class="chart-empty"><strong>尚未选择显示关节</strong><p>勾选关节后，可在同一个曲线面板观察。</p></div>';
     if (!visibleChannels.size) return '<div class="chart-empty"><strong>尚未选择显示数据</strong><p>勾选位置、误差或其他数据。</p></div>';
-    const frames = paused && frozenFrames ? frozenFrames : buffer.frames();
+    const frames = paused && frozenFrames ? frozenFrames : history.frames();
     const end = frames.length ? Math.max.apply(null, frames.map(function (frame) { return frame.t; })) : 0;
     const start = Math.max(0, end - windowSeconds);
     // Before a full window is available, keep the axis at its selected length.
@@ -244,22 +170,18 @@
     const status = container.querySelector('[data-chart-source-status]');
     if (status) status.textContent = contextText();
     const relative = container.querySelector('[data-chart-relative-time]');
-    if (relative) relative.textContent = buffer.latestTime().toFixed(1) + ' s';
+    if (relative) relative.textContent = displayTime().toFixed(1) + ' s';
   }
 
-  function ingest(frame) {
-    const accepted = buffer.push(frame);
-    if (accepted) {
-      if (onFrame) onFrame(Object.assign({}, normalizeFrame(frame)));
-      paint();
-    }
-    return accepted;
+  function displayTime() {
+    if (paused && frozenFrames) return frozenFrames.length ? frozenFrames[frozenFrames.length - 1].t : 0;
+    return history.latestTime();
   }
 
-  function sampleTick() {
+  function handleFrame() {
     if (!container || !container.isConnected) { unmount(); return; }
-    const t = clock();
-    ingest(sampleFrame(t, context.state));
+    context.state = session.snapshot().state;
+    paint();
   }
 
   function updateSelectionControls() {
@@ -280,7 +202,7 @@
     else if (button.matches('[data-chart-clear-joints]')) { visibleJointIds.clear(); updateSelectionControls(); }
     else if (button.matches('[data-chart-pause]')) {
       paused = !paused;
-      frozenFrames = paused ? buffer.frames() : null;
+      frozenFrames = paused ? history.frames() : null;
       button.textContent = paused ? '恢复显示' : '暂停显示';
       const follow = container.querySelector('[data-chart-follow]');
       if (follow) follow.textContent = paused ? '显示已暂停，样例继续采集' : '跟随最新样例';
@@ -325,24 +247,21 @@
     const nextContainer = options.container || (typeof document !== 'undefined' ? document.querySelector('#joint-charts') : null);
     if (!nextContainer) return false;
     setContext(options);
-    onFrame = typeof options.onFrame === 'function' ? options.onFrame : null;
     if (nextContainer !== container) {
       unmount();
       container = nextContainer;
-      onFrame = typeof options.onFrame === 'function' ? options.onFrame : null;
       container.addEventListener('click', handleClick);
       container.addEventListener('change', handleChange);
       container.addEventListener('toggle', handleToggle, true);
     }
-    if (!clock) clock = createRelativeClock(options.now);
-    if (!timer) { sampleTick(); timer = setInterval(sampleTick, 200); }
+    if (!unsubscribe) unsubscribe = session.subscribe(handleFrame);
     paint();
     return true;
   }
 
   function unmount() {
-    if (timer) clearInterval(timer);
-    timer = null;
+    if (unsubscribe) unsubscribe();
+    unsubscribe = null;
     if (container) {
       const settings = container.querySelector('.chart-selection-tools');
       if (settings) selectionExpanded = settings.open;
@@ -351,7 +270,6 @@
       container.removeEventListener('toggle', handleToggle, true);
     }
     container = null;
-    onFrame = null;
   }
 
   function snapshot() {
@@ -360,15 +278,16 @@
       channels: Object.keys(channels).filter(function (key) { return visibleChannels.has(key); }),
       windowSeconds: windowSeconds, paused: paused, state: context.state,
       selectionExpanded: selectionExpanded,
-      focusedJointId: context.jointId, running: timer !== null, frames: buffer.frames()
+      focusedJointId: context.jointId, mounted: container !== null,
+      running: session.snapshot().running, frames: history.frames()
     };
   }
 
   return Object.freeze({
-    channels: channels, createBuffer: createBuffer, createRelativeClock: createRelativeClock,
-    normalizeFrame: normalizeFrame, sampleFrame: sampleFrame, seriesFor: seriesFor,
+    channels: channels, createBuffer: session.createBuffer, createRelativeClock: session.createRelativeClock,
+    normalizeFrame: session.normalizeFrame, sampleFrame: session.sampleFrame, seriesFor: seriesFor,
     pathFor: pathFor, extentFor: extentFor,
     render: render, mount: mount, unmount: unmount, setContext: setContext,
-    ingest: ingest, snapshot: snapshot
+    ingest: session.ingest, snapshot: snapshot
   });
 });

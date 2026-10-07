@@ -28,7 +28,7 @@
 |---|---|---|
 | GET `/` | 返回上游 `index.html`，禁用缓存 | 不是当前 Hatchery 原型；上游 3D 页面无需随协议迁移 |
 | GET `/imu_attitude.js` | 返回上游 IMU 页面脚本 | 本次未审核其实现 |
-| GET `/model/{name}` | 只允许 `model.json`、`meshes.bin`，不存在时返回 404 | 属于上游模型展示资源，当前 Hatchery 不做 Web 3D |
+| GET `/model/{name}` | 只允许 `model.json`、`meshes.bin`，不存在时返回 404 | 属于上游模型展示资源；2026-10-07 Hatchery 将参考显示资源单独用于静态只读 3D，不依赖此设备服务路由，也不据此接入控制 |
 | GET `/api/info` | 返回 `version/ids/present/names/fake/stats/log`，日志最近 50 条 | 没有唯一设备身份、协议版本、会话 ID 或完整能力表 |
 | GET `/api/poses` | 返回姿态列表中的 `file/name/time/note/goals/steps` | 没有完整的校准版本、单位、设备身份和映射兼容契约 |
 | GET `/api/logfile` | 下载当天文本日志；没有日志时返回 404 | 不等于 Hatchery 正式实验记录格式 |

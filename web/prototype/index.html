@@ -8,6 +8,8 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="joint-console.css">
 <link rel="stylesheet" href="joint-charts.css">
+<link rel="stylesheet" href="console-workspace.css">
+<link rel="stylesheet" href="joint-viewer.css">
 </head>
 <body>
 <a class="skip" href="#main">跳到正文</a>
@@ -21,7 +23,12 @@
 <dialog id="connection-dialog" aria-labelledby="connection-title"><div class="dialog-top"><span class="eyebrow">DEVICE CONNECTION</span><button class="icon-button close-dialog" aria-label="关闭连接说明">×</button></div><h2 id="connection-title">选择连接路径</h2><p class="muted">设备调试在开发板或电脑本地桥接提供的网页中进行。</p><div class="tabs" role="tablist" aria-label="连接方式"><button role="tab" aria-selected="true" data-connect="wifi">Wi-Fi</button><button role="tab" aria-selected="false" data-connect="usb">USB-C</button><button role="tab" aria-selected="false" data-connect="ble">蓝牙 BLE</button></div><div id="connection-content"></div><div class="callout"><strong>当前是视觉原型</strong><p>不发起网络连接或设备操作。连接步骤须在团队硬件上验证。</p></div><div class="dialog-bottom"><a class="button primary close-on-route" href="#article">查看连接教程</a><button class="button secondary close-dialog">关闭</button></div></dialog>
 <div class="toast" role="status" aria-live="polite"></div>
 <script src="joint-drafts.js"></script>
+<script src="joint-session.js"></script>
 <script src="joint-charts.js"></script>
 <script src="joint-console.js"></script>
+<script src="joint-viewer-model.js"></script>
+<script src="joint-viewer-geometry.js"></script>
+<script src="joint-viewer.js"></script>
+<script src="console-workspace.js"></script>
 <script src="app.js"></script>
 </body></html>
