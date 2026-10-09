@@ -8,20 +8,20 @@
 
   // Reference mapping only. Display order never defines a runtime or policy index.
   const metadata = [
-    [20, '左髋偏航', 'left_hip_yaw', '左腿', 0, 0],
-    [21, '左髋侧倾', 'left_hip_roll', '左腿', 1, 1],
-    [22, '左髋俯仰', 'left_hip_pitch', '左腿', 2, 2],
+    [20, '左髋 Yaw', 'left_hip_yaw', '左腿', 0, 0],
+    [21, '左髋 Roll', 'left_hip_roll', '左腿', 1, 1],
+    [22, '左髋 Pitch', 'left_hip_pitch', '左腿', 2, 2],
     [23, '左膝', 'left_knee', '左腿', 3, 3],
     [24, '左踝', 'left_ankle', '左腿', 4, 4],
-    [10, '右髋偏航', 'right_hip_yaw', '右腿', 10, 9],
-    [11, '右髋侧倾', 'right_hip_roll', '右腿', 11, 10],
-    [12, '右髋俯仰', 'right_hip_pitch', '右腿', 12, 11],
+    [10, '右髋 Yaw', 'right_hip_yaw', '右腿', 10, 9],
+    [11, '右髋 Roll', 'right_hip_roll', '右腿', 11, 10],
+    [12, '右髋 Pitch', 'right_hip_pitch', '右腿', 12, 11],
     [13, '右膝', 'right_knee', '右腿', 13, 12],
     [14, '右踝', 'right_ankle', '右腿', 14, 13],
-    [30, '颈部俯仰', 'neck_pitch', '头颈', 5, 5],
-    [31, '头部俯仰', 'head_pitch', '头颈', 6, 6],
-    [32, '头部偏航', 'head_yaw', '头颈', 7, 7],
-    [33, '头部侧倾', 'head_roll', '头颈', 8, 8],
+    [30, '颈部 Pitch', 'neck_pitch', '头颈', 5, 5],
+    [31, '头部 Pitch', 'head_pitch', '头颈', 6, 6],
+    [32, '头部 Yaw', 'head_yaw', '头颈', 7, 7],
+    [33, '头部 Roll', 'head_roll', '头颈', 8, 8],
     [34, '嘴部', 'mouth', '头颈', 9, null]
   ].map(function (row, index) {
     return Object.freeze({

@@ -1,9 +1,4 @@
 /* Reference 3D keeps the existing paper, green and mustard palette. */
-.console-wrap[data-console-page="joint"] .console-heading{margin-bottom:12px;gap:12px}
-.console-wrap[data-console-page="joint"] .console-heading .eyebrow{margin-bottom:4px}
-.console-wrap[data-console-page="joint"] .devicebar{padding:10px 16px;margin-bottom:12px}
-.console-wrap[data-console-page="joint"] .status-banner{padding:8px 16px;margin-bottom:12px}
-.console-wrap[data-console-page="joint"] .console-navigation-tools{margin-bottom:12px}
 .coordination-workspace{display:grid;grid-template-columns:minmax(320px,.9fr) minmax(540px,1.1fr);gap:18px;align-items:start;min-width:0}
 .joint-viewer-slot{min-width:0;position:sticky;top:18px}
 .joint-viewer-panel{overflow:hidden;min-width:0}

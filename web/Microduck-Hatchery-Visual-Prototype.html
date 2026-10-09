@@ -38,14 +38,14 @@
 .coordination-grid.sidebar-collapsed{grid-template-columns:minmax(0,1fr)}
 .coordination-panel{min-width:0}
 .coordination-panel .panel-title{padding:14px 16px;align-items:center}
-.coordination-panel .panel-title h2{font-size:22px}
+.coordination-panel .panel-title h2{font-size:22px;line-height:1.4}
 .coordination-panel .panel-title p{font-size:14px;color:var(--muted);margin:4px 0 0}
-.joint-toolbar{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:7px 8px;align-items:center;font-size:14px}
-.joint-toolbar>.joint-toolbar-line{display:contents;margin:0}
+.joint-toolbar{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.joint-toolbar>.joint-toolbar-line{display:flex;margin:0}
 .joint-toolbar>.joint-extra-tools{flex-basis:100%;margin:0}
 .joint-toolbar-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-size:14px}
 .joint-toolbar-line:last-child{margin-bottom:0}
-.joint-toolbar .button{min-height:36px;padding:7px 10px;font-size:14px}
+.joint-toolbar .button{min-height:36px;padding:7px 10px;font-size:14px;line-height:1.4}
 .joint-toolbar select,.joint-toolbar input[type=text]{min-width:0;max-width:100%;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink);padding:7px 8px;font:14px var(--body)}
 .joint-pose-controls select{flex:1;min-width:130px}
 .joint-pose-controls input{flex:1;min-width:120px}
@@ -57,38 +57,39 @@
 .joint-extra-tools[open]>summary{margin-bottom:8px}
 .joint-toolbar-note{font-size:14px;color:var(--muted);line-height:1.6;margin:0 0 12px}
 .joint-mirror-label{display:flex;align-items:center;gap:5px;color:var(--muted)}
-.joint-edit-legend{display:flex;flex-wrap:wrap;align-items:center;gap:5px 14px;padding:8px 14px;border-bottom:1px solid var(--line);font-size:14px;color:var(--muted)}
+.joint-edit-legend{display:flex;flex-wrap:wrap;align-items:center;gap:5px 14px;padding:8px 14px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.4;color:var(--muted)}
 .joint-edit-legend>span{display:inline-flex;align-items:center;gap:6px}
 .joint-marker-key{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid var(--accent)}
 .coordination-board{display:block;max-height:none;overflow:visible}
 .joint-limb{min-width:0;border-right:0}
 .joint-limb+.joint-limb{border-top:1px solid var(--line)}
-.joint-limb h3{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0;padding:7px 12px;background:#e9ece3;font-size:16px}
+.joint-limb h3{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0;padding:4px 12px;background:#e9ece3;font-size:16px;line-height:1.4}
 .joint-limb h3 span{font-size:14px;color:var(--muted);font-weight:400;white-space:nowrap}
-.joint-servo-row{display:grid;grid-template-columns:145px minmax(0,1fr);column-gap:10px;row-gap:2px;padding:5px 12px;border-bottom:1px solid var(--line);font-size:14px;min-width:0;line-height:1.5}
+.joint-servo-row{display:grid;grid-template-columns:132px minmax(0,1fr);column-gap:8px;row-gap:1px;padding:2px 12px;border-bottom:1px solid var(--line);font-size:14px;min-width:0;line-height:1.3}
 .joint-servo-row:last-child{border-bottom:0}
 .joint-servo-row.selected{background:var(--accent-soft)}
 .joint-row-heading{display:flex;gap:7px;align-items:center;margin:0;min-width:0}
 .joint-servo-row input[type=checkbox]{width:17px;height:17px;margin:0;flex:none;accent-color:var(--accent);cursor:pointer}
-.joint-servo-row .joint-select{display:flex;align-items:center;gap:8px;min-width:0;flex:1;width:auto;white-space:nowrap;font-size:14px}
+.joint-servo-row .joint-select{display:flex;align-items:center;gap:5px;min-width:0;flex:1;width:auto;padding:0;white-space:nowrap;font-size:14px;line-height:1.4}
 .joint-servo-row .joint-select strong{font-size:14px}
-.joint-servo-row .joint-select span{font:14px/1.5 var(--mono);color:var(--muted)}
-.joint-draft-controls{display:grid;grid-template-columns:minmax(80px,1fr) 128px;align-items:center;gap:8px;min-width:0}
-.joint-slider-track{position:relative;min-width:0;padding:0 0 7px}
-.joint-slider-track input[type=range]{width:100%;display:block;margin:0;height:27px;accent-color:var(--moss);cursor:pointer}
+.joint-servo-row .joint-select span{font:14px/1.4 var(--mono);color:var(--muted)}
+.joint-draft-controls{display:grid;grid-template-columns:minmax(80px,1fr) 116px;align-items:center;gap:6px;min-width:0}
+.joint-slider-track{position:relative;min-width:0;padding:0 0 4px}
+.joint-slider-track input[type=range]{width:100%;display:block;margin:0;height:22px;accent-color:var(--moss);cursor:pointer}
 .joint-slider-track input[aria-invalid=true]{opacity:.45}
-.joint-feedback-meter{position:absolute;left:8px;right:8px;bottom:5px;pointer-events:none}
+.joint-feedback-meter{position:absolute;left:8px;right:8px;bottom:2px;pointer-events:none}
 .joint-feedback-marker{position:absolute;top:-7px;width:0;height:0;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid var(--accent)}
 .joint-feedback-marker[hidden]{display:none}
 .joint-feedback-marker.stale{border-bottom-color:#a16e14;opacity:.65}
 .joint-number-controls{display:flex;gap:4px;align-items:center;min-width:0}
-.joint-number-controls input[type=number]{width:64px;min-width:0;flex:1;font:14px var(--mono);padding:5px 3px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink)}
-.joint-number-controls button{padding:3px 5px;min-width:27px;min-height:30px;border:1px solid var(--line);border-radius:4px;background:var(--surface);font:14px var(--mono);color:var(--ink)}
+.joint-number-controls input[type=number]{width:60px;min-width:0;flex:1;height:26px;font:14px var(--mono);padding:3px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink)}
+.joint-number-controls button{padding:2px 4px;min-width:24px;min-height:26px;border:1px solid var(--line);border-radius:4px;background:var(--surface);font:14px var(--mono);color:var(--ink)}
 .joint-number-controls input[aria-invalid=true]{border-color:var(--danger)}
-.joint-row-feedback{grid-column:1/-1;display:flex;align-items:baseline;gap:2px 10px;flex-wrap:wrap;font-size:14px;line-height:1.5;min-width:0;color:var(--muted)}
+.joint-row-feedback{grid-column:1/-1;display:flex;align-items:baseline;gap:1px 8px;flex-wrap:wrap;font-size:14px;line-height:1.3;min-width:0;color:var(--muted)}
 .joint-row-feedback>span{white-space:nowrap}
 .joint-row-feedback [data-joint-age]:empty{display:none}
 .joint-row-feedback strong{font-size:14px;font-weight:700;color:var(--ink)}
+.joint-row-feedback .mono{font-size:14px;line-height:1.3}
 .joint-row-attention{grid-column:1/-1;color:var(--danger);font-size:14px}
 .joint-row-attention[hidden]{display:none}
 .joint-inline-result{min-width:0;font-size:14px;max-width:100%}
@@ -119,7 +120,7 @@
 .console-grid:not(.coordination-grid) .joint-table .joint-status{font-family:var(--body);overflow-wrap:anywhere}
 @media(max-width:1240px){.coordination-grid{grid-template-columns:minmax(0,1fr)}.coordination-grid .console-sidebar:not([hidden]){width:auto;grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;border-right:0;border-bottom:1px solid var(--line);padding:0 0 8px}.coordination-grid .console-sidebar a{margin:0}.coordination-grid .console-sidebar hr{display:none}.coordination-grid .console-sidebar p{margin:0;font-size:14px;flex-basis:100%}}
 @media(max-width:1120px){.console-grid:not(.coordination-grid),.console-grid:not(.coordination-grid).sidebar-collapsed{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}.console-grid .console-sidebar:not([hidden]){width:auto;grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;border-right:0;border-bottom:1px solid var(--line);padding:0 0 8px}.console-sidebar p{flex-basis:100%;margin-top:0}}
-@media(max-width:760px){.console-grid:not(.coordination-grid),.console-grid:not(.coordination-grid).sidebar-collapsed{grid-template-columns:minmax(0,1fr)}.console-navigation-tools{align-items:flex-start;flex-wrap:wrap;gap:8px}.coordination-grid{grid-template-columns:minmax(0,1fr)}.joint-toolbar{padding:12px}.coordination-panel .panel-title{padding:14px 12px}.joint-toolbar-line{gap:7px}.joint-toolbar .button{min-height:38px}.joint-pose-controls select{min-width:100px}.joint-edit-legend{padding:9px 12px;gap:5px 12px}.console-wrap{padding-left:18px;padding-right:18px}.joint-panel-footer{padding:12px}.joint-panel-footer .button{flex:1}.joint-number-controls button{min-height:34px}.joint-slider-track input[type=range]{height:34px}}
+@media(max-width:760px){.console-grid:not(.coordination-grid),.console-grid:not(.coordination-grid).sidebar-collapsed{grid-template-columns:minmax(0,1fr)}.console-navigation-tools{align-items:flex-start;flex-wrap:wrap;gap:8px}.coordination-grid{grid-template-columns:minmax(0,1fr)}.joint-toolbar{padding:8px 12px}.coordination-panel .panel-title{padding:10px 12px}.joint-toolbar-line{gap:7px}.joint-toolbar .button{min-height:38px}.joint-pose-controls select{min-width:100px}.joint-edit-legend{padding:6px 12px;gap:2px 8px}.console-wrap{padding-left:18px;padding-right:18px}.joint-panel-footer{padding:8px 12px}.joint-panel-footer .button{flex:1}.joint-number-controls button,.joint-number-controls input[type=number]{min-height:34px}.joint-slider-track input[type=range]{height:34px}}
 @media(max-width:540px){.joint-servo-row{grid-template-columns:minmax(0,1fr);padding:7px 12px}.joint-row-heading{margin-bottom:2px}.joint-draft-controls{grid-template-columns:minmax(80px,1fr) 128px}.joint-row-feedback{gap:2px 8px}.joint-row-attention{grid-column:1}}
 
 </style>
@@ -208,11 +209,6 @@
 </style>
 <style>
 /* Reference 3D keeps the existing paper, green and mustard palette. */
-.console-wrap[data-console-page="joint"] .console-heading{margin-bottom:12px;gap:12px}
-.console-wrap[data-console-page="joint"] .console-heading .eyebrow{margin-bottom:4px}
-.console-wrap[data-console-page="joint"] .devicebar{padding:10px 16px;margin-bottom:12px}
-.console-wrap[data-console-page="joint"] .status-banner{padding:8px 16px;margin-bottom:12px}
-.console-wrap[data-console-page="joint"] .console-navigation-tools{margin-bottom:12px}
 .coordination-workspace{display:grid;grid-template-columns:minmax(320px,.9fr) minmax(540px,1.1fr);gap:18px;align-items:start;min-width:0}
 .joint-viewer-slot{min-width:0;position:sticky;top:18px}
 .joint-viewer-panel{overflow:hidden;min-width:0}
@@ -239,6 +235,139 @@
 @media(max-width:760px){.joint-viewer-heading{padding:12px;align-items:flex-start;flex-wrap:wrap}.joint-viewer-heading h2{font-size:20px}.joint-viewer-stage{height:350px}.joint-viewer-tools span{flex-basis:100%}.joint-viewer-tools button{min-height:38px}.joint-viewer-notes{overflow-wrap:anywhere}}
 
 </style>
+<style>
+/* Feedback inspection shares the existing paper, surface and accent palette. */
+.joint-feedback-panel{min-width:0;overflow:hidden}
+.feedback-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.feedback-heading h2{display:flex;align-items:center;gap:10px;font-size:20px;flex-wrap:wrap}
+.feedback-heading button{border:0;background:none;color:var(--moss);font-size:14px;padding:6px 0;white-space:nowrap}
+.feedback-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--surface)}
+.feedback-filters{display:flex;flex-wrap:wrap;gap:3px;padding:3px;border:1px solid var(--line);border-radius:5px}
+.feedback-filters button{padding:6px 10px;border:0;border-radius:3px;background:none;color:var(--muted);font-size:14px;white-space:nowrap}
+.feedback-filters button[aria-pressed=true]{background:var(--accent-soft);color:var(--ink);font-weight:700}
+.feedback-extra-toggle{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:14px}
+.feedback-extra-toggle input{accent-color:var(--moss);width:16px;height:16px}
+.feedback-search{margin-left:auto;min-width:0}
+.feedback-search input{width:190px;max-width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--ink);font-size:14px}
+.feedback-table-scroll{max-height:520px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-color:#aeb6a5 var(--paper)}
+.feedback-table{width:100%;border-collapse:separate;border-spacing:0;white-space:nowrap;font-size:14px;line-height:1.4}
+.feedback-table th,.feedback-table td{border-bottom:1px solid var(--line);padding:4px 8px;text-align:right}
+.feedback-table thead th{position:sticky;top:0;z-index:2;background:#e9ece3;color:var(--muted);font-weight:500;font-family:var(--body)}
+.feedback-table thead th small{display:block;font:12px/1.2 var(--mono)}
+.feedback-table th:first-child{position:sticky;left:0;z-index:1;background:var(--surface);min-width:145px;text-align:left}
+.feedback-table thead th:first-child{z-index:3;background:#e9ece3}
+.feedback-table th:nth-child(2),.feedback-table td:nth-child(2){text-align:left}
+.feedback-table td{font-family:var(--mono);font-variant-numeric:tabular-nums;min-width:58px}
+.feedback-table td:nth-child(2){font-family:var(--body);min-width:72px}
+.feedback-table tr.selected td,.feedback-table tr.selected th{background:var(--accent-soft)}
+.feedback-table tr.selected th{box-shadow:inset 3px 0 var(--accent)}
+.feedback-table tr[hidden],.feedback-table [hidden],.feedback-empty[hidden]{display:none}
+.feedback-table tbody th button{display:flex;align-items:center;gap:8px;width:100%;padding:0;border:0;background:none;text-align:left;color:var(--ink)}
+.feedback-table tbody th strong{font-size:14px;font-weight:700}
+.feedback-id{display:inline-flex;justify-content:center;align-items:center;min-width:28px;height:22px;border:1px solid var(--line);border-radius:4px;font:14px var(--mono);color:var(--moss)}
+.feedback-state{font-size:14px;color:var(--muted)}
+.feedback-state.sample{color:var(--moss)}
+.feedback-state.stale{color:#80551b}.feedback-state.offline{color:var(--danger)}
+.feedback-empty{padding:28px;text-align:center;margin:0;color:var(--muted);font-size:14px}
+.feedback-footnote{display:flex;flex-wrap:wrap;gap:4px 12px;padding:6px 14px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+.feedback-footnote span:last-child{margin-left:auto}
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:760px){.feedback-heading{padding:14px}.feedback-heading h2{font-size:18px;gap:6px}.feedback-toolbar{padding:10px 14px;gap:8px}.feedback-filters{width:100%}.feedback-filters button{flex:1;padding:6px 7px}.feedback-search{flex:1;min-width:140px}.feedback-search input{width:100%;padding:8px 10px}.feedback-table-scroll{max-height:380px}.feedback-table tbody th,.feedback-table tbody td{padding-top:7px;padding-bottom:7px}.feedback-footnote{padding:6px 12px}.feedback-footnote span:last-child{margin-left:0}}
+
+</style>
+<style>
+.single-joint-chart{min-width:0;overflow:hidden;height:100%}
+.single-chart-heading{padding:16px 20px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.single-chart-heading h2{font-size:18px;color:var(--muted)}
+.single-chart-heading h2 span{display:inline-block;margin-left:9px;color:var(--ink)}
+.single-chart-heading select,.single-chart-toolbar select{padding:7px 9px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink);font-size:14px;max-width:100%}
+.single-chart-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 20px;font-size:14px}
+.single-chart-toolbar label{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.single-chart-toolbar button{padding:6px 10px;border:1px solid var(--line);border-radius:5px;color:var(--ink);background:var(--surface);font-size:14px}
+.single-chart-toolbar a{margin-left:auto;font-size:14px;color:var(--moss)}
+[data-single-plot]{margin:0 16px;min-width:0}
+.single-chart-svg{display:block;width:100%;height:var(--single-plot-height);overflow:visible}
+.single-chart-svg text{fill:var(--muted);font:11px var(--mono)}
+.single-chart-svg line{stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
+.single-line{fill:none;stroke:var(--moss);stroke-width:2.5;vector-effect:non-scaling-stroke}
+.single-line.goal{stroke:var(--accent);stroke-dasharray:7 5}.single-dot.actual{fill:var(--moss)}.single-dot.goal{fill:var(--accent)}
+.single-chart-legend{display:flex;gap:10px 20px;flex-wrap:wrap;padding:8px 3px 16px;font-size:14px;color:var(--muted)}
+.single-chart-legend i{display:inline-block;width:18px;border-top:3px solid var(--moss);margin-right:6px;vertical-align:middle}
+.single-chart-legend i.goal{border-color:var(--accent);border-top-style:dashed}.single-chart-legend b{font-family:var(--mono);color:var(--ink)}
+.single-chart-source{padding:10px 20px;margin:0;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+.single-plot-empty{min-height:var(--single-plot-height);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:8px;padding:24px}
+.single-plot-empty strong{font-size:18px}.single-plot-empty p{font-size:14px;color:var(--muted);margin:0}
+@media(max-width:760px){.single-chart-heading{padding:14px}.single-chart-heading h2{font-size:16px}.single-chart-toolbar{padding:10px 14px;gap:8px}.single-chart-toolbar a{margin-left:0}[data-single-plot]{margin:0 8px}.single-chart-source{padding:10px 14px}.single-chart-legend{font-size:14px}}
+
+</style>
+<style>
+/* Console arrangement; color tokens remain owned by the existing visual theme. */
+.console-layout{padding:28px 32px 40px}
+.console-layout .console-heading{gap:24px;margin-bottom:24px;align-items:center}
+.console-layout .console-heading .eyebrow{margin-bottom:8px;font-size:12px}
+.console-layout .console-heading h1{font-size:28px}
+.console-layout .console-heading p{margin:6px 0 0;font-size:14px}
+.console-layout .console-heading>div:last-child{gap:12px}
+.console-layout .console-heading .button{min-height:44px;padding:10px 18px}
+.console-layout .design-state-select{min-height:42px;font-size:14px}
+.console-layout .devicebar{padding:18px 22px;margin-bottom:20px;gap:24px;flex-wrap:wrap}
+.console-layout .device-icon{display:inline-flex;align-items:center;justify-content:center;flex:none}
+.console-layout .device-id{gap:16px;flex-wrap:wrap;min-width:0;max-width:100%}
+.console-layout .device-id>div{display:block;min-width:0;max-width:100%}
+.console-layout .device-id p{margin:4px 0 0;font-size:13px;overflow-wrap:anywhere}
+.console-layout .device-id strong{font-size:16px}
+.console-layout .device-stats{gap:28px;font-size:14px;flex-wrap:wrap;min-width:0}
+.console-layout .device-stats>div{display:block;min-width:0}
+.console-layout .device-stats strong{display:block;margin-top:5px;font-size:14px;overflow-wrap:anywhere}
+.console-layout .status-banner{margin-bottom:20px;padding:12px 20px;font-size:14px;line-height:1.6}
+.console-layout .console-navigation-tools{margin-bottom:20px}
+.console-layout .console-navigation-tools button{min-height:42px;padding:10px 16px}
+.console-layout .console-grid .console-sidebar:not([hidden]){width:180px;padding-right:22px}
+.console-layout .console-sidebar .console-navigation a{font-size:16px;padding:12px 14px}
+.console-layout .console-sidebar .console-nav-children a{font-size:15px;padding:10px 12px}
+.console-layout .console-navigation p{font-size:14px;line-height:1.7}
+.console-layout .console-grid.console-layout-grid{grid-template-columns:180px minmax(0,1fr);gap:24px;align-items:start}
+.console-layout .console-grid.console-layout-grid.sidebar-collapsed{grid-template-columns:minmax(0,1fr)}
+.joint-workspace,.single-workspace{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;min-width:0}
+.console-layout #joint-feedback{min-width:0}
+.single-detail-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:stretch;min-width:0;scroll-margin-top:20px}
+#single-joint-chart,.single-workbench{min-width:0}
+.single-workbench{overflow:hidden}
+.single-workbench .command-box{padding:0;border:0}
+.workbench-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.workbench-heading h2{font-size:20px}
+.workbench-position{padding:16px 20px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,.85fr) minmax(0,.85fr);gap:16px;align-items:end;border-bottom:1px solid var(--line)}
+.workbench-position label,.workbench-position>div>span{display:block;font-size:14px;color:var(--muted)}
+.workbench-position select{display:block;width:100%;min-width:0;margin-top:8px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font-size:14px}
+.workbench-position strong{display:block;font:26px/1.6 var(--mono);color:var(--ink)}
+.workbench-measurements{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:14px 20px;gap:10px;border-bottom:1px solid var(--line)}
+.workbench-measurements span{display:block;font-size:13px;color:var(--muted)}
+.workbench-measurements small{display:block;font:11px var(--mono)}
+.workbench-measurements strong{display:block;font:16px/1.8 var(--mono)}
+.workbench-section{padding:16px 20px;border-bottom:1px solid var(--line)}
+.workbench-section-heading{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap}
+.workbench-section-heading h3{font-size:16px}
+.workbench-section-heading h3 small{font:12px var(--mono);color:var(--muted);margin-left:6px}
+.workbench-section-heading>span{font-size:12px;color:var(--muted)}
+.workbench-target .joint-draft-controls{grid-template-columns:minmax(100px,1fr) 152px;gap:16px}
+.workbench-target .joint-slider-track input[type=range]{height:36px}
+.workbench-target .joint-number-controls input{min-height:36px;font-size:16px}
+.workbench-target .joint-number-controls button{min-height:36px;min-width:32px}
+.workbench-hint{font-size:12px;color:var(--muted);margin:8px 0 0}
+.workbench-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.workbench-actions .button{min-height:36px;padding:7px 12px}
+.workbench-calibration{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0}
+.workbench-calibration dt{font-size:13px;color:var(--muted);margin-bottom:8px}
+.workbench-calibration dd{margin:0;border:1px solid var(--line);border-radius:5px;background:var(--paper);padding:8px 10px;font:16px var(--mono)}
+.workbench-details{padding:12px 20px;font-size:14px}
+.workbench-details summary{cursor:pointer;color:var(--muted)}
+.workbench-details .joint-index-list{margin:12px 0}
+.workbench-details p{font-size:13px;color:var(--muted);margin:10px 0 0}
+@media(max-width:1240px){.console-layout .console-grid.console-layout-grid{grid-template-columns:minmax(0,1fr)}.console-layout .console-grid .console-sidebar:not([hidden]){grid-column:1/-1;width:auto;padding:0 0 12px;border-right:0;border-bottom:1px solid var(--line)}.console-layout .console-heading>div:last-child{margin-top:0}}
+@media(max-width:1000px){.single-detail-grid{grid-template-columns:minmax(0,1fr)}.console-layout .device-stats{gap:16px 24px}}
+@media(max-width:760px){.console-layout{padding:24px 18px 32px}.console-layout .console-heading{display:flex;flex-wrap:wrap;align-items:start}.console-layout .console-heading h1{font-size:26px}.console-layout .console-heading>div:last-child{flex-wrap:wrap;justify-content:flex-start;gap:10px}.console-layout .devicebar{padding:16px}.console-layout .device-icon{display:none}.console-layout .device-id{gap:12px;justify-content:flex-start}.console-layout .device-id>div{flex:1 1 100%}.console-layout .device-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;border-top:1px solid var(--line);padding-top:14px;margin-top:14px;gap:14px}.console-layout .device-stats>div:last-child{grid-column:1/-1}.console-layout .status-banner{padding:12px 16px;font-size:14px}.console-layout .console-sidebar .console-navigation a{padding:10px 12px}.console-layout .console-grid.console-layout-grid{gap:20px}.single-workspace,.joint-workspace,.single-detail-grid{gap:20px}.workbench-heading,.workbench-section{padding:14px}.workbench-position{padding:14px;gap:10px;grid-template-columns:1fr 1fr}.workbench-position label{grid-column:1/-1}.workbench-measurements{padding:12px 14px;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.workbench-calibration{grid-template-columns:1fr 1fr}.workbench-target .joint-draft-controls{grid-template-columns:minmax(70px,1fr) 138px;gap:10px}.workbench-details{padding:12px 14px}}
+
+</style>
 </head>
 <body>
 <a class="skip" href="#main">跳到正文</a>
@@ -262,20 +391,20 @@
 
   // Reference mapping only. Display order never defines a runtime or policy index.
   const metadata = [
-    [20, '左髋偏航', 'left_hip_yaw', '左腿', 0, 0],
-    [21, '左髋侧倾', 'left_hip_roll', '左腿', 1, 1],
-    [22, '左髋俯仰', 'left_hip_pitch', '左腿', 2, 2],
+    [20, '左髋 Yaw', 'left_hip_yaw', '左腿', 0, 0],
+    [21, '左髋 Roll', 'left_hip_roll', '左腿', 1, 1],
+    [22, '左髋 Pitch', 'left_hip_pitch', '左腿', 2, 2],
     [23, '左膝', 'left_knee', '左腿', 3, 3],
     [24, '左踝', 'left_ankle', '左腿', 4, 4],
-    [10, '右髋偏航', 'right_hip_yaw', '右腿', 10, 9],
-    [11, '右髋侧倾', 'right_hip_roll', '右腿', 11, 10],
-    [12, '右髋俯仰', 'right_hip_pitch', '右腿', 12, 11],
+    [10, '右髋 Yaw', 'right_hip_yaw', '右腿', 10, 9],
+    [11, '右髋 Roll', 'right_hip_roll', '右腿', 11, 10],
+    [12, '右髋 Pitch', 'right_hip_pitch', '右腿', 12, 11],
     [13, '右膝', 'right_knee', '右腿', 13, 12],
     [14, '右踝', 'right_ankle', '右腿', 14, 13],
-    [30, '颈部俯仰', 'neck_pitch', '头颈', 5, 5],
-    [31, '头部俯仰', 'head_pitch', '头颈', 6, 6],
-    [32, '头部偏航', 'head_yaw', '头颈', 7, 7],
-    [33, '头部侧倾', 'head_roll', '头颈', 8, 8],
+    [30, '颈部 Pitch', 'neck_pitch', '头颈', 5, 5],
+    [31, '头部 Pitch', 'head_pitch', '头颈', 6, 6],
+    [32, '头部 Yaw', 'head_yaw', '头颈', 7, 7],
+    [33, '头部 Roll', 'head_roll', '头颈', 8, 8],
     [34, '嘴部', 'mouth', '头颈', 9, null]
   ].map(function (row, index) {
     return Object.freeze({
@@ -1125,7 +1254,7 @@ window.JointConsole = (() => {
     return `<div data-joint-row="${id}" class="joint-servo-row ${id === activeId ? 'selected' : ''}">
       <div class="joint-row-heading"><input type="checkbox" data-joint-select="${id}" aria-label="选择${joint.name}" ${selected(id) ? 'checked' : ''}><button class="joint-select" data-joint="${id}" aria-pressed="${id === activeId}" title="${joint.raw}"><strong>${joint.name}</strong><span>#${id}</span></button></div>
       ${draftEditor(joint, mode)}
-      <div class="joint-row-feedback"><span>实测 <strong class="mono" data-joint-feedback="${id}">${numberText(feedback.value)}</strong></span><span>目标回读 <strong class="mono" data-joint-measurement="goal">${numberText(feedback.goal)}</strong></span><span>raw load <strong class="mono" data-joint-measurement="load">${numberText(feedback.load)}</strong></span><span><strong class="mono" data-joint-measurement="volt">${numberText(feedback.volt)}</strong> V</span><span><strong class="mono" data-joint-measurement="temp">${numberText(feedback.temp)}</strong> °C</span><span data-joint-age="${id}">${escape(feedback.available || mode === 'offline' ? feedback.ageLabel : '')}</span><span data-joint-feedback-state="${id}">${feedbackMarker(id, mode).state}</span><details class="joint-inline-result" data-joint-result-details ${result ? '' : 'hidden'}><summary data-joint-result="${id}" class="joint-result ${result?.status || ''}">${result ? compactStatusText[result.status] : ''}</summary><p data-joint-result-reason="${id}">${escape(result?.reason || '')}</p></details><span data-joint-result-empty ${result ? 'hidden' : ''}>尚未检查</span></div>
+      <div class="joint-row-feedback"><span>实测 <strong class="mono" data-joint-feedback="${id}">${numberText(feedback.value)}</strong></span><span title="目标回读，ticks" aria-label="目标回读，ticks">回读 <strong class="mono" data-joint-measurement="goal">${numberText(feedback.goal)}</strong></span><span title="负载原始值，raw load" aria-label="负载原始值，raw load">负载 <strong class="mono" data-joint-measurement="load">${numberText(feedback.load)}</strong></span><span><strong class="mono" data-joint-measurement="volt">${numberText(feedback.volt)}</strong> V</span><span><strong class="mono" data-joint-measurement="temp">${numberText(feedback.temp)}</strong> °C</span><span data-joint-age="${id}">${escape(feedback.available || mode === 'offline' ? feedback.ageLabel : '')}</span><span data-joint-feedback-state="${id}">${feedbackMarker(id, mode).state}</span><details class="joint-inline-result" data-joint-result-details ${result ? '' : 'hidden'}><summary data-joint-result="${id}" class="joint-result ${result?.status || ''}">${result ? compactStatusText[result.status] : ''}</summary><p data-joint-result-reason="${id}">${escape(result?.reason || '')}</p></details><span data-joint-result-empty ${result ? 'hidden' : ''}>尚未检查</span></div>
       <div class="joint-row-attention" data-joint-draft-state="${id}" ${draftNeedsAttention(id) ? '' : 'hidden'}>${draftStatus(id, true)}</div>
     </div>`;
   }
@@ -1146,7 +1275,7 @@ window.JointConsole = (() => {
         <div class="joint-toolbar-line joint-pose-controls"><input id="joint-pose-name" type="text" maxlength="60" value="${escape(poseName)}" aria-label="保存姿态名称" placeholder="姿态名称"><button id="joint-save-pose" class="button secondary">保存全部草稿</button></div>
         <p class="joint-toolbar-note">姿态保留映射、单位与样例校准版本；仅存在本页面会话中，刷新后清空。加载只改草稿。</p></details></details>
       </div>
-      <div class="joint-edit-legend"><span>滑块：目标草稿</span><span><i class="joint-marker-key" aria-hidden="true"></i>三角：样例实测</span><span>ticks · 使能 / 校准 / 限位未知 · 编辑不发送</span></div>
+      <div class="joint-edit-legend"><span>滑块：目标草稿</span><span><i class="joint-marker-key" aria-hidden="true"></i>三角：实测 ticks</span><span>回读：目标回读 ticks · 负载：raw load</span><span>使能 / 校准 / 限位未知 · 编辑不发送</span></div>
       <div id="joint-coordination-scroll" class="coordination-board" role="region" aria-label="15关节联调面板，全部展开，无内部滚动">${rows}</div>
       <div class="joint-batch-box"><p id="joint-batch-result" role="status" aria-live="polite">${escape(store.snapshot().lastBatch?.summary || '尚未应用样例草稿；没有发送设备请求。')}</p><p id="joint-operation-notice" role="status" aria-live="polite">${escape(notice)}</p><details id="joint-operation-details" ${noticeItems.length ? '' : 'hidden'}><summary>逐关节草稿操作结果</summary><ul>${noticeItems.map(item => `<li>${escape(item)}</li>`).join('')}</ul></details></div>
       <div class="joint-panel-footer"><p class="joint-note">15 关节完整保留，样例检查不代表命令确认；实测超范围隐藏标记，完整原因可在逐项结果中展开。</p><a id="joint-open-single" class="button secondary" href="#console/servos/single">查看 <span data-joint-current-name>${escape(model.metadata.find(joint => joint.id === activeId)?.name || '')}</span> · 单舵机详情</a><a class="button secondary" href="#console/charts">打开曲线页</a></div>
@@ -1158,7 +1287,17 @@ window.JointConsole = (() => {
     const draft = store.getDraft(id);
     const result = resultFor(id);
     const range = model.sampleConfig.ranges[id];
-    return `<div class="command-box"><h3>当前目标草稿</h3><p class="joint-detail-draft"><strong data-detail-draft>${draft.value === null ? '—' : escape(draft.value)} ticks</strong><span data-detail-draft-state>${draftStatus(id)}</span></p>${draftEditor(joint, mode)}<p class="joint-editor-note">演示编辑范围 ${range.min}–${range.max} ticks；黄色三角为样例实测。实机方向 / 零位 / 限位未知，草稿尚未发送到设备。</p><dl class="joint-index-list"><div><dt>显示序号</dt><dd>${joint.displayOrder}</dd></div><div><dt>物理运行时索引</dt><dd>${joint.runtimeIndex}</dd></div><div><dt>策略索引</dt><dd>${joint.policyIndex === null ? '无 · 嘴部独立控制' : joint.policyIndex}</dd></div></dl><p data-detail-result>${result ? statusText[result.status] + '：' + escape(result.reason) : '尚无样例检查结果；接收、应用、反馈与物理到位待设备端确认。'}</p><div class="button-row"><button class="button primary" disabled>发送目标</button><button class="button secondary" disabled>关闭舵机使能</button><button class="button secondary" disabled>停止序列</button><a class="button secondary" href="#console/charts">打开曲线页</a></div><p>关闭使能、停止序列与停止记录分别定义；release 不是停止或硬件急停。</p></div>`;
+    const feedback = store.getFeedback(id, mode);
+    const measurements = { actual: feedback.value, goal: feedback.goal, load: feedback.load, volt: feedback.volt, temp: feedback.temp,
+      error: Number.isFinite(feedback.value) && Number.isFinite(feedback.goal) ? feedback.value - feedback.goal : null };
+    return `<div class="command-box workbench-content" data-joint-row="${id}">
+      <div class="workbench-heading"><h2>关节工作台</h2><span class="badge draft">实机校准未知</span></div>
+      <div class="workbench-position"><label>选择关节<select data-workbench-joint aria-label="工作台关节">${['左腿', '右腿', '头颈'].map(group => `<optgroup label="${group === '头颈' ? '头颈与嘴部' : group}">${model.metadata.filter(item => item.group === group).map(item => `<option value="${item.id}" ${item.id === id ? 'selected' : ''}>${item.id} · ${item.name}</option>`).join('')}</optgroup>`).join('')}</select></label><div><span>样例实测 / ticks</span><strong data-workbench-value="actual">${numberText(measurements.actual)}</strong></div><div><span>实际角度 / °</span><strong>—</strong></div></div>
+      <div class="workbench-measurements">${[['goal', '目标回读', 'ticks'], ['error', '跟踪误差', 'ticks'], ['load', '负载原始值', 'raw load'], ['volt', '电压', 'V'], ['temp', '温度', '°C']].map(([key, name, unit]) => `<div><span>${name} <small>${unit}</small></span><strong data-workbench-value="${key}">${numberText(measurements[key])}</strong></div>`).join('')}</div>
+      <section class="workbench-section workbench-target"><div class="workbench-section-heading"><h3>目标草稿 <small>ticks</small></h3><span data-detail-draft-state>${draftStatus(id)}</span></div>${draftEditor(joint, mode)}<p class="workbench-hint">演示范围 ${range.min}–${range.max} ticks · 黄色三角为样例实测 · 编辑不发送</p><div class="workbench-actions"><button class="button primary" disabled>发送目标</button><button class="button secondary" disabled>关闭使能</button><button class="button secondary" disabled>停止序列</button></div></section>
+      <section class="workbench-section"><div class="workbench-section-heading"><h3>实际关节校准</h3><span>待设备数据</span></div><dl class="workbench-calibration">${[['零位 / ticks', '—'], ['编码器正方向', '—'], ['实际最小角 / °', '—'], ['实际最大角 / °', '—']].map(([name, value]) => `<div><dt>${name}</dt><dd>${value}</dd></div>`).join('')}</dl><p class="workbench-hint">尚无实机方向、零位和比例；3D 样例角度不作为校准值。</p></section>
+      <details class="workbench-details"><summary>索引与执行结果</summary><dl class="joint-index-list"><div><dt>显示序号</dt><dd>${joint.displayOrder}</dd></div><div><dt>物理运行时索引</dt><dd>${joint.runtimeIndex}</dd></div><div><dt>策略索引</dt><dd>${joint.policyIndex === null ? '无 · 嘴部独立控制' : joint.policyIndex}</dd></div></dl><p data-detail-result>${result ? statusText[result.status] + '：' + escape(result.reason) : '尚无样例检查结果；未发送设备命令。'}</p><p>关闭使能、停止序列与停止记录分别定义；release 不是停止或硬件急停。</p></details>
+    </div>`;
   }
 
   function applySidebarLayout(grid, sidebar, button) {
@@ -1296,6 +1435,12 @@ window.JointConsole = (() => {
       detailResult.textContent = result ? statusText[result.status] + '：' + result.reason : '尚无样例检查结果；接收、应用、反馈与物理到位待设备端确认。';
     }
     const feedback = store.getFeedback(activeId, mode);
+    const workbenchValues = { actual: feedback.value, goal: feedback.goal, load: feedback.load, volt: feedback.volt, temp: feedback.temp,
+      error: Number.isFinite(feedback.value) && Number.isFinite(feedback.goal) ? feedback.value - feedback.goal : null };
+    for (const [key, value] of Object.entries(workbenchValues)) {
+      const field = document.querySelector(`[data-workbench-value="${key}"]`);
+      if (field) field.textContent = numberText(value);
+    }
     const metricValues = document.querySelectorAll('.metrics .metric strong');
     [feedback.value, feedback.goal, feedback.volt].forEach((value, index) => {
       if (metricValues[index]) metricValues[index].innerHTML = `${feedback.available ? numberText(value) : '—'}<small>${index === 2 ? 'V' : 'ticks'}</small>`;
@@ -1381,6 +1526,11 @@ window.JointConsole = (() => {
   }
 
   function handleChange(input, options) {
+    if (input.matches('[data-workbench-joint]')) {
+      const id = Number(input.value);
+      if (model.metadata.some(joint => joint.id === id)) options.onSelect?.(id);
+      return true;
+    }
     if (input.matches('[data-joint-select]')) {
       store.select(Number(input.dataset.jointSelect), input.checked);
       scope = 'custom';
@@ -1407,7 +1557,7 @@ window.JointConsole = (() => {
     if (button) applySidebarLayout(document.querySelector('.console-grid'), document.querySelector('#console-sidebar'), button);
   });
 
-  return { store, render, sync, handleClick, handleInput, handleChange, rememberScroll, restoreScroll, mode: () => currentMode };
+  return { store, render, detailControls, sync, handleClick, handleInput, handleChange, rememberScroll, restoreScroll, mode: () => currentMode };
 })();
 
 </script>
@@ -1914,6 +2064,251 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
 <script>
 (function (root, factory) {
   'use strict';
+  const model = typeof module === 'object' && module.exports ? require('./joint-drafts.js') : root.JointDrafts;
+  const api = factory(root, model);
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.JointFeedback = api;
+})(typeof window !== 'undefined' ? window : globalThis, function (root, model) {
+  'use strict';
+
+  // Read-only feedback inspection. Filtering and row selection never write a draft.
+  const finite = value => typeof value === 'number' && Number.isFinite(value);
+  const numberText = value => finite(value) ? String(Number(value.toFixed(3))) : '—';
+  const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+  const groups = { all: null, left: '左腿', right: '右腿', head: '头颈' };
+  const fields = [
+    ['actual', '位置', 'ticks'], ['goal', '目标回读', 'ticks'], ['error', '跟踪误差', 'ticks'],
+    ['load', '负载', 'raw load'], ['volt', '电压', 'V'], ['temp', '温度', '°C'],
+    ['angle', '实际角度', '°', true], ['zero', '校准零位', 'ticks', true],
+    ['min', '实机最小', '°', true], ['max', '实机最大', '°', true], ['enabled', '使能', '', true]
+  ];
+  let filter = 'all', query = '', expanded = true, scrollTop = 0, scrollLeft = 0;
+  let container = null, context = null;
+
+  function rowsFor(store, state) {
+    return model.metadata.map(joint => {
+      const feedback = store.getFeedback(joint.id, state);
+      const actual = finite(feedback.value) ? feedback.value : null;
+      const goal = finite(feedback.goal) ? feedback.goal : null;
+      return {
+        id: joint.id, name: joint.name, raw: joint.raw, group: joint.group,
+        source: 'browser-sample', sampleOnly: true,
+        state: state === 'offline' ? 'offline' : feedback.available ? feedback.stale ? 'stale' : 'sample' : 'missing',
+        actual, goal, error: finite(actual) && finite(goal) ? actual - goal : null,
+        load: feedback.load, volt: feedback.volt, temp: feedback.temp,
+        // Visual model angles and UI fixture ranges are not physical calibration.
+        angle: null, zero: null, min: null, max: null, enabled: null
+      };
+    });
+  }
+
+  function matches(row, selectedFilter, search) {
+    const group = groups[selectedFilter];
+    const normalized = String(search || '').trim().toLocaleLowerCase();
+    return (!group || row.group === group) && (!normalized || [row.id, row.name, row.raw].join(' ').toLocaleLowerCase().includes(normalized));
+  }
+
+  function csvCell(value) {
+    if (value == null) return '';
+    let text = String(value);
+    if (typeof value === 'string' && /^[\s]*[=+\-@]/.test(text)) text = "'" + text;
+    return '"' + text.replace(/"/g, '""') + '"';
+  }
+
+  function toCsv(rows) {
+    const columns = ['sample', 'source', 'id', 'joint', 'feedback_state', 'actual_ticks', 'goal_readback_ticks', 'error_ticks', 'raw_load', 'voltage_v', 'temperature_c', 'actual_angle_deg', 'zero_ticks', 'physical_min_deg', 'physical_max_deg', 'enabled'];
+    return columns.join(',') + '\r\n' + rows.map(row => [true, row.source, row.id, row.raw, row.state, row.actual, row.goal, row.error, row.load, row.volt, row.temp, row.angle, row.zero, row.min, row.max, row.enabled].map(csvCell).join(',')).join('\r\n') + '\r\n';
+  }
+
+  function rowMarkup(row, jointId) {
+    const label = { sample: '样例', missing: '缺测', stale: '陈旧样例', offline: '离线' }[row.state];
+    return `<tr data-feedback-row="${row.id}" class="${row.id === jointId ? 'selected' : ''}" ${matches(row, filter, query) ? '' : 'hidden'}><th scope="row"><button type="button" data-feedback-select="${row.id}" aria-pressed="${row.id === jointId}" title="${escape(row.raw)}" aria-label="${escape(row.name)}，ID ${row.id}，${escape(row.raw)}"><span class="feedback-id">${row.id}</span><strong>${escape(row.name)}</strong></button></th><td data-feedback-status><span class="feedback-state ${row.state}">${label}</span></td>${fields.map(([key, , , extra]) => `<td data-feedback-value="${key}" ${extra ? `data-feedback-extra ${expanded ? '' : 'hidden'}` : ''}>${numberText(row[key])}</td>`).join('')}</tr>`;
+  }
+
+  function render(options) {
+    const rows = rowsFor(options.store, options.state);
+    return `<section class="panel joint-feedback-panel" aria-labelledby="joint-feedback-title"><div class="feedback-heading"><h2 id="joint-feedback-title">全部关节反馈 <span class="badge example">只读样例</span></h2><button type="button" data-feedback-export>↓ CSV 快照</button></div><div class="feedback-toolbar"><div class="feedback-filters" role="group" aria-label="反馈分组">${[['all', '全部关节'], ['left', '左腿'], ['right', '右腿'], ['head', '头颈与嘴部']].map(([value, label]) => `<button type="button" data-feedback-filter="${value}" aria-pressed="${filter === value}">${label}</button>`).join('')}</div><label class="feedback-extra-toggle"><input type="checkbox" data-feedback-columns ${expanded ? 'checked' : ''}>校准与使能列</label><label class="feedback-search"><span class="visually-hidden">搜索关节名称或 ID</span><input type="search" data-feedback-search value="${escape(query)}" placeholder="搜索 ID / 关节" aria-label="搜索 ID 或关节"></label></div><div class="feedback-table-scroll" tabindex="0" role="region" aria-label="15 个关节反馈表，可独立滚动"><table class="feedback-table"><thead><tr><th scope="col">关节 / ID</th><th scope="col">反馈状态</th>${fields.map(([, label, unit, extra]) => `<th scope="col" ${extra ? `data-feedback-extra ${expanded ? '' : 'hidden'}` : ''}>${label}${unit ? `<small>${unit}</small>` : ''}</th>`).join('')}</tr></thead><tbody>${rows.map(row => rowMarkup(row, options.jointId)).join('')}</tbody></table><p class="feedback-empty" data-feedback-empty ${rows.some(row => matches(row, filter, query)) ? 'hidden' : ''}>没有匹配的关节。</p></div><div class="feedback-footnote"><span data-feedback-count>${rows.filter(row => matches(row, filter, query)).length} / 15 个关节</span><span>浏览器样例 · 缺测保留 — · 校准与使能未知</span><span data-feedback-notice role="status">CSV 导出当前筛选的只读快照。</span></div></section>`;
+  }
+
+  function paint() {
+    if (!container || !context) return;
+    const rows = rowsFor(context.store, context.state);
+    let visible = 0;
+    rows.forEach(row => {
+      const element = container.querySelector(`[data-feedback-row="${row.id}"]`);
+      if (!element) return;
+      element.hidden = !matches(row, filter, query);
+      if (!element.hidden) visible += 1;
+      const selected = row.id === context.jointId;
+      element.classList.toggle('selected', selected);
+      element.querySelector('[data-feedback-select]').setAttribute('aria-pressed', String(selected));
+      const status = element.querySelector('[data-feedback-status] span');
+      status.className = 'feedback-state ' + row.state;
+      status.textContent = { sample: '样例', missing: '缺测', stale: '陈旧样例', offline: '离线' }[row.state];
+      fields.forEach(([key]) => { element.querySelector(`[data-feedback-value="${key}"]`).textContent = numberText(row[key]); });
+    });
+    container.querySelectorAll('[data-feedback-extra]').forEach(element => { element.hidden = !expanded; });
+    container.querySelectorAll('[data-feedback-filter]').forEach(button => { button.setAttribute('aria-pressed', String(button.dataset.feedbackFilter === filter)); });
+    container.querySelector('[data-feedback-count]').textContent = visible + ' / 15 个关节';
+    container.querySelector('[data-feedback-empty]').hidden = visible > 0;
+  }
+
+  function click(event) {
+    const button = event.target.closest('button');
+    if (!button || !container.contains(button)) return;
+    if (button.matches('[data-feedback-filter]')) { filter = button.dataset.feedbackFilter; paint(); }
+    else if (button.matches('[data-feedback-select]')) context.onSelect?.(Number(button.dataset.feedbackSelect));
+    else if (button.matches('[data-feedback-export]')) {
+      const rows = rowsFor(context.store, context.state).filter(row => matches(row, filter, query));
+      const url = URL.createObjectURL(new Blob(['\uFEFF' + toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
+      const link = root.document.createElement('a');
+      link.href = url; link.download = 'Microduck-Hatchery-EXAMPLE-ONLY-joints.csv'; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      container.querySelector('[data-feedback-notice]').textContent = `已导出 ${rows.length} 个关节的样例快照；没有发送设备目标。`;
+    }
+  }
+
+  function input(event) { if (event.target.matches('[data-feedback-search]')) { query = event.target.value; paint(); } }
+  function change(event) { if (event.target.matches('[data-feedback-columns]')) { expanded = event.target.checked; paint(); } }
+  function setContext(options) { if (context) { context = { ...context, ...options }; paint(); } }
+  function mount(options) {
+    unmount();
+    container = options.container;
+    if (!container) return false;
+    context = { ...options };
+    container.addEventListener('click', click); container.addEventListener('input', input); container.addEventListener('change', change);
+    root.addEventListener('joint-draft-change', paint);
+    paint();
+    const scroll = container.querySelector('.feedback-table-scroll');
+    scroll.scrollTop = scrollTop; scroll.scrollLeft = scrollLeft;
+    return true;
+  }
+  function unmount() {
+    if (!container) return;
+    const scroll = container.querySelector('.feedback-table-scroll');
+    scrollTop = scroll.scrollTop; scrollLeft = scroll.scrollLeft;
+    container.removeEventListener('click', click); container.removeEventListener('input', input); container.removeEventListener('change', change);
+    root.removeEventListener('joint-draft-change', paint);
+    container = null; context = null;
+  }
+  function snapshot() { return { mounted: Boolean(container), filter, query, expanded, jointId: context?.jointId, visibleIds: context ? rowsFor(context.store, context.state).filter(row => matches(row, filter, query)).map(row => row.id) : [] }; }
+
+  return Object.freeze({ render, mount, setContext, unmount, snapshot, rowsFor, matches, toCsv });
+});
+
+</script>
+<script>
+(function (root, factory) {
+  'use strict';
+  const api = factory(root);
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.SingleJointChart = api;
+})(typeof window !== 'undefined' ? window : globalThis, function (root) {
+  'use strict';
+
+  // This view owns no acquisition, targets or independent multi-joint chart settings.
+  let container = null, unsubscribe = null, observer = null;
+  let context = { jointId: 23, state: 'example' };
+  let channel = 'position', windowSeconds = 10, paused = false, frozenFrames = null;
+  const finite = value => typeof value === 'number' && Number.isFinite(value);
+  const text = value => finite(value) ? String(Number(value.toFixed(2))) : '—';
+  const names = { position: '实测位置 / 目标回读', error: '跟踪误差', load: '负载原始读数', volt: '电压', temp: '温度' };
+  function joint() { return root.JointDrafts.metadata.find(item => item.id === context.jointId) || root.JointDrafts.metadata[0]; }
+  function frames() { return paused && frozenFrames ? frozenFrames : root.JointSession.history.frames(); }
+
+  function plotMarkup() {
+    const config = root.JointCharts.channels[channel];
+    const history = frames(), end = history.length ? history[history.length - 1].t : 0;
+    const axisEnd = Math.max(windowSeconds, end), start = Math.max(0, end - windowSeconds), axisStart = axisEnd - windowSeconds;
+    const series = config.keys.map(key => ({ key, points: root.JointCharts.seriesFor(history, context.jointId, key, start, end) }));
+    const extent = root.JointCharts.extentFor(series, channel);
+    const plot = container?.querySelector('[data-single-plot]');
+    const width = plot ? Math.max(120, Math.round(plot.clientWidth)) : 640;
+    const height = root.innerWidth <= 760 ? 340 : 480;
+    if (!extent) return `<div class="single-plot-empty" style="--single-plot-height:${height}px"><strong>该关节暂无${channel === 'load' ? ' raw load' : ''}数据</strong><p>缺测不补零；当前仅左膝 #23 有浏览器位置样例。</p></div>`;
+    const left = width < 460 ? 44 : 58, right = 20, top = 24, bottom = 34;
+    const x = t => left + (t - axisStart) / windowSeconds * (width - left - right);
+    const y = value => height - bottom - (value - extent[0]) / (extent[1] - extent[0]) * (height - top - bottom);
+    let grid = `<text x="${left}" y="13">${config.unit}</text>`;
+    for (let i = 0; i <= 4; i += 1) {
+      const value = extent[0] + (extent[1] - extent[0]) * i / 4;
+      grid += `<line x1="${left}" x2="${width - right}" y1="${y(value)}" y2="${y(value)}"/><text x="${left - 8}" y="${y(value) + 4}" text-anchor="end">${text(value)}</text>`;
+    }
+    const ticks = width < 460 ? 2 : 4;
+    for (let i = 0; i <= ticks; i += 1) {
+      const t = axisStart + windowSeconds * i / ticks;
+      grid += `<text x="${x(t)}" y="${height - 8}" text-anchor="middle">${text(t)} s</text>`;
+    }
+    const paths = series.map(item => {
+      const points = item.points.filter(point => finite(point.value));
+      const style = item.key === 'goal' ? 'goal' : 'actual';
+      const path = root.JointCharts.pathFor(item.points, x, y, 0.65, item.key === 'goal');
+      return `<path class="single-line ${style}" data-single-line="${item.key}" d="${path}"/>${points.length === 1 ? `<circle class="single-dot ${style}" cx="${x(points[0].t)}" cy="${y(points[0].value)}" r="3"/>` : ''}`;
+    }).join('');
+    const legend = series.map(item => `<span><i class="${item.key === 'goal' ? 'goal' : 'actual'}"></i>${item.key === 'goal' ? '目标回读' : item.key === 'actual' ? '实测位置' : names[channel]} <b>${text(item.points[item.points.length - 1]?.value)}</b> ${config.unit}</span>`).join('');
+    return `<svg class="single-chart-svg" style="--single-plot-height:${height}px" viewBox="0 0 ${width} ${height}" role="img" aria-label="${joint().name} ${names[channel]}，只读浏览器样例">${grid}${paths}</svg><div class="single-chart-legend">${legend}</div>`;
+  }
+
+  function sourceText() {
+    return `${paused ? '显示已暂停 · ' : ''}${context.state === 'offline' ? '离线，仅保留历史样例' : context.state === 'stale' ? '反馈陈旧，仅保留历史样例' : '浏览器样例 · 每 200 ms 更新'} · 目标草稿不作为目标回读`;
+  }
+  function render(options) {
+    context = { ...context, ...options };
+    return `<section class="panel single-joint-chart" aria-labelledby="single-chart-title"><div class="single-chart-heading"><h2 id="single-chart-title">关节曲线 <span data-single-chart-name>${joint().name} · #${joint().id}</span></h2><select data-single-channel aria-label="单关节曲线数据">${Object.keys(names).map(key => `<option value="${key}" ${channel === key ? 'selected' : ''}>${names[key]} · ${root.JointCharts.channels[key].unit}</option>`).join('')}</select></div><div class="single-chart-toolbar"><label>时间窗 <select data-single-window><option value="10" ${windowSeconds === 10 ? 'selected' : ''}>10 秒</option><option value="30" ${windowSeconds === 30 ? 'selected' : ''}>30 秒</option></select></label><button type="button" data-single-pause>${paused ? '恢复显示' : '暂停显示'}</button><a href="#console/charts">多关节曲线 ↗</a></div><div data-single-plot>${plotMarkup()}</div><p class="single-chart-source" data-single-chart-source>${sourceText()}</p></section>`;
+  }
+  function paint() {
+    if (!container || !container.isConnected) return;
+    container.querySelector('[data-single-chart-name]').textContent = joint().name + ' · #' + joint().id;
+    container.querySelector('[data-single-plot]').innerHTML = plotMarkup();
+    container.querySelector('[data-single-chart-source]').textContent = sourceText();
+  }
+  function onFrame() { if (!paused) paint(); }
+  function click(event) {
+    if (!event.target.closest('[data-single-pause]')) return;
+    paused = !paused;
+    frozenFrames = paused ? root.JointSession.history.frames() : null;
+    container.querySelector('[data-single-pause]').textContent = paused ? '恢复显示' : '暂停显示';
+    paint();
+  }
+  function change(event) {
+    if (event.target.matches('[data-single-channel]') && names[event.target.value]) channel = event.target.value;
+    else if (event.target.matches('[data-single-window]') && [10, 30].includes(Number(event.target.value))) windowSeconds = Number(event.target.value);
+    else return;
+    paint();
+  }
+  function setContext(options) { context = { ...context, ...options }; paint(); }
+  function mount(options) {
+    unmount();
+    container = options.container;
+    context = { ...context, state: options.state, jointId: options.jointId };
+    if (!container) return false;
+    container.addEventListener('click', click); container.addEventListener('change', change);
+    unsubscribe = root.JointSession.subscribe(onFrame);
+    if (root.ResizeObserver) {
+      let previousWidth = -1;
+      observer = new root.ResizeObserver(() => {
+        const width = container?.querySelector('[data-single-plot]')?.clientWidth;
+        if (width !== previousWidth) { previousWidth = width; paint(); }
+      });
+      observer.observe(container);
+    }
+    paint();
+    return true;
+  }
+  function unmount() {
+    unsubscribe?.(); unsubscribe = null;
+    observer?.disconnect(); observer = null;
+    if (container) { container.removeEventListener('click', click); container.removeEventListener('change', change); }
+    container = null;
+  }
+  function snapshot() { return { mounted: Boolean(container), jointId: context.jointId, channel, windowSeconds, paused, displayTime: frames().at(-1)?.t ?? 0 }; }
+  return { render, mount, setContext, unmount, snapshot };
+});
+
+</script>
+<script>
+(function (root, factory) {
+  'use strict';
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.ConsoleWorkspace = api;
@@ -2001,9 +2396,13 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     template.innerHTML = markup;
     const wrap = template.content.querySelector('.console-wrap');
     wrap.dataset.consolePage = view;
+    wrap.classList.add('wide-console', 'console-layout');
     template.content.querySelector('.console-sidebar').innerHTML = navigation(view);
     const grid = template.content.querySelector('.console-grid');
+    grid.classList.add('console-layout-grid');
     if (view === 'joint') {
+      const content = root.document.createElement('div');
+      content.className = 'console-page-content joint-workspace';
       const workspace = root.document.createElement('div');
       workspace.className = 'coordination-workspace';
       const viewer = root.document.createElement('div');
@@ -2011,7 +2410,19 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
       viewer.id = 'joint-viewer';
       viewer.innerHTML = root.JointViewer.render();
       workspace.append(viewer, grid.querySelector('.joint-panel'));
-      grid.append(workspace);
+      content.append(workspace);
+      const feedback = root.document.createElement('div');
+      feedback.id = 'joint-feedback';
+      feedback.innerHTML = root.JointFeedback.render({ ...options, store: root.JointConsole.store });
+      content.append(feedback);
+      grid.append(content);
+    }
+    if (view === 'single') {
+      grid.querySelectorAll('.joint-panel,.console-detail').forEach(element => element.remove());
+      const content = root.document.createElement('div');
+      content.className = 'console-page-content single-workspace';
+      content.innerHTML = `<div id="joint-feedback">${root.JointFeedback.render({ ...options, store: root.JointConsole.store })}</div><div class="single-detail-grid"><div id="single-joint-chart">${root.SingleJointChart.render(options)}</div><section class="panel single-workbench" id="joint-workbench">${root.JointConsole.detailControls(options.jointId, options.state)}</section></div>`;
+      grid.append(content);
     }
     if (view !== 'joint' && view !== 'single') {
       grid.querySelectorAll('.joint-panel,.console-detail,.coordination-workspace').forEach(element => element.remove());
@@ -2035,12 +2446,18 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   function mount(options) {
     root.JointCharts.unmount();
     root.JointViewer.unmount();
+    root.JointFeedback.unmount();
+    root.SingleJointChart.unmount();
     context = { ...options };
     root.JointSession.start({ state: context.state, onFrame: onSampleFrame });
     const container = root.document.querySelector('#joint-charts');
     if (context.view === 'charts' && container) root.JointCharts.mount({ container, state: context.state, jointId: context.jointId });
     const viewer = root.document.querySelector('#joint-viewer');
     if (context.view === 'joint' && viewer) root.JointViewer.mount({ container: viewer, store: root.JointConsole.store, state: context.state, jointId: context.jointId, onSelect: context.onSelect });
+    const feedback = root.document.querySelector('#joint-feedback');
+    if (feedback) root.JointFeedback.mount({ container: feedback, store: root.JointConsole.store, state: context.state, jointId: context.jointId, onSelect: context.onSelect });
+    const singleChart = root.document.querySelector('#single-joint-chart');
+    if (context.view === 'single' && singleChart) root.SingleJointChart.mount({ container: singleChart, state: context.state, jointId: context.jointId });
     root.JointConsole.restoreScroll();
   }
 
@@ -2050,9 +2467,16 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     root.JointSession.setState(context.state);
     root.JointCharts.setContext({ state: context.state, jointId: context.jointId });
     root.JointViewer.setContext({ state: context.state, jointId: context.jointId });
+    root.JointFeedback.setContext({ state: context.state, jointId: context.jointId });
+    root.SingleJointChart.setContext({ state: context.state, jointId: context.jointId });
   }
 
-  function unmountView() { root.JointCharts.unmount(); root.JointViewer.unmount(); }
+  function refreshWorkbench(options) {
+    const workbench = root.document.querySelector('#joint-workbench');
+    if (workbench) workbench.innerHTML = root.JointConsole.detailControls(options.jointId, options.state);
+  }
+
+  function unmountView() { root.JointCharts.unmount(); root.JointViewer.unmount(); root.JointFeedback.unmount(); root.SingleJointChart.unmount(); }
 
   function leave() {
     unmountView();
@@ -2060,7 +2484,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     context = null;
   }
 
-  return { resolve, render, mount, setContext, unmountView, leave };
+  return { resolve, render, mount, setContext, refreshWorkbench, unmountView, leave };
 });
 
 </script>
@@ -2098,7 +2522,7 @@ const caseView=()=>`<div class="wrap case-article"><section class="article-top">
 const connectionDetails={wifi:'<h3>电脑与板卡在同一可互通网络</h3><p>在浏览器打开板端实际地址，例如 <code>http://&lt;板端 IP&gt;:8080/</code>。地址与端口以设备配置为准。</p><ul><li>确认实际 IP、服务端口与网络隔离条件。</li><li>先核对设备与服务信息，再进入调试。</li></ul>',usb:'<h3>USB-C 1 / OTG → 虚拟网卡</h3><p>板端完成 USB gadget 配置后，使用同一网页与 API。USB-C 2 是 HOST。</p><ul><li>UDC、描述符、供电与三系统枚举需要实测。</li><li>优先核实 NCM；具体配置依主机系统与板端能力决定。</li><li>数据线接入不等同于网络已经建立。</li></ul>',ble:'<h3>官方 BLE 客户端 → 本地桥接</h3><p>优先复用 duckctl / btd。电脑薄桥接提供同源网页，能力由实际服务与带宽决定。</p><ul><li>Windows、Linux、macOS 分别验证客户端与权限。</li><li>不把浏览器直连 BLE 作为三系统主路径。</li><li>配网凭据不进入日志和导出记录。</li></ul>'};
 const consoleView=()=>ConsoleWorkspace.render({state:consoleState,jointId:jointID,view:parseRoute().consolePage?.view||'joint'});
 const main=document.querySelector('#main'),dialog=document.querySelector('#connection-dialog');
-const jointInteractionOptions=()=>({state:consoleState,jointId:jointID,view:parseRoute().consolePage?.view,toast,redraw:redrawConsole});
+const jointInteractionOptions=()=>({state:consoleState,jointId:jointID,view:parseRoute().consolePage?.view,toast,redraw:redrawConsole,onSelect:id=>{jointID=id;updateSelectedJoint();}});
 function mountConsoleWorkspace(){ConsoleWorkspace.mount({state:consoleState,jointId:jointID,view:parseRoute().consolePage?.view||'joint',onSelect:id=>{jointID=id;updateSelectedJoint();}});}
 function redrawConsole(){JointConsole.rememberScroll();ConsoleWorkspace.unmountView();main.innerHTML=consoleView();mountConsoleWorkspace();}
 function toast(message){const el=document.querySelector('.toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),2500)}
@@ -2134,9 +2558,7 @@ function render(){
 function updateSelectedJoint(){
   const page=parseRoute().consolePage;
   if(page?.view==='single'){
-    const holder=document.createElement('template');holder.innerHTML=consoleView();
-    const detail=document.querySelector('.console-detail');
-    if(detail)detail.replaceWith(holder.content.querySelector('.console-detail'));
+    ConsoleWorkspace.refreshWorkbench({state:consoleState,jointId:jointID});
   }
   JointConsole.sync(consoleState,jointID);
   document.querySelectorAll('[data-joint]').forEach(button=>{
@@ -2145,7 +2567,7 @@ function updateSelectedJoint(){
     button.closest('[data-joint-row],tr')?.classList.toggle('selected',selected);
   });
   ConsoleWorkspace.setContext({jointId:jointID,state:consoleState});
-  if(page?.view==='single'&&window.innerWidth<=760)document.querySelector('.console-detail')?.scrollIntoView({block:'start'});
+  if(page?.view==='single'&&window.innerWidth<=760)document.querySelector('.single-detail-grid')?.scrollIntoView({block:'start'});
 }
 document.addEventListener('click',async e=>{const el=e.target.closest('button,a');if(!el)return;if(JointConsole.handleClick(el,jointInteractionOptions()))return;if(el.matches('[data-section]')){e.preventDefault();const href=el.getAttribute('href');if(location.hash===href){document.getElementById(el.dataset.section)?.scrollIntoView({block:'start'});setReadingSection(el.dataset.section);}else location.hash=href;return}if(el.matches('.mobile-menu')){const nav=document.querySelector('.site-nav');nav.classList.toggle('open');el.setAttribute('aria-expanded',nav.classList.contains('open'));return}if(el.matches('[data-connect-open]')){document.querySelector('#connection-content').innerHTML=connectionDetails.wifi;document.querySelectorAll('[data-connect]').forEach(b=>b.setAttribute('aria-selected',b.dataset.connect==='wifi'));dialog.showModal();return}if(el.matches('[data-connect]')){document.querySelector('#connection-content').innerHTML=connectionDetails[el.dataset.connect];document.querySelectorAll('[data-connect]').forEach(b=>b.setAttribute('aria-selected',b===el));return}if(el.matches('.close-dialog,.close-on-route')){dialog.close();return}if(el.matches('[data-experiment]')){experimentIndex=Number(el.dataset.experiment);main.innerHTML=showcase();return}if(el.matches('[data-os]')){selectedOS=el.dataset.os;document.querySelectorAll('[data-os]').forEach(b=>{b.classList.toggle('active',b===el);b.setAttribute('aria-pressed',b===el)});document.querySelector('#os-note').textContent=osNote();return}if(el.matches('[data-joint]')){jointID=Number(el.dataset.joint);updateSelectedJoint();return}if(el.matches('[data-record]')){recordIndex=Number(el.dataset.record);main.innerHTML=records();return}if(el.matches('[data-copy]')){const value=el.closest('.code-block').querySelector('code').textContent;try{await navigator.clipboard.writeText(value);el.textContent='已复制';setTimeout(()=>el.textContent='复制',1800)}catch{toast('请选中代码后复制。')}return}if(el.matches('[data-export]')){const csv='sample,source,relative_time_s,goal_ticks,actual_ticks\n'+sampleData.map(d=>`true,prototype-generated,${d.t.toFixed(1)},${d.goal},${d.actual.toFixed(3)}`).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='Microduck-Hatchery-EXAMPLE-ONLY.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('已下载示例 CSV；不是实测数据。')}});
 document.addEventListener('change',e=>{if(JointConsole.handleChange(e.target,jointInteractionOptions()))return;if(e.target.id==='state-select'){consoleState=e.target.value;redrawConsole();document.querySelector('#state-select').focus({preventScroll:true});}});

@@ -87,9 +87,13 @@
     template.innerHTML = markup;
     const wrap = template.content.querySelector('.console-wrap');
     wrap.dataset.consolePage = view;
+    wrap.classList.add('wide-console', 'console-layout');
     template.content.querySelector('.console-sidebar').innerHTML = navigation(view);
     const grid = template.content.querySelector('.console-grid');
+    grid.classList.add('console-layout-grid');
     if (view === 'joint') {
+      const content = root.document.createElement('div');
+      content.className = 'console-page-content joint-workspace';
       const workspace = root.document.createElement('div');
       workspace.className = 'coordination-workspace';
       const viewer = root.document.createElement('div');
@@ -97,7 +101,19 @@
       viewer.id = 'joint-viewer';
       viewer.innerHTML = root.JointViewer.render();
       workspace.append(viewer, grid.querySelector('.joint-panel'));
-      grid.append(workspace);
+      content.append(workspace);
+      const feedback = root.document.createElement('div');
+      feedback.id = 'joint-feedback';
+      feedback.innerHTML = root.JointFeedback.render({ ...options, store: root.JointConsole.store });
+      content.append(feedback);
+      grid.append(content);
+    }
+    if (view === 'single') {
+      grid.querySelectorAll('.joint-panel,.console-detail').forEach(element => element.remove());
+      const content = root.document.createElement('div');
+      content.className = 'console-page-content single-workspace';
+      content.innerHTML = `<div id="joint-feedback">${root.JointFeedback.render({ ...options, store: root.JointConsole.store })}</div><div class="single-detail-grid"><div id="single-joint-chart">${root.SingleJointChart.render(options)}</div><section class="panel single-workbench" id="joint-workbench">${root.JointConsole.detailControls(options.jointId, options.state)}</section></div>`;
+      grid.append(content);
     }
     if (view !== 'joint' && view !== 'single') {
       grid.querySelectorAll('.joint-panel,.console-detail,.coordination-workspace').forEach(element => element.remove());
@@ -121,12 +137,18 @@
   function mount(options) {
     root.JointCharts.unmount();
     root.JointViewer.unmount();
+    root.JointFeedback.unmount();
+    root.SingleJointChart.unmount();
     context = { ...options };
     root.JointSession.start({ state: context.state, onFrame: onSampleFrame });
     const container = root.document.querySelector('#joint-charts');
     if (context.view === 'charts' && container) root.JointCharts.mount({ container, state: context.state, jointId: context.jointId });
     const viewer = root.document.querySelector('#joint-viewer');
     if (context.view === 'joint' && viewer) root.JointViewer.mount({ container: viewer, store: root.JointConsole.store, state: context.state, jointId: context.jointId, onSelect: context.onSelect });
+    const feedback = root.document.querySelector('#joint-feedback');
+    if (feedback) root.JointFeedback.mount({ container: feedback, store: root.JointConsole.store, state: context.state, jointId: context.jointId, onSelect: context.onSelect });
+    const singleChart = root.document.querySelector('#single-joint-chart');
+    if (context.view === 'single' && singleChart) root.SingleJointChart.mount({ container: singleChart, state: context.state, jointId: context.jointId });
     root.JointConsole.restoreScroll();
   }
 
@@ -136,9 +158,16 @@
     root.JointSession.setState(context.state);
     root.JointCharts.setContext({ state: context.state, jointId: context.jointId });
     root.JointViewer.setContext({ state: context.state, jointId: context.jointId });
+    root.JointFeedback.setContext({ state: context.state, jointId: context.jointId });
+    root.SingleJointChart.setContext({ state: context.state, jointId: context.jointId });
   }
 
-  function unmountView() { root.JointCharts.unmount(); root.JointViewer.unmount(); }
+  function refreshWorkbench(options) {
+    const workbench = root.document.querySelector('#joint-workbench');
+    if (workbench) workbench.innerHTML = root.JointConsole.detailControls(options.jointId, options.state);
+  }
+
+  function unmountView() { root.JointCharts.unmount(); root.JointViewer.unmount(); root.JointFeedback.unmount(); root.SingleJointChart.unmount(); }
 
   function leave() {
     unmountView();
@@ -146,5 +175,5 @@
     context = null;
   }
 
-  return { resolve, render, mount, setContext, unmountView, leave };
+  return { resolve, render, mount, setContext, refreshWorkbench, unmountView, leave };
 });

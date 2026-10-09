@@ -78,7 +78,7 @@ window.JointConsole = (() => {
     return `<div data-joint-row="${id}" class="joint-servo-row ${id === activeId ? 'selected' : ''}">
       <div class="joint-row-heading"><input type="checkbox" data-joint-select="${id}" aria-label="选择${joint.name}" ${selected(id) ? 'checked' : ''}><button class="joint-select" data-joint="${id}" aria-pressed="${id === activeId}" title="${joint.raw}"><strong>${joint.name}</strong><span>#${id}</span></button></div>
       ${draftEditor(joint, mode)}
-      <div class="joint-row-feedback"><span>实测 <strong class="mono" data-joint-feedback="${id}">${numberText(feedback.value)}</strong></span><span>目标回读 <strong class="mono" data-joint-measurement="goal">${numberText(feedback.goal)}</strong></span><span>raw load <strong class="mono" data-joint-measurement="load">${numberText(feedback.load)}</strong></span><span><strong class="mono" data-joint-measurement="volt">${numberText(feedback.volt)}</strong> V</span><span><strong class="mono" data-joint-measurement="temp">${numberText(feedback.temp)}</strong> °C</span><span data-joint-age="${id}">${escape(feedback.available || mode === 'offline' ? feedback.ageLabel : '')}</span><span data-joint-feedback-state="${id}">${feedbackMarker(id, mode).state}</span><details class="joint-inline-result" data-joint-result-details ${result ? '' : 'hidden'}><summary data-joint-result="${id}" class="joint-result ${result?.status || ''}">${result ? compactStatusText[result.status] : ''}</summary><p data-joint-result-reason="${id}">${escape(result?.reason || '')}</p></details><span data-joint-result-empty ${result ? 'hidden' : ''}>尚未检查</span></div>
+      <div class="joint-row-feedback"><span>实测 <strong class="mono" data-joint-feedback="${id}">${numberText(feedback.value)}</strong></span><span title="目标回读，ticks" aria-label="目标回读，ticks">回读 <strong class="mono" data-joint-measurement="goal">${numberText(feedback.goal)}</strong></span><span title="负载原始值，raw load" aria-label="负载原始值，raw load">负载 <strong class="mono" data-joint-measurement="load">${numberText(feedback.load)}</strong></span><span><strong class="mono" data-joint-measurement="volt">${numberText(feedback.volt)}</strong> V</span><span><strong class="mono" data-joint-measurement="temp">${numberText(feedback.temp)}</strong> °C</span><span data-joint-age="${id}">${escape(feedback.available || mode === 'offline' ? feedback.ageLabel : '')}</span><span data-joint-feedback-state="${id}">${feedbackMarker(id, mode).state}</span><details class="joint-inline-result" data-joint-result-details ${result ? '' : 'hidden'}><summary data-joint-result="${id}" class="joint-result ${result?.status || ''}">${result ? compactStatusText[result.status] : ''}</summary><p data-joint-result-reason="${id}">${escape(result?.reason || '')}</p></details><span data-joint-result-empty ${result ? 'hidden' : ''}>尚未检查</span></div>
       <div class="joint-row-attention" data-joint-draft-state="${id}" ${draftNeedsAttention(id) ? '' : 'hidden'}>${draftStatus(id, true)}</div>
     </div>`;
   }
@@ -99,7 +99,7 @@ window.JointConsole = (() => {
         <div class="joint-toolbar-line joint-pose-controls"><input id="joint-pose-name" type="text" maxlength="60" value="${escape(poseName)}" aria-label="保存姿态名称" placeholder="姿态名称"><button id="joint-save-pose" class="button secondary">保存全部草稿</button></div>
         <p class="joint-toolbar-note">姿态保留映射、单位与样例校准版本；仅存在本页面会话中，刷新后清空。加载只改草稿。</p></details></details>
       </div>
-      <div class="joint-edit-legend"><span>滑块：目标草稿</span><span><i class="joint-marker-key" aria-hidden="true"></i>三角：样例实测</span><span>ticks · 使能 / 校准 / 限位未知 · 编辑不发送</span></div>
+      <div class="joint-edit-legend"><span>滑块：目标草稿</span><span><i class="joint-marker-key" aria-hidden="true"></i>三角：实测 ticks</span><span>回读：目标回读 ticks · 负载：raw load</span><span>使能 / 校准 / 限位未知 · 编辑不发送</span></div>
       <div id="joint-coordination-scroll" class="coordination-board" role="region" aria-label="15关节联调面板，全部展开，无内部滚动">${rows}</div>
       <div class="joint-batch-box"><p id="joint-batch-result" role="status" aria-live="polite">${escape(store.snapshot().lastBatch?.summary || '尚未应用样例草稿；没有发送设备请求。')}</p><p id="joint-operation-notice" role="status" aria-live="polite">${escape(notice)}</p><details id="joint-operation-details" ${noticeItems.length ? '' : 'hidden'}><summary>逐关节草稿操作结果</summary><ul>${noticeItems.map(item => `<li>${escape(item)}</li>`).join('')}</ul></details></div>
       <div class="joint-panel-footer"><p class="joint-note">15 关节完整保留，样例检查不代表命令确认；实测超范围隐藏标记，完整原因可在逐项结果中展开。</p><a id="joint-open-single" class="button secondary" href="#console/servos/single">查看 <span data-joint-current-name>${escape(model.metadata.find(joint => joint.id === activeId)?.name || '')}</span> · 单舵机详情</a><a class="button secondary" href="#console/charts">打开曲线页</a></div>
@@ -111,7 +111,17 @@ window.JointConsole = (() => {
     const draft = store.getDraft(id);
     const result = resultFor(id);
     const range = model.sampleConfig.ranges[id];
-    return `<div class="command-box"><h3>当前目标草稿</h3><p class="joint-detail-draft"><strong data-detail-draft>${draft.value === null ? '—' : escape(draft.value)} ticks</strong><span data-detail-draft-state>${draftStatus(id)}</span></p>${draftEditor(joint, mode)}<p class="joint-editor-note">演示编辑范围 ${range.min}–${range.max} ticks；黄色三角为样例实测。实机方向 / 零位 / 限位未知，草稿尚未发送到设备。</p><dl class="joint-index-list"><div><dt>显示序号</dt><dd>${joint.displayOrder}</dd></div><div><dt>物理运行时索引</dt><dd>${joint.runtimeIndex}</dd></div><div><dt>策略索引</dt><dd>${joint.policyIndex === null ? '无 · 嘴部独立控制' : joint.policyIndex}</dd></div></dl><p data-detail-result>${result ? statusText[result.status] + '：' + escape(result.reason) : '尚无样例检查结果；接收、应用、反馈与物理到位待设备端确认。'}</p><div class="button-row"><button class="button primary" disabled>发送目标</button><button class="button secondary" disabled>关闭舵机使能</button><button class="button secondary" disabled>停止序列</button><a class="button secondary" href="#console/charts">打开曲线页</a></div><p>关闭使能、停止序列与停止记录分别定义；release 不是停止或硬件急停。</p></div>`;
+    const feedback = store.getFeedback(id, mode);
+    const measurements = { actual: feedback.value, goal: feedback.goal, load: feedback.load, volt: feedback.volt, temp: feedback.temp,
+      error: Number.isFinite(feedback.value) && Number.isFinite(feedback.goal) ? feedback.value - feedback.goal : null };
+    return `<div class="command-box workbench-content" data-joint-row="${id}">
+      <div class="workbench-heading"><h2>关节工作台</h2><span class="badge draft">实机校准未知</span></div>
+      <div class="workbench-position"><label>选择关节<select data-workbench-joint aria-label="工作台关节">${['左腿', '右腿', '头颈'].map(group => `<optgroup label="${group === '头颈' ? '头颈与嘴部' : group}">${model.metadata.filter(item => item.group === group).map(item => `<option value="${item.id}" ${item.id === id ? 'selected' : ''}>${item.id} · ${item.name}</option>`).join('')}</optgroup>`).join('')}</select></label><div><span>样例实测 / ticks</span><strong data-workbench-value="actual">${numberText(measurements.actual)}</strong></div><div><span>实际角度 / °</span><strong>—</strong></div></div>
+      <div class="workbench-measurements">${[['goal', '目标回读', 'ticks'], ['error', '跟踪误差', 'ticks'], ['load', '负载原始值', 'raw load'], ['volt', '电压', 'V'], ['temp', '温度', '°C']].map(([key, name, unit]) => `<div><span>${name} <small>${unit}</small></span><strong data-workbench-value="${key}">${numberText(measurements[key])}</strong></div>`).join('')}</div>
+      <section class="workbench-section workbench-target"><div class="workbench-section-heading"><h3>目标草稿 <small>ticks</small></h3><span data-detail-draft-state>${draftStatus(id)}</span></div>${draftEditor(joint, mode)}<p class="workbench-hint">演示范围 ${range.min}–${range.max} ticks · 黄色三角为样例实测 · 编辑不发送</p><div class="workbench-actions"><button class="button primary" disabled>发送目标</button><button class="button secondary" disabled>关闭使能</button><button class="button secondary" disabled>停止序列</button></div></section>
+      <section class="workbench-section"><div class="workbench-section-heading"><h3>实际关节校准</h3><span>待设备数据</span></div><dl class="workbench-calibration">${[['零位 / ticks', '—'], ['编码器正方向', '—'], ['实际最小角 / °', '—'], ['实际最大角 / °', '—']].map(([name, value]) => `<div><dt>${name}</dt><dd>${value}</dd></div>`).join('')}</dl><p class="workbench-hint">尚无实机方向、零位和比例；3D 样例角度不作为校准值。</p></section>
+      <details class="workbench-details"><summary>索引与执行结果</summary><dl class="joint-index-list"><div><dt>显示序号</dt><dd>${joint.displayOrder}</dd></div><div><dt>物理运行时索引</dt><dd>${joint.runtimeIndex}</dd></div><div><dt>策略索引</dt><dd>${joint.policyIndex === null ? '无 · 嘴部独立控制' : joint.policyIndex}</dd></div></dl><p data-detail-result>${result ? statusText[result.status] + '：' + escape(result.reason) : '尚无样例检查结果；未发送设备命令。'}</p><p>关闭使能、停止序列与停止记录分别定义；release 不是停止或硬件急停。</p></details>
+    </div>`;
   }
 
   function applySidebarLayout(grid, sidebar, button) {
@@ -249,6 +259,12 @@ window.JointConsole = (() => {
       detailResult.textContent = result ? statusText[result.status] + '：' + result.reason : '尚无样例检查结果；接收、应用、反馈与物理到位待设备端确认。';
     }
     const feedback = store.getFeedback(activeId, mode);
+    const workbenchValues = { actual: feedback.value, goal: feedback.goal, load: feedback.load, volt: feedback.volt, temp: feedback.temp,
+      error: Number.isFinite(feedback.value) && Number.isFinite(feedback.goal) ? feedback.value - feedback.goal : null };
+    for (const [key, value] of Object.entries(workbenchValues)) {
+      const field = document.querySelector(`[data-workbench-value="${key}"]`);
+      if (field) field.textContent = numberText(value);
+    }
     const metricValues = document.querySelectorAll('.metrics .metric strong');
     [feedback.value, feedback.goal, feedback.volt].forEach((value, index) => {
       if (metricValues[index]) metricValues[index].innerHTML = `${feedback.available ? numberText(value) : '—'}<small>${index === 2 ? 'V' : 'ticks'}</small>`;
@@ -334,6 +350,11 @@ window.JointConsole = (() => {
   }
 
   function handleChange(input, options) {
+    if (input.matches('[data-workbench-joint]')) {
+      const id = Number(input.value);
+      if (model.metadata.some(joint => joint.id === id)) options.onSelect?.(id);
+      return true;
+    }
     if (input.matches('[data-joint-select]')) {
       store.select(Number(input.dataset.jointSelect), input.checked);
       scope = 'custom';
@@ -360,5 +381,5 @@ window.JointConsole = (() => {
     if (button) applySidebarLayout(document.querySelector('.console-grid'), document.querySelector('#console-sidebar'), button);
   });
 
-  return { store, render, sync, handleClick, handleInput, handleChange, rememberScroll, restoreScroll, mode: () => currentMode };
+  return { store, render, detailControls, sync, handleClick, handleInput, handleChange, rememberScroll, restoreScroll, mode: () => currentMode };
 })();

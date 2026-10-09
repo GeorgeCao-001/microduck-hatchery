@@ -30,7 +30,7 @@ const caseView=()=>`<div class="wrap case-article"><section class="article-top">
 const connectionDetails={wifi:'<h3>电脑与板卡在同一可互通网络</h3><p>在浏览器打开板端实际地址，例如 <code>http://&lt;板端 IP&gt;:8080/</code>。地址与端口以设备配置为准。</p><ul><li>确认实际 IP、服务端口与网络隔离条件。</li><li>先核对设备与服务信息，再进入调试。</li></ul>',usb:'<h3>USB-C 1 / OTG → 虚拟网卡</h3><p>板端完成 USB gadget 配置后，使用同一网页与 API。USB-C 2 是 HOST。</p><ul><li>UDC、描述符、供电与三系统枚举需要实测。</li><li>优先核实 NCM；具体配置依主机系统与板端能力决定。</li><li>数据线接入不等同于网络已经建立。</li></ul>',ble:'<h3>官方 BLE 客户端 → 本地桥接</h3><p>优先复用 duckctl / btd。电脑薄桥接提供同源网页，能力由实际服务与带宽决定。</p><ul><li>Windows、Linux、macOS 分别验证客户端与权限。</li><li>不把浏览器直连 BLE 作为三系统主路径。</li><li>配网凭据不进入日志和导出记录。</li></ul>'};
 const consoleView=()=>ConsoleWorkspace.render({state:consoleState,jointId:jointID,view:parseRoute().consolePage?.view||'joint'});
 const main=document.querySelector('#main'),dialog=document.querySelector('#connection-dialog');
-const jointInteractionOptions=()=>({state:consoleState,jointId:jointID,view:parseRoute().consolePage?.view,toast,redraw:redrawConsole});
+const jointInteractionOptions=()=>({state:consoleState,jointId:jointID,view:parseRoute().consolePage?.view,toast,redraw:redrawConsole,onSelect:id=>{jointID=id;updateSelectedJoint();}});
 function mountConsoleWorkspace(){ConsoleWorkspace.mount({state:consoleState,jointId:jointID,view:parseRoute().consolePage?.view||'joint',onSelect:id=>{jointID=id;updateSelectedJoint();}});}
 function redrawConsole(){JointConsole.rememberScroll();ConsoleWorkspace.unmountView();main.innerHTML=consoleView();mountConsoleWorkspace();}
 function toast(message){const el=document.querySelector('.toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),2500)}
@@ -66,9 +66,7 @@ function render(){
 function updateSelectedJoint(){
   const page=parseRoute().consolePage;
   if(page?.view==='single'){
-    const holder=document.createElement('template');holder.innerHTML=consoleView();
-    const detail=document.querySelector('.console-detail');
-    if(detail)detail.replaceWith(holder.content.querySelector('.console-detail'));
+    ConsoleWorkspace.refreshWorkbench({state:consoleState,jointId:jointID});
   }
   JointConsole.sync(consoleState,jointID);
   document.querySelectorAll('[data-joint]').forEach(button=>{
@@ -77,7 +75,7 @@ function updateSelectedJoint(){
     button.closest('[data-joint-row],tr')?.classList.toggle('selected',selected);
   });
   ConsoleWorkspace.setContext({jointId:jointID,state:consoleState});
-  if(page?.view==='single'&&window.innerWidth<=760)document.querySelector('.console-detail')?.scrollIntoView({block:'start'});
+  if(page?.view==='single'&&window.innerWidth<=760)document.querySelector('.single-detail-grid')?.scrollIntoView({block:'start'});
 }
 document.addEventListener('click',async e=>{const el=e.target.closest('button,a');if(!el)return;if(JointConsole.handleClick(el,jointInteractionOptions()))return;if(el.matches('[data-section]')){e.preventDefault();const href=el.getAttribute('href');if(location.hash===href){document.getElementById(el.dataset.section)?.scrollIntoView({block:'start'});setReadingSection(el.dataset.section);}else location.hash=href;return}if(el.matches('.mobile-menu')){const nav=document.querySelector('.site-nav');nav.classList.toggle('open');el.setAttribute('aria-expanded',nav.classList.contains('open'));return}if(el.matches('[data-connect-open]')){document.querySelector('#connection-content').innerHTML=connectionDetails.wifi;document.querySelectorAll('[data-connect]').forEach(b=>b.setAttribute('aria-selected',b.dataset.connect==='wifi'));dialog.showModal();return}if(el.matches('[data-connect]')){document.querySelector('#connection-content').innerHTML=connectionDetails[el.dataset.connect];document.querySelectorAll('[data-connect]').forEach(b=>b.setAttribute('aria-selected',b===el));return}if(el.matches('.close-dialog,.close-on-route')){dialog.close();return}if(el.matches('[data-experiment]')){experimentIndex=Number(el.dataset.experiment);main.innerHTML=showcase();return}if(el.matches('[data-os]')){selectedOS=el.dataset.os;document.querySelectorAll('[data-os]').forEach(b=>{b.classList.toggle('active',b===el);b.setAttribute('aria-pressed',b===el)});document.querySelector('#os-note').textContent=osNote();return}if(el.matches('[data-joint]')){jointID=Number(el.dataset.joint);updateSelectedJoint();return}if(el.matches('[data-record]')){recordIndex=Number(el.dataset.record);main.innerHTML=records();return}if(el.matches('[data-copy]')){const value=el.closest('.code-block').querySelector('code').textContent;try{await navigator.clipboard.writeText(value);el.textContent='已复制';setTimeout(()=>el.textContent='复制',1800)}catch{toast('请选中代码后复制。')}return}if(el.matches('[data-export]')){const csv='sample,source,relative_time_s,goal_ticks,actual_ticks\n'+sampleData.map(d=>`true,prototype-generated,${d.t.toFixed(1)},${d.goal},${d.actual.toFixed(3)}`).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='Microduck-Hatchery-EXAMPLE-ONLY.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('已下载示例 CSV；不是实测数据。')}});
 document.addEventListener('change',e=>{if(JointConsole.handleChange(e.target,jointInteractionOptions()))return;if(e.target.id==='state-select'){consoleState=e.target.value;redrawConsole();document.querySelector('#state-select').focus({preventScroll:true});}});

@@ -1,0 +1,37 @@
+/* Feedback inspection shares the existing paper, surface and accent palette. */
+.joint-feedback-panel{min-width:0;overflow:hidden}
+.feedback-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.feedback-heading h2{display:flex;align-items:center;gap:10px;font-size:20px;flex-wrap:wrap}
+.feedback-heading button{border:0;background:none;color:var(--moss);font-size:14px;padding:6px 0;white-space:nowrap}
+.feedback-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--surface)}
+.feedback-filters{display:flex;flex-wrap:wrap;gap:3px;padding:3px;border:1px solid var(--line);border-radius:5px}
+.feedback-filters button{padding:6px 10px;border:0;border-radius:3px;background:none;color:var(--muted);font-size:14px;white-space:nowrap}
+.feedback-filters button[aria-pressed=true]{background:var(--accent-soft);color:var(--ink);font-weight:700}
+.feedback-extra-toggle{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:14px}
+.feedback-extra-toggle input{accent-color:var(--moss);width:16px;height:16px}
+.feedback-search{margin-left:auto;min-width:0}
+.feedback-search input{width:190px;max-width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--ink);font-size:14px}
+.feedback-table-scroll{max-height:520px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-color:#aeb6a5 var(--paper)}
+.feedback-table{width:100%;border-collapse:separate;border-spacing:0;white-space:nowrap;font-size:14px;line-height:1.4}
+.feedback-table th,.feedback-table td{border-bottom:1px solid var(--line);padding:4px 8px;text-align:right}
+.feedback-table thead th{position:sticky;top:0;z-index:2;background:#e9ece3;color:var(--muted);font-weight:500;font-family:var(--body)}
+.feedback-table thead th small{display:block;font:12px/1.2 var(--mono)}
+.feedback-table th:first-child{position:sticky;left:0;z-index:1;background:var(--surface);min-width:145px;text-align:left}
+.feedback-table thead th:first-child{z-index:3;background:#e9ece3}
+.feedback-table th:nth-child(2),.feedback-table td:nth-child(2){text-align:left}
+.feedback-table td{font-family:var(--mono);font-variant-numeric:tabular-nums;min-width:58px}
+.feedback-table td:nth-child(2){font-family:var(--body);min-width:72px}
+.feedback-table tr.selected td,.feedback-table tr.selected th{background:var(--accent-soft)}
+.feedback-table tr.selected th{box-shadow:inset 3px 0 var(--accent)}
+.feedback-table tr[hidden],.feedback-table [hidden],.feedback-empty[hidden]{display:none}
+.feedback-table tbody th button{display:flex;align-items:center;gap:8px;width:100%;padding:0;border:0;background:none;text-align:left;color:var(--ink)}
+.feedback-table tbody th strong{font-size:14px;font-weight:700}
+.feedback-id{display:inline-flex;justify-content:center;align-items:center;min-width:28px;height:22px;border:1px solid var(--line);border-radius:4px;font:14px var(--mono);color:var(--moss)}
+.feedback-state{font-size:14px;color:var(--muted)}
+.feedback-state.sample{color:var(--moss)}
+.feedback-state.stale{color:#80551b}.feedback-state.offline{color:var(--danger)}
+.feedback-empty{padding:28px;text-align:center;margin:0;color:var(--muted);font-size:14px}
+.feedback-footnote{display:flex;flex-wrap:wrap;gap:4px 12px;padding:6px 14px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+.feedback-footnote span:last-child{margin-left:auto}
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:760px){.feedback-heading{padding:14px}.feedback-heading h2{font-size:18px;gap:6px}.feedback-toolbar{padding:10px 14px;gap:8px}.feedback-filters{width:100%}.feedback-filters button{flex:1;padding:6px 7px}.feedback-search{flex:1;min-width:140px}.feedback-search input{width:100%;padding:8px 10px}.feedback-table-scroll{max-height:380px}.feedback-table tbody th,.feedback-table tbody td{padding-top:7px;padding-bottom:7px}.feedback-footnote{padding:6px 12px}.feedback-footnote span:last-child{margin-left:0}}

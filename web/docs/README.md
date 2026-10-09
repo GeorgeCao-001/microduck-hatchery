@@ -8,8 +8,8 @@
 |---|---|
 | [NEXT_STEPS.md](../NEXT_STEPS.md) | 官方 Web 源码参考、后续优先级与本阶段提交前事项；建议未实施 |
 | [LOCAL_STATUS.md](LOCAL_STATUS.md) | 本地真实状态、验证范围与已知缺口；样例传输检查不代表实机验收 |
-| [JOINT_COORDINATION.md](JOINT_COORDINATION.md) | 左只读 3D / 右纵向联调、单舵机子页、独立曲线与共享样例会话的使用和模块边界；真实连接未实现 |
-| [LOCAL_REVIEW_PROPOSAL.md](LOCAL_REVIEW_PROPOSAL.md) | 第 9 节子页与第 10 节截图式联调 / 只读 3D 已按授权实现样例；总控与七章仍待审查，真实控制契约待核对 |
+| [JOINT_COORDINATION.md](JOINT_COORDINATION.md) | 只读 3D / 纵向联调、全量反馈表、单关节曲线与工作台、独立多关节曲线和共享样例会话的使用与模块边界 |
+| [LOCAL_REVIEW_PROPOSAL.md](LOCAL_REVIEW_PROPOSAL.md) | 第 9–11 节子页、3D 与反馈工作台已实现本地样例；总控与七章仍待审查，真实控制契约待核对 |
 | [模型 NOTICE](../licenses/microduck-model-NOTICE.md) | 本地参考模型 CC BY-NC-SA 4.0、Three.js MIT、来源与未校准边界；不代表实际装配模型 |
 | [Microduck-Hatchery-Visual-Design.md](Microduck-Hatchery-Visual-Design.md) | 当前视觉约束、素材许可及 Figma 脚本参考 |
 | [SOURCE_FREEZE.md](SOURCE_FREEZE.md) | 来源版本、照片 blob 与许可线索；不代表设备或工具的当前状态 |

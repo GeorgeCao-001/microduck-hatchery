@@ -6,18 +6,23 @@
 
 ## 使用
 
+2026-10-09：调试台使用全量反馈表和单关节工作台排版，保持既有背景、颜色和字体。紧凑处理仅用于重复的舵机行与反馈数据行，设备信息、状态提示、导航和普通面板维持常规尺寸与留白；最新页面组织见 [第 11 节](LOCAL_REVIEW_PROPOSAL.md#11-调试台反馈与关节工作台已实现本地样例)。
+
 在仓库根目录运行 `python web/tools/preview.py`，打开 <http://127.0.0.1:5173/#console>。`#console` 与 `#console/servos` 默认进入联调；“舵机”下的关节联调使用 `#console/servos/joint`，单舵机调试使用 `#console/servos/single`，曲线独立使用 `#console/charts`。总控、设备、传感器和日志的独立路由目前显示待实现占位内容。
 
 - 右侧 15 个关节按左腿 → 右腿 → 头颈与嘴部分成三组纵向排列，每组五条关节行；保持正常 14 px 字号，联调面板没有内部列表滚动。范围选择只决定哪些草稿参与操作，不隐藏其他关节，复选框可自定义范围。
+- 旋转轴名称保留 Yaw / Pitch / Roll，例如“左髋 Yaw”“颈部 Pitch”，在联调、反馈表、关节选择与曲线中统一使用。
 - 用滑块、数字输入或加减按钮编辑目标草稿。范围为独立的 UI 演示配置，全部使用 ticks；实机限位、零位和方向未知。无效输入保留并提示，不自动裁剪。
 - 样例反馈更新只影响反馈层，不覆盖草稿；当前仅左膝有生成反馈，其他 14 个关节显示缺测。离线隐藏反馈，陈旧反馈不能填入草稿。
 - 黄色三角单独表示样例实测位置，目标滑块仍是本地草稿。缺测不显示标记；反馈超出演示编辑范围时隐藏标记并提示，不裁剪反馈冒充可见测量；陈旧样例保留时同时标明陈旧。使能状态显示未知，按钮禁用。
-- 每条滑块下方显示独立的实测/目标回读 ticks、raw load、电压 V、温度 °C、有效性与最近逐项结果；缺测保留“—”。结果可展开完整原因，草稿无效或检查后有新编辑时另提示，不用缩小字号增加密度。
+- 每条关节保持紧凑的控件行与反馈行：滑块下方显示实测/目标回读 ticks、raw load、电压 V、温度 °C、有效性与最近逐项结果；“回读”指目标回读，“负载”指 raw load，顶部图例统一说明。缺测保留“—”，正文保持 14px。结果可展开完整原因，草稿无效或检查后有新编辑时另提示，异常行允许增高。
 - “反馈填入已选草稿”只更新已选关节中的有效反馈，逐项列出更新或跳过原因。
 - 展开“姿态草稿与镜像”及“姿态草稿”，保存全部 15 个目标及格式、映射、单位、校准和范围版本；加载只修改已选且兼容的草稿。姿态和草稿保存在当前页面内存，整页刷新后清空。
 - “样例应用已选草稿”生成所选目标与编辑版本的快照，进行本地检查，并显示每项通过、跳过或失败；部分结果不会显示为整体成功。它不发送、写入或确认物理到位。
 
-桌面联调左侧显示只读 3D，右侧为三组纵向长滑块，窄屏依次堆叠；页面高度不足时自然滚动。曲线继续使用独立页面，不占联调调节区。导航保持正常字号、支持收起，窄屏展开为顶部导航。单舵机调试保留独立滚动列表、详情和本地草稿编辑；完整索引分别展示。切页保留当前关节、草稿、范围、姿态、曲线选择与单舵机列表滚动位置；反馈刷新不重建调节控件或打断输入。
+桌面联调左侧显示只读 3D，右侧为三组纵向长滑块，下方是反馈总表；窄屏依次堆叠，控制列表不设内部滚动。单舵机页上方是独立滚动的反馈表，下方左大曲线、右关节工作台；窄屏依次堆叠。多关节曲线继续使用独立页面。导航保持正常字号、支持收起。切页保留当前关节、草稿、范围、姿态、曲线选择、反馈筛选和滚动；反馈刷新不重建调节控件或打断输入。
+
+反馈表按左腿→右腿→头颈与嘴列出全部 15 个关节，关节名与 ID 在同一行，英文名保留在悬浮说明、无障碍名称、搜索和 CSV 中。默认展开全部 13 列，可关闭校准与使能列；单位放在表头，数值按列对齐。分组和搜索只改显示，不改草稿应用范围。点击行或工作台选择关节会同步选中状态与单关节曲线，不写目标。实际角度、校准零位、物理限位与使能状态未知，显示“—”。CSV 导出当前筛选的只读样例快照，保留来源、状态、单位字段和空值，不能当作正式记录或重新执行。
 
 应用范围、样例应用、反馈填充、样例刷新与禁用的实机使能入口集中在顶部；镜像提示及姿态保存/加载放在默认收起的展开区，其状态随视图保留。
 
@@ -34,6 +39,8 @@
 ## 曲线与连续样例
 
 打开 `#console/charts` 使用完整工作区观察曲线；该页不放目标调节控件。设置默认收起，摘要显示已选关节数与数据项数；展开后以正常 14 px 字号选择关节和数据。图表关节选择独立于草稿应用范围与当前详情关节，打开曲线页不会自动改图表范围。
+
+单舵机页的大曲线只跟随当前关节，支持位置/误差/raw load/电压/温度、10/30 秒窗口与暂停。它的选择与暂停独立于多关节曲线页；暂停后仍可切换关节或调整布局查看冻结历史，样例采集继续。当前仅显示原始 ticks，缺少实机校准时不生成实际角度。
 
 - 位置图展示目标回读与实测回读，单位 ticks；当前均为生成样例。误差采用“实测回读 − 目标回读”，也以 ticks 显示。本地目标草稿不进入目标回读或误差计算。
 - raw load、电压 V、温度 °C 分图显示，避免混合量纲。raw load 是原始负载值，不标成扭矩。
@@ -58,9 +65,11 @@
 - [joint-console.js](../prototype/joint-console.js)、[joint-console.css](../prototype/joint-console.css)：紧凑联调、单舵机视图、目标交互与局部同步；不负责采集或通信。
 - [joint-session.js](../prototype/joint-session.js)：单一浏览器样例数据源、计时、订阅与每关节 320 点有界历史；不接受未标记的真实设备帧。
 - [joint-charts.js](../prototype/joint-charts.js)、[joint-charts.css](../prototype/joint-charts.css)：只消费共享会话历史，负责关节/数据选择、绘图、断段与暂停；挂载和卸载不启动或停止采集。
+- [joint-feedback.js](../prototype/joint-feedback.js)、[joint-feedback.css](../prototype/joint-feedback.css)：只读反馈行、筛选/搜索、选中与样例 CSV，不修改草稿或应用范围。
+- [single-joint-chart.js](../prototype/single-joint-chart.js)、[single-joint-chart.css](../prototype/single-joint-chart.css)：单关节曲线、独立暂停与布局重绘；复用现有绘图函数和会话历史。
 - [joint-viewer-model.js](../prototype/joint-viewer-model.js)：独立样例角度映射、草稿/反馈来源和缺测状态；[joint-viewer-geometry.js](../prototype/joint-viewer-geometry.js)：参考模型校验与网格解码；[joint-viewer.js](../prototype/joint-viewer.js)、[joint-viewer.css](../prototype/joint-viewer.css)：只读场景、相机、选中和挂载清理。
 - [console-workspace.js](../prototype/console-workspace.js)、[console-workspace.css](../prototype/console-workspace.css)：独立子页、共享导航和调试台会话生命周期。[app.js](../prototype/app.js) 负责站点路由与事件衔接；加载顺序见 [index.html](../prototype/index.html)。
-- [草稿测试](../tests/joint-drafts.test.cjs)、[曲线测试](../tests/joint-charts.test.cjs)、[会话测试](../tests/joint-session.test.cjs)、[路由测试](../tests/console-routes.test.cjs)、[3D 映射测试](../tests/joint-viewer-model.test.cjs) 与 [网格测试](../tests/joint-viewer-geometry.test.cjs)：使用 Node 原生测试，无网络或硬件。本轮共 59 项通过，包括原 42 项、3D 映射 9 项和网格解析 8 项；浏览器显示、交互与布局核验以状态报告为准，不借用历史结果。
+- [草稿测试](../tests/joint-drafts.test.cjs)、[反馈表测试](../tests/joint-feedback.test.cjs)、[曲线测试](../tests/joint-charts.test.cjs)、[会话测试](../tests/joint-session.test.cjs)、[路由测试](../tests/console-routes.test.cjs)、[3D 映射测试](../tests/joint-viewer-model.test.cjs) 与 [网格测试](../tests/joint-viewer-geometry.test.cjs)：使用 Node 原生测试，无网络或硬件。64 项通过，包括已有 59 项与反馈表 5 项；浏览器显示、交互与布局核验以状态报告为准。
 - [单文件生成](../tools/build_standalone.py)：`python web/tools/build_standalone.py`，同步根目录与 web 下两份 HTML，内嵌样式、脚本、图片、字体、本地 3D 引擎与模型，直接打开无需 CDN 或额外安装包。
 
 实际核验范围见 [LOCAL_STATUS.md](LOCAL_STATUS.md)，原审查方案及后续契约见 [LOCAL_REVIEW_PROPOSAL.md](LOCAL_REVIEW_PROPOSAL.md)。
