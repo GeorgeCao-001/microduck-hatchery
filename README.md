@@ -4,14 +4,14 @@ Microduck 整机复刻项目，覆盖机械与电气、运控、仿真与 RL、�
 
 架构主要依据 [架构 v2](docs/microduck-hatchery-architecture-v2.md)，保留 Pollen Robotics 官方 Microduck 的运行职责和完整 crate 边界，硬件适配以 **Radxa Zero 3W + FT / Feetech** 的实际配置为准。
 
-**当前处于目录准备与本地样例阶段：正式运行源码尚未迁入，没有 Cargo workspace、设备部署或实机通信。** 目录存在不表示模块已经实现。
+**Radxa Zero 3W 是整机的主要运行平台；电脑上的 FD1985 / FE-URT2 用于台架舵机维护。** 已建立最小 Rust 只读维护 workspace，Windows binary 和测试夹具链路可运行；完整官方运行源码、Radxa 部署、真实舵机通信与校准尚未完成。目录存在不表示模块已经实现。
 
 ## 当前状态
 
 | 部分 | 已有内容 | 尚未完成 |
 |---|---|---|
-| 设备软件与协议 | 7 个 daemon、9 个 library、2 个协议、5 个官方工具的 README；样例协议 JSON | 正式源码、Cargo 构建、板端 gateway、robotd 与 FT 适配 |
-| Hatchery Web | 原生原型、左侧只读 3D 与右侧 15 关节长滑块、全量反馈表与筛选/CSV 快照、单舵机大曲线与关节工作台、独立多关节曲线页、共享样例会话、草稿/姿态/逐项样例检查 | 总控界面（整机总览与全局操作）、真实连接、校准/实机模型映射、正式记录、生产构建；生产前端栈尚未冻结 |
+| 设备软件与协议 | 保留 v2 目录；4 个可构建 Rust crate、只读 robotd / gateway、FT 原码边界与维护 RPC；原样例 JSON | 完整整机源码、板端网络 gateway、HD 固件 / 寄存器确认、真实读取与 Radxa 部署 |
+| Hatchery Web | 原生原型、只读 3D 与 15 关节长滑块、紧凑反馈表 / CSV、单舵机工作台和独立曲线；HD 参考角、参数 / 标定草稿与批量；独立本机只读诊断快照 | 总控界面、实机校准 / 模型映射、完整 FD 调试与维护、正式记录、生产构建；生产前端栈尚未冻结 |
 | 教程 | 当前原型仍为六章结构，七章全栈方案已整理为审查稿 | 七章页面及完整教程内容，须先共同审查 |
 | 本地工具 | Python 静态预览、独立的只读 HTTP/WS 样例服务与检查脚本 | 诊断页 `app.js`、schema 对齐、完整的新环境依赖清单 |
 | 硬件 | BOM 采购与选型记录、厂商规格书、照片及 CAD | 实际装配与接口配置核实、校准、上电和实机验收 |
@@ -25,6 +25,9 @@ Microduck 整机复刻项目，覆盖机械与电气、运控、仿真与 RL、�
 ```text
 microduck-hatchery/
 ├─ src/
+│  ├─ Cargo.toml     Rust workspace 与 path dependency
+│  ├─ Cargo.lock     锁定依赖
+│  ├─ rust-toolchain.toml
 │  ├─ daemons/       robotd、mediad 等设备服务
 │  └─ libraries/     duck-control 等控制与支撑库
 ├─ protocol/         duck-ipc-proto、duck-ble；样例映射、消息与 schema
@@ -55,7 +58,7 @@ Browser / Hatchery Web
 
 `web/` 只负责页面、目标草稿、展示缓存和只读回放。控制权、校准、限位、执行与确认由 `src/` 中的对应模块裁定。官方 `mediad/webclient` 作为通信与控制语义参考，Hatchery 保留自己的 UI。
 
-正式模块目前只有说明文件。后续源码迁移须保留 crate 原名和内部结构，并核对 Cargo workspace、path dependency、scripts、deploy、hooks、systemd、CI 与测试资源路径。分类后的源码路径不能直接当作二进制安装路径。详见 [架构与边界](docs/ARCHITECTURE.md)。
+Rust 构建文件统一位于 `src/`；workspace 只包括 duck-ipc-proto、duck-control、robotd、mediad 的最小只读子集，源码和顶层协议位置保持架构 v2。其他模块仍是说明位置。电脑维护后端与 Radxa 整机共用这些职责边界，完整整机源码迁移仍须核对 path dependency、脚本与部署路径。详见 [架构与边界](docs/ARCHITECTURE.md)。
 
 ## 本地运行
 
@@ -95,6 +98,25 @@ python tools/check_shell.py --transport-only
 
 检查脚本需要 `websockets`；当前依赖清单尚未完整列出检查与 WS 所需依赖。此检查覆盖样例 HTTP/WS、只读拒绝及静态资源；默认完整检查仍会因诊断页脚本缺失失败，schema 与实际消息也有待对齐。运行细节见 [样例工具说明](tools/hatchery-shell/README.md)。这些检查不构成实机验收。
 
+### 本机只读维护后端
+
+需要 Rust 1.99.0 及该平台的链接环境；Python 只负责启动两个 Rust 程序：
+
+```powershell
+python scripts/hatchery-maintenance.py --fixture
+```
+
+打开 <http://127.0.0.1:8088/#console/servos/maintenance>。`--fixture` 是明确的 fake 原码夹具；不提供 `--fixture` 或 `--port` 则保持未连接。原联调、曲线与 3D 仍为浏览器样例。
+
+USB 台架实际连接：先给舵机供电并在 FD1985 中关闭串口，再按实际端口、ID、波特率启动。下面是本机单颗 ID 1 的设置示例，其他电脑以枚举结果为准：
+
+```powershell
+python scripts/hatchery-maintenance.py --list-ports
+python scripts/hatchery-maintenance.py --port COM5 --ids 1 --baud 1000000
+```
+
+仍打开上面的 **8088 维护网页**，静态预览 5173 或直接双击 HTML 不连接设备。默认只 PING；ID 1 独立显示为“未分配关节的舵机”，不会自动绑定到整机的 15 关节。2026-10-10 已实测 Windows / COM5 / 1 Mbps 下 ID 1 成功应答；位置原码、HD 寄存器、实际角度与控制仍待核对，没有发送目标或参数写入。`Ctrl+C` 停止后端并释放串口；使用与平台验收见 [维护后端](docs/MAINTENANCE_BACKEND.md)。
+
 ## 硬件与实现约束
 
 采购与选型见 [BOM](hardware/microduck_bom.xlsx)，规格书、照片和本地 CAD 见 [厂商资料](hardware/vendor_docs/)。CAD 已加入 `.gitignore`，保留在本地；后续再决定通过 Release 或外部链接分发。BOM 中的“已购”是采购记录，不能替代安装、兼容性或上电验收；采购数量也不能当作关节数量。即使有 HAT 资料和采购记录，仍须核对实际板卡、接线与可用功能。
@@ -112,6 +134,7 @@ python tools/check_shell.py --transport-only
 | 架构依据与当前边界 | [架构 v2](docs/microduck-hatchery-architecture-v2.md)、[ARCHITECTURE](docs/ARCHITECTURE.md) |
 | 接手背景与推进顺序 | [本地开发交接](Microduck-Hatchery-Local-Development-Handoff.md)、[PLAN](docs/PLAN.md) |
 | Web 运行、状态与共同设计 | [Web README](web/README.md)、[Web 文档索引](web/docs/README.md)、[联调说明](web/docs/JOINT_COORDINATION.md)、[总控、七章与联调审查稿](web/docs/LOCAL_REVIEW_PROPOSAL.md) |
+| HD 舵机调试扩展 | [FD1985 接入方案](web/docs/FD1985_INTEGRATION_PROPOSAL.md)、[只读维护后端](docs/MAINTENANCE_BACKEND.md)：B 已完成，C 软件基础可运行，硬件验收待完成 |
 | 正式模块与本地样例 | [src](src/README.md)、[protocol](protocol/README.md)、[hatchery-shell](tools/hatchery-shell/README.md) |
 | 来源、冻结与参考范围 | [SOURCES](docs/SOURCES.md)、[设备协议源码审核](web/docs/PROTOCOL_SOURCE_AUDIT.md)、[官方文档快照](docs/official-microduck/README.md) |
 | 开发约束与记录 | [AGENTS](AGENTS.md)、[项目日志](logs/PROJECT_LOG.md)、[日志规则](logs/README.md) |

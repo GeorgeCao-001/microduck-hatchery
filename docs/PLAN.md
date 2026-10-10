@@ -6,8 +6,8 @@
 
 | 阶段 | 输出 | 进入下一阶段的条件 |
 |---|---|---|
-| 0 · 本地结构 | daemons / libraries / protocol / tools 位置，hooks / scripts / spaces，独立样例工具与文档入口 | 本轮已建立说明壳、迁移既有 Python 样例；检查启动与资源路径。没有官方源码或 Cargo workspace。 |
-| 1 · 来源与路径 | 经授权后引入固定来源的完整 crate；逐项修正 workspace、path dependency、脚本、hooks、systemd、CI、测试资源 | 先复查已有 FT 代码，保留上游内部分工；构建检查与硬件运行检查分开。当前未开始源码引入。 |
+| 0 · 本地结构 | daemons / libraries / protocol / tools 位置，hooks / scripts / spaces，独立样例工具与文档入口 | 已建立说明位置与 Python 样例入口；未自动迁入官方源码，后续只读 workspace 见阶段 1。 |
+| 1 · 来源与路径 | 经授权后引入固定来源的完整 crate；逐项修正 workspace、path dependency、脚本、hooks、systemd、CI、测试资源 | 已核对 FT 冻结来源并建立 4 成员只读 workspace；完整官方 crate 仍未迁入，构建与硬件运行分别验收。 |
 | 2 · 协议与只读 | 核对 shared protocol / RPC、板端 gateway 与 robotd；15 关节、单位、时钟、来源、会话、有效期 | 实物型号、固件、节点与总线所有者明确；只读不绕开 robotd 直接轮询；样例和真实来源可区分。 |
 | 3 · 有限台架控制 | duck-control / safety 裁定校准、限位、控制权、模式、期限与确认；先单关节再逐关节批量 | 所有入口统一门控；校准与 robotd 互斥；停止、失联和重连行为经核对，重连不补发旧目标。 |
 | 4 · 模型与标准导出 | 保留所选训练源码结构，固定模型、仿真、RL、评估及标准策略产物 | 观察/动作映射、HOME、归一化、缩放、IMU 坐标、频率和运行时兼容逐项有证据。 |
@@ -34,6 +34,16 @@
 生产前端栈尚未冻结。当前原生原型继续使用；缺少 `app.js` 的样例诊断页不是已完成的正式连接界面。补页面脚本、协议 schema 和干净环境依赖属于后续功能收尾，联调样例不修复这些独立缺口。
 
 ## 后续能力
+
+### FD1985 完整调试与 HD-1910 标定（已批准分阶段推进）
+
+2026-10-10 已确认 15 颗均为 HD-1910-C001。**Radxa Zero 3W 是整机主要平台**；FE-URT2-C001 当前接 Windows 用于台架维护，辅助入口优先 Windows / macOS，Linux 桌面与 Radxa 分别验收。[接入方案](../web/docs/FD1985_INTEGRATION_PROPOSAL.md)保留完整 FD 功能目标，并增加逐关节批量工作流。
+
+按审查 → 型号规格 / 双单位只读 UI → 权威后端与真实只读 → 逐关节标定及有限控制 → 完整调试 / 维护 → Linux / 板端扩展推进。原始值、编码器参考角和实际标定角分别保存；未知零位、方向、限位及寄存器单位不补默认值，现有演示数据不改成实测。FD 旧文件、升级及在线接口的兼容性仍需资料和验证，不能宣布全部可用。
+
+阶段 B 已完成前端参考角、参数 / 软件标定草稿、逐关节批量差异与 JSON 导入导出；阶段 C 已增加独立的只读诊断快照，维护操作仍禁用。真实角度未知，草稿不写入设备、不改变联调目标、曲线或 3D。使用与本团队验证见 [联调说明](../web/docs/JOINT_COORDINATION.md#参数与软件标定草稿) 和 [状态报告](../web/docs/LOCAL_STATUS.md)。
+
+阶段 C 的软件基础已建立：隔离 Rust 工具链、锁定依赖、4 个 crate、最小 robotd / gateway、冻结 FT 只读包和主机接收时间。Windows 已构建并用 fixture 验证，目标源码检查与实机结果分列。下一步核对实际 HD 固件 / 内存表、15 个 ID，再验收真实读取、串口独占、超时与拔插；不自动打开端口或发送控制。使用见 [维护后端](MAINTENANCE_BACKEND.md)。完整 Radxa 运行仍为主线，gateway / tools 只负责传输 / 启动，现有 Python 样例不接管总线，不迁入其他服务或新建 drivers framework。
 
 ### Web 模型导入与轻量物理（后置，未实施）
 

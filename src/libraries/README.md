@@ -1,6 +1,6 @@
 # 设备库
 
-按 [v2 架构](../../docs/microduck-hatchery-architecture-v2.md) 分类，库被 daemon 调用，不另设运行进程；未来以完整 crate 导入，内部结构尽量保持。当前只有目录说明，未导入源码，无 Cargo manifests 或可运行 binary，未部署。
+按 [v2 架构](../../docs/microduck-hatchery-architecture-v2.md) 分类，库被 daemon 调用，不另设运行进程；未来完整源码内部结构尽量保持。duck-control 当前已有 FT 只读 bus / io，其他库只有说明文件；完整整机实现与硬件验收尚未完成。
 
 | 模块 | 预期职责 |
 |---|---|

@@ -1,0 +1,25 @@
+.servo-backend-panel{margin-top:24px;min-width:0}
+.console-page-content>#servo-backend:first-child .servo-backend-panel{margin-top:0}
+.servo-backend-panel .panel-title{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.servo-backend-panel .panel-title h2{font-size:22px}
+.servo-backend-note{font-size:14px;line-height:1.7;color:var(--muted);margin:16px 24px}
+.servo-backend-message{padding:14px 24px;font-size:16px;color:var(--ink);background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.servo-backend-summary{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:18px 24px;font-size:14px;overflow-wrap:anywhere}
+.servo-backend-table-scroll{overflow:auto;max-width:100%}
+.servo-backend-table-scroll table{width:100%;border-collapse:collapse;font-size:14px;white-space:nowrap}
+.servo-backend-table-scroll th,.servo-backend-table-scroll td{padding:6px 14px;border-top:1px solid var(--line);text-align:right}
+.servo-backend-table-scroll th:first-child,.servo-backend-table-scroll td:last-child{text-align:left}
+.servo-backend-table-scroll thead{background:var(--paper);color:var(--muted)}
+.servo-backend-ports{margin:16px 24px;font-size:14px;overflow-wrap:anywhere}
+.servo-backend-ports summary{cursor:pointer;padding:8px 0}
+.servo-backend-ports p{margin:10px 0}
+.servo-backend-guide{margin:20px 24px;font-size:16px;line-height:1.7}
+.servo-backend-guide summary{cursor:pointer;color:var(--ink);font-weight:600}
+.servo-backend-guide ol{padding-left:24px}
+.servo-backend-guide li{margin:12px 0}
+.servo-backend-guide code{display:block;margin-top:8px;padding:12px;background:var(--paper);border:1px solid var(--line);border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+.servo-backend-unassigned{border-top:1px solid var(--line);padding-bottom:20px}
+.servo-backend-unassigned h3{margin:20px 24px 8px;font-size:18px}
+.servo-backend-unassigned p{margin:8px 24px 16px;font-size:14px;color:var(--muted);line-height:1.7}
+.servo-backend-unassigned td:last-child{white-space:normal;min-width:180px;max-width:400px}
+@media(max-width:760px){.servo-backend-note,.servo-backend-ports{margin:16px}.servo-backend-message,.servo-backend-summary{padding:14px 16px}.servo-backend-panel .panel-title h2{font-size:20px}}

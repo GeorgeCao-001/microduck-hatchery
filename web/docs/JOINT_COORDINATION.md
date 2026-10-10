@@ -2,7 +2,7 @@
 
 2026-10-06：本轮按用户授权实现前端联调样例。正式设备链路尚未接通；页面不访问设备 API、串口或总线，不构成实机控制器。
 
-2026-10-07：已按用户最新授权落实截图式联调与只读 3D，保留舵机下的两个同级子页、调试台独立曲线页和共享样例采集会话；见 [第 10 节落实状态](LOCAL_REVIEW_PROPOSAL.md#10-截图式联调布局与只读-3d已实现样例)。此前三列关节布局已调整为左 3D、右纵向长滑块。本文描述源码实现，浏览器核验另以状态报告为准，不代表真实设备链路或整机总控已完成。
+2026-10-07：已按用户最新授权落实截图式联调与只读 3D、舵机下的同级子页、调试台独立曲线页和共享样例采集会话；见 [第 10 节落实状态](LOCAL_REVIEW_PROPOSAL.md#10-截图式联调布局与只读-3d已实现样例)。2026-10-10 已按分阶段方案加入参数与标定、通信与维护入口。本文描述源码实现，浏览器核验另以状态报告为准，不代表真实设备链路或整机总控已完成。
 
 ## 使用
 
@@ -51,6 +51,21 @@
 
 连续显示用于检查前端数据展示，不访问设备 API，不证明真实遥测、采样频率或实机闭环已完成。未来真实曲线只消费设备 gateway 提供的带来源、时钟与有效期的状态，Web 不裁定控制权。
 
+## 参数与软件标定草稿
+
+“舵机 → 参数与标定”使用 `#console/servos/parameters`，分为参数草稿、软件标定两个标签页。15 个关节含嘴部按显示顺序保留；表中范围选择与查看详情分开，均不改变联调目标或曲线选择。
+
+1. 在表中选择查看关节，在右侧填写本地字段。设备回读仍未知；ID、波特率、模式、分辨率、偏移、速度、加速度、输出限制、PID 与保护 raw 值不填厂商配置中的猜测初值，实际寄存器编码及范围待后端核实。
+2. 选择批量关节范围，勾选当前关节要复制的字段，点击“预览逐关节差异”。核对旧值、新值与逐项结果后，再“应用到本地草稿”。预览固定来源和字段快照；离页、换关节、改字段或范围后重新预览。此操作不发送命令。
+3. 软件标定填写参考位置 counts、该姿态的已知关节角、机械方向 ±1 和机械限位。手动测试采用 `q = reference° + direction × (counts − zeroCounts) × 360/4096`，完整草稿仍未实机确认，不影响反馈、镜像、目标或 3D。
+4. JSON 导出 / 导入只保存本地草稿。导入先检查格式版本、型号、全部 ID、数值与来源，最多 128 KiB；异常文件不部分覆盖，伪造实机确认的文件被拒绝。草稿只在当前页面内存保存，刷新会清空，请先导出。
+
+默认 4096 counts/rev 得到 0.087890625°/count；2048 对应编码器参考 180°、中位参考 0°，不能据此认定装机零位。多圈、非默认分辨率和无明确 profile / 单位的数据不计算参考角；超出填写的机械限位时显示原预览并警示，不裁剪或执行。
+
+联调与单舵机反馈表可勾选“HD counts 参考样例”，用独立的 15 关节假数据检查原值 / 参考角双单位。该夹具不进入会话、曲线或 3D；旧 ticks 样例保留原映射，真实角度继续未知。CSV 新增 `raw_unit`、`profile_id`、原值、参考角及 fake / 实机确认字段；旧 `*_ticks` 列名保留，读取时必须核对 `raw_unit`。
+
+“通信与维护”使用 `#console/servos/maintenance`。从 [本机 Rust gateway](../../docs/MAINTENANCE_BACKEND.md) 打开时，顶部独立展示 15 关节原码快照和仅枚举的串口；默认未连接，`--fixture` 明确 fake。刷新仅 GET，离页取消未完成请求，失联清除旧快照。静态 / 单文件入口不发起 API 请求。连接 / 发现、通信测试、固件 / 在线资料、扫描 / 步进仍为禁用入口；实机标定 0/15，联调、曲线和 3D 样例不受此快照影响。
+
 ## 仍未实现
 
 实机应用、使能与停止按钮保持禁用。缺少已验证的校准方向、零位、比例和语义镜像符号时，左右镜像禁用，不能直接复制两侧 ticks。真实镜像与控制确认须等待设备协议和校准阶段；`release` 不是停止或急停。
@@ -66,10 +81,13 @@
 - [joint-session.js](../prototype/joint-session.js)：单一浏览器样例数据源、计时、订阅与每关节 320 点有界历史；不接受未标记的真实设备帧。
 - [joint-charts.js](../prototype/joint-charts.js)、[joint-charts.css](../prototype/joint-charts.css)：只消费共享会话历史，负责关节/数据选择、绘图、断段与暂停；挂载和卸载不启动或停止采集。
 - [joint-feedback.js](../prototype/joint-feedback.js)、[joint-feedback.css](../prototype/joint-feedback.css)：只读反馈行、筛选/搜索、选中与样例 CSV，不修改草稿或应用范围。
+- [servo-profile.js](../prototype/servo-profile.js)：纯型号规格、待核实参数目录、显式单位参考角、独立软件草稿与严格 JSON 校验；没有寄存器地址或硬件调用。
+- [servo-parameters.js](../prototype/servo-parameters.js)、[servo-parameters.css](../prototype/servo-parameters.css)：参数 / 软件标定、逐项批量快照、文件预览与生命周期；不激活实机校准。
+- [servo-backend.js](../prototype/servo-backend.js)、[servo-backend.css](../prototype/servo-backend.css)：独立只读后端快照、映射 / 来源校验、超时与离页清理；不打开串口或修改草稿。
 - [single-joint-chart.js](../prototype/single-joint-chart.js)、[single-joint-chart.css](../prototype/single-joint-chart.css)：单关节曲线、独立暂停与布局重绘；复用现有绘图函数和会话历史。
 - [joint-viewer-model.js](../prototype/joint-viewer-model.js)：独立样例角度映射、草稿/反馈来源和缺测状态；[joint-viewer-geometry.js](../prototype/joint-viewer-geometry.js)：参考模型校验与网格解码；[joint-viewer.js](../prototype/joint-viewer.js)、[joint-viewer.css](../prototype/joint-viewer.css)：只读场景、相机、选中和挂载清理。
 - [console-workspace.js](../prototype/console-workspace.js)、[console-workspace.css](../prototype/console-workspace.css)：独立子页、共享导航和调试台会话生命周期。[app.js](../prototype/app.js) 负责站点路由与事件衔接；加载顺序见 [index.html](../prototype/index.html)。
-- [草稿测试](../tests/joint-drafts.test.cjs)、[反馈表测试](../tests/joint-feedback.test.cjs)、[曲线测试](../tests/joint-charts.test.cjs)、[会话测试](../tests/joint-session.test.cjs)、[路由测试](../tests/console-routes.test.cjs)、[3D 映射测试](../tests/joint-viewer-model.test.cjs) 与 [网格测试](../tests/joint-viewer-geometry.test.cjs)：使用 Node 原生测试，无网络或硬件。64 项通过，包括已有 59 项与反馈表 5 项；浏览器显示、交互与布局核验以状态报告为准。
+- [草稿测试](../tests/joint-drafts.test.cjs)、[型号规格测试](../tests/servo-profile.test.cjs)、[参数页测试](../tests/servo-parameters.test.cjs)、[反馈表测试](../tests/joint-feedback.test.cjs)、[曲线测试](../tests/joint-charts.test.cjs)、[会话测试](../tests/joint-session.test.cjs)、[路由测试](../tests/console-routes.test.cjs)、[3D 映射测试](../tests/joint-viewer-model.test.cjs) 与 [网格测试](../tests/joint-viewer-geometry.test.cjs)：`node --test web/tests/*.test.cjs`，Node 原生测试，无网络或硬件。最新实际结果与浏览器核验见状态报告。
 - [单文件生成](../tools/build_standalone.py)：`python web/tools/build_standalone.py`，同步根目录与 web 下两份 HTML，内嵌样式、脚本、图片、字体、本地 3D 引擎与模型，直接打开无需 CDN 或额外安装包。
 
 实际核验范围见 [LOCAL_STATUS.md](LOCAL_STATUS.md)，原审查方案及后续契约见 [LOCAL_REVIEW_PROPOSAL.md](LOCAL_REVIEW_PROPOSAL.md)。

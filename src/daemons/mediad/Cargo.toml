@@ -1,0 +1,11 @@
+[package]
+name = "mediad"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+duck-ipc-proto.workspace = true
+serde_json.workspace = true
+tiny_http.workspace = true

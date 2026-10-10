@@ -12,6 +12,8 @@
 <link rel="stylesheet" href="joint-viewer.css">
 <link rel="stylesheet" href="joint-feedback.css">
 <link rel="stylesheet" href="single-joint-chart.css">
+<link rel="stylesheet" href="servo-parameters.css">
+<link rel="stylesheet" href="servo-backend.css">
 <link rel="stylesheet" href="console-layout.css">
 </head>
 <body>
@@ -23,9 +25,10 @@
 </header>
 <main id="main" tabindex="-1"></main>
 <footer class="site-footer"><div class="footer-top"><a class="brand" href="#home">microduck<span class="brand-hatchery">HATCHERY</span></a><p>从装配到回读，把每一步留下来。</p><div><a href="#learn">阅读教程</a><a href="https://github.com/fanhao375/microduck-replica" target="_blank" rel="noreferrer">复刻仓库</a><a href="https://github.com/pollen-robotics/microduck" target="_blank" rel="noreferrer">官方仓库</a></div></div><div class="footer-bottom"><p>独立项目视觉原型 · 2026.10 · 不代表 Pollen Robotics 官方</p><p>参考照片：microduck-replica contributors · CC BY-NC-SA 4.0<br>视频、团队照片和实测记录待补。示例数据仅供布局与交互审阅。</p></div></footer>
-<dialog id="connection-dialog" aria-labelledby="connection-title"><div class="dialog-top"><span class="eyebrow">DEVICE CONNECTION</span><button class="icon-button close-dialog" aria-label="关闭连接说明">×</button></div><h2 id="connection-title">选择连接路径</h2><p class="muted">设备调试在开发板或电脑本地桥接提供的网页中进行。</p><div class="tabs" role="tablist" aria-label="连接方式"><button role="tab" aria-selected="true" data-connect="wifi">Wi-Fi</button><button role="tab" aria-selected="false" data-connect="usb">USB-C</button><button role="tab" aria-selected="false" data-connect="ble">蓝牙 BLE</button></div><div id="connection-content"></div><div class="callout"><strong>当前是视觉原型</strong><p>不发起网络连接或设备操作。连接步骤须在团队硬件上验证。</p></div><div class="dialog-bottom"><a class="button primary close-on-route" href="#article">查看连接教程</a><button class="button secondary close-dialog">关闭</button></div></dialog>
+<dialog id="connection-dialog" aria-labelledby="connection-title"><div class="dialog-top"><span class="eyebrow">DEVICE CONNECTION</span><button class="icon-button close-dialog" aria-label="关闭连接说明">×</button></div><h2 id="connection-title">选择连接路径</h2><p class="muted">设备调试在开发板或电脑本地维护服务提供的网页中进行。</p><div class="tabs" role="tablist" aria-label="连接方式"><button role="tab" aria-selected="true" data-connect="wifi">Wi-Fi</button><button role="tab" aria-selected="false" data-connect="usb">USB-C</button><button role="tab" aria-selected="false" data-connect="ble">蓝牙 BLE</button><button role="tab" aria-selected="false" data-connect="maintenance">台架 USB</button></div><div id="connection-content"></div><div class="callout"><strong>当前连接范围</strong><p>本机 USB 台架支持独立只读诊断；联调、曲线与 3D 仍为样例。板端 Wi-Fi、USB gadget 和 BLE 尚待实现与实测。</p></div><div class="dialog-bottom"><a class="button primary close-on-route" href="#article">查看连接教程</a><button class="button secondary close-dialog">关闭</button></div></dialog>
 <div class="toast" role="status" aria-live="polite"></div>
 <script src="joint-drafts.js"></script>
+<script src="servo-profile.js"></script>
 <script src="joint-session.js"></script>
 <script src="joint-charts.js"></script>
 <script src="joint-console.js"></script>
@@ -34,6 +37,8 @@
 <script src="joint-viewer.js"></script>
 <script src="joint-feedback.js"></script>
 <script src="single-joint-chart.js"></script>
+<script src="servo-parameters.js"></script>
+<script src="servo-backend.js"></script>
 <script src="console-workspace.js"></script>
 <script src="app.js"></script>
 </body></html>

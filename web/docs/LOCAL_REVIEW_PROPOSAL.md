@@ -240,3 +240,11 @@ George 已明确本轮加入 3D，并要求联调参考所提供的 servo-web �
 新增 `joint-feedback.js/css` 管理反馈表和快照，`single-joint-chart.js/css` 管理单关节绘图，`console-layout.css` 管理工作区排版；`joint-console.js` 继续管理草稿控件，`console-workspace.js` 统一挂载/卸载。离开调试台清理视图订阅和采集，两份单文件入口同步。窄屏让表格单独横向滚动，曲线与工作台堆叠，保持正常字号。
 
 64 项数据/模型检查和 19 项 Windows / Edge 定向浏览器检查通过；范围见 [状态报告](LOCAL_STATUS.md)。模型导入、轻量物理按后续计划推进，本轮未实施；总控、七章、正式连接、校准与控制仍待后续阶段。
+
+## 12. FD1985 功能接入与 HD-1910 标定（已批准分阶段推进）
+
+2026-10-10：George 要求 Web 覆盖本地 FD1985 调试软件功能，增加批量调试，保留原始值与角度及良好 UI；已确认全部 15 颗为 HD-1910-C001，当前 FE-URT2-C001 接 Windows，优先支持 Windows / macOS，Linux 也是目标。
+
+完整功能覆盖、参数冲突、双单位换算、逐关节标定、批量结果和跨平台维护服务方案集中在 [FD1985_INTEGRATION_PROPOSAL.md](FD1985_INTEGRATION_PROPOSAL.md)，George 已批准分阶段推进。保留现有视觉、紧凑舵机行与常规导航，联调 / 单舵机同属舵机，曲线独立；参数与标定、通信与维护已加入同级子导航，Web 仍仅为前端。
+
+阶段 B 已实现参考角、参数 / 软件标定草稿、批量与 JSON；草稿不使能镜像或修改 3D。阶段 C 已提供最小 Rust 只读后端和独立维护快照，维护操作仍禁用。Radxa 是整机主平台，电脑台架仅为维护入口；完整整机后端、HD 固件 / 寄存器、装机标定与 FD 文件 / 升级仍待验收。4096 counts/rev 只确定默认比例，2048 不是装机零位。使用和范围见 [维护后端](../../docs/MAINTENANCE_BACKEND.md)。

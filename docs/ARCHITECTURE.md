@@ -34,9 +34,15 @@ microduck-hatchery/
 └─ logs/
 ```
 
-7 个 daemon、9 个 library、2 个 protocol、5 个官方工具位置目前均只有 README。`hooks/`、`spaces/` 同样只预留职责，不制造空安装钩子、Cargo manifest、Rust 源文件或 systemd unit。`hardware/` 已收录 BOM 与厂商资料；`training/`、`deploy/` 当前为说明入口。
+7 个 daemon、9 个 library、2 个 protocol、5 个官方工具的位置保持 v2。2026-10-10 按批准的 FD1985 方案新增 4 个可构建成员：duck-ipc-proto、duck-control、robotd、mediad，只实现本机只读维护子集；其余目录仍只有说明。`hooks/`、`spaces/` 不生成空实现，`training/`、`deploy/` 当前为说明入口。
 
-分类只改变所属路径，不拆 crate、不改 crate 名，不创建新的 drivers、runtime、robot_io 或 libs 框架。`duck-control` 后续保持上游平铺模块边界，包括 `bus.rs`、`io.rs`、`obs.rs`、`policy.rs`、`safety.rs`；本轮没有建立这些源码文件。
+分类不拆 crate、不改 crate 名，不创建新的 drivers、runtime、robot_io 或 libs 框架。`duck-control` 已在 `bus.rs` / `io.rs` 适配冻结 FT 只读包与解码；obs、policy、safety 的整机能力仍待正式源码与硬件基线，不能把只读子集当作完整控制栈。
+
+## Radxa 整机与电脑维护
+
+**Radxa Zero 3W 是主要运行平台。** Windows 的 FD1985 通过 FE-URT2 调试舵机；Hatchery 的 Windows / macOS 本地维护入口是辅助能力。装机后由电脑浏览器访问 Radxa gateway，权威仍在板端 robotd / duck-control。台架时使用本机最小维护服务，不启动整机策略、IMU、Camera 或其他 daemon。
+
+当前 `robotd` / `mediad` binary 是上述职责中的只读子集，未迁入完整官方运行源码。loopback HTTP → 维护 RPC → robotd → duck-control 已用明确 fake 夹具验证；Radxa 网络 gateway、整机运控、HD 身份 / 寄存器及真实串口尚未验收。启动和接口见 [MAINTENANCE_BACKEND.md](MAINTENANCE_BACKEND.md)，FT 复用见 [FT_READ_ONLY_SOURCE.md](FT_READ_ONLY_SOURCE.md)。
 
 ## 正式控制关系
 
@@ -76,7 +82,11 @@ Python 只读样例位于 [tools/hatchery-shell/](../tools/hatchery-shell/README
 
 ## 后续引入源码时
 
-本轮不修改不存在的 workspace / path dependency，也不生成虚假的可编译壳。授权引入源码后先保持 crate 整体，再逐项修正 Cargo workspace、crate 间路径、xtask 查根、脚本、hooks、systemd、CI 和测试资源路径；分类目录不能直接假设等于二进制安装路径。
+`src/Cargo.toml` / `src/Cargo.lock` / `src/rust-toolchain.toml` 管理这 4 个真实只读成员；不为其余说明目录生成空 manifest。设备成员使用 `daemons/`、`libraries/` 相对路径，协议成员保持顶层 `protocol/duck-ipc-proto`，并以 package.workspace 显式指向 `../../src`。默认构建输出为 `src/target/`，本地启动器与合约测试按同一位置查找 binary。外部成员机制参考 [Cargo workspace 文档](https://doc.rust-lang.org/cargo/reference/workspaces.html)。
+
+尚未分配关节的台架 ID（如 ID 1）只进入维护协议的 `unassigned_devices`，没有 runtime / policy 索引；15 个物理关节的映射不会由串口枚举或 PING 改写。只读维护允许显式指定最多 32 个独立总线 ID，拒绝重复和广播 ID，不进行自动扫描。
+
+后续授权引入完整运行源码时保持 crate 整体，再核对 xtask 查根、脚本、hooks、systemd、CI 和测试资源路径；分类目录不能直接假设等于二进制安装路径。
 
 运行部署需区分源码、发布文件、设备配置/校准、可变状态与临时 socket；具体路径和权限按 Radxa 镜像核对。`logs/` 保存开发记录及日志规则，不替代板端日志系统。
 

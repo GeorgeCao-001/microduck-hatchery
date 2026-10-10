@@ -1,4 +1,5 @@
 .local/
+target/
 __pycache__/
 logs/runtime/
 logs/experiments/raw/
@@ -25,3 +26,5 @@ logs/experiments/artifacts/
 
 # A CAD-named directory may also contain ordinary documentation.
 !*.[xX]_[tT]/
+
+tools\FD1985-250729/

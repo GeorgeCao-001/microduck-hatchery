@@ -38,3 +38,7 @@
 用户明确要求在联调中加入只读姿态展示。仅引入上述固定复刻提交中的网页 `model.json` / `meshes.bin` 与本地 Three.js `0.160.0`，未迁入官方设备或训练代码。原始文件 SHA256 与下载地址见 [资源清单](../web/prototype/assets/microduck-reference/manifest.json)，几何 CC BY-NC-SA 4.0 和引擎 MIT 范围见 [许可说明](../web/licenses/microduck-model-NOTICE.md)。
 
 参考外形、嘴部估计铰链、作者的质量及 Dynamixel 外壳不代表 Hatchery 的实际装配。独立样例角度映射不沿用设备中点/方向，不充当校准。真实资产格式由本地解析测试核验，渲染与交互由本团队浏览器验证，不能当作来源作者的实机结果。
+
+## FT 只读维护子集（2026-10-10）
+
+按批准方案复查冻结 `tools/servo-web/feetech.py`，仅将包 / 校验 / 参考解码适配到既有 Rust bus / io 边界，未迁入完整官方 daemon。固定 blob、SHA256、Apache-2.0 署名、修改范围与锁定依赖见 [FT_READ_ONLY_SOURCE.md](FT_READ_ONLY_SOURCE.md)。原始字节保留；HD 真实固件 / 寄存器 / 单位仍未确认，当前构建和 fixture 结果不替代硬件验收。

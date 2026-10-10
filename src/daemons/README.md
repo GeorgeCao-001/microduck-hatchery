@@ -1,6 +1,6 @@
 # 板端进程
 
-按 [v2 架构](../../docs/microduck-hatchery-architecture-v2.md) 分类，daemon 作为完整 crate 保留内部结构。当前只有目录说明，未导入源码；没有 Cargo manifests、可运行 binary 或已部署服务。
+按 [v2 架构](../../docs/microduck-hatchery-architecture-v2.md) 分类，保留 crate 边界。robotd / mediad 当前已有最小只读维护 binary，完整官方 daemon 尚未迁入；其他位置只有目录说明。主运行平台是 Radxa Zero 3W，电脑维护入口是辅助能力；均未部署或实机验收。
 
 | 模块 | 预期职责 |
 |---|---|

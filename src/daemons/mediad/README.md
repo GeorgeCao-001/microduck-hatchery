@@ -4,4 +4,4 @@
 
 来源 `mediad/webclient` 以后作为 crate 内部内容整体保留，用于控制语义与通信参考；顶层 `web/` 继续是 Hatchery 的调试、展示和教程前端，不复制官方 UI。
 
-当前仅此说明文件，未导入源码，无 `Cargo.toml`、binary 或 `webclient`，未部署。Camera、Mic、WebRTC 和设备节点均需按实际硬件配置验证。
+当前已有最小 Rust 本机 gateway：同源提供 Hatchery 原型和只读 GET，通过共享维护 RPC 转发 robotd 实际回复；loopback、Host / Origin 和会话凭证限制，不依赖串口库或自行合成反馈。完整官方 mediad / webclient 尚未迁入，Camera、Mic、WebRTC、远程 Radxa gateway 和部署均未实现。运行见 [维护后端](../../../docs/MAINTENANCE_BACKEND.md)。

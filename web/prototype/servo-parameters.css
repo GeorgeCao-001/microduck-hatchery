@@ -1,0 +1,97 @@
+/* Local parameter drafts use the existing paper, green and mustard tokens. */
+.servo-parameters-workspace{display:grid;gap:20px;min-width:0}
+.servo-parameters-workspace [hidden]{display:none}
+.servo-profile-card,.servo-ledger-panel,.servo-editor-panel,.servo-batch-panel{min-width:0;overflow:hidden}
+.servo-parameters-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:20px 24px;border-bottom:1px solid var(--line)}
+.servo-parameters-heading .eyebrow{margin-bottom:6px;font-size:12px}
+.servo-parameters-heading h2{font-size:24px}
+.servo-parameters-heading p{margin:6px 0 0;font-size:14px;color:var(--muted)}
+.servo-profile-badges{display:flex;flex-wrap:wrap;gap:10px}
+.servo-profile-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;padding:18px 24px;margin:0}
+.servo-profile-facts dt{font-size:14px;color:var(--muted);margin-bottom:6px}
+.servo-profile-facts dd{font:18px/1.6 var(--mono);margin:0;overflow-wrap:anywhere}
+.servo-profile-facts small{font:12px/1.6 var(--mono);color:var(--muted)}
+.servo-profile-note{padding:12px 24px;margin:0;border-top:1px solid var(--line);background:var(--paper);font-size:14px;color:var(--muted)}
+.servo-parameters-tools,.servo-file-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.servo-parameters-tools{justify-content:space-between;gap:20px}
+.servo-parameters-tabs{display:flex;gap:8px;border-bottom:1px solid var(--line)}
+.servo-parameters-tabs button{background:none;border:0;border-bottom:3px solid transparent;min-height:46px;padding:10px 18px;font-size:16px;color:var(--muted)}
+.servo-parameters-tabs button[aria-selected=true]{border-bottom-color:var(--accent);color:var(--ink);font-weight:700}
+.servo-file-actions .button{min-height:44px;padding:9px 16px}
+.servo-scope-panel{display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:16px 20px;font-size:14px}
+.servo-scope-panel>div:first-child strong{display:block;font-size:16px}
+.servo-scope-panel>div:first-child span{display:block;color:var(--muted)}
+.servo-scope-buttons{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid var(--line);border-radius:6px}
+.servo-scope-buttons button{min-height:38px;padding:7px 12px;border:0;border-radius:4px;background:none;color:var(--muted);font-size:14px}
+.servo-scope-buttons button[aria-pressed=true]{background:var(--accent-soft);color:var(--ink);font-weight:700}
+.servo-scope-panel>[data-servo-selection-count]{margin-left:auto;color:var(--muted)}
+.servo-text-button{padding:8px 0;border:0;background:none;color:var(--moss);font-size:14px}
+.servo-parameters-body{display:grid;gap:20px;min-width:0}
+.servo-parameters-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
+.servo-section-heading{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.servo-section-heading h3{font-size:20px}
+.servo-section-heading h3 span{font-size:16px;color:var(--muted);margin-left:5px}
+.servo-section-heading>span,.servo-section-heading p{font-size:14px;color:var(--muted);margin:6px 0 0}
+.servo-ledger-scroll{overflow-x:auto;scrollbar-color:#aeb6a5 var(--paper)}
+.servo-ledger{width:100%;border-collapse:separate;border-spacing:0;white-space:nowrap;font-size:14px;line-height:1.4}
+.servo-ledger th,.servo-ledger td{padding:6px 9px;border-bottom:1px solid var(--line);text-align:right}
+.servo-ledger thead th{background:#e9ece3;color:var(--muted);font-weight:500}
+.servo-ledger th:first-child,.servo-ledger td:first-child{text-align:center;width:38px;padding-left:10px;padding-right:6px}
+.servo-ledger th:nth-child(2){text-align:left;min-width:150px}
+.servo-ledger td{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.servo-ledger td:last-child{font-family:var(--body);text-align:left}
+.servo-ledger input[type=checkbox]{width:16px;height:16px;accent-color:var(--moss);vertical-align:middle;margin:0}
+.servo-ledger tbody th button{display:flex;align-items:center;gap:7px;width:100%;border:0;background:none;padding:0;color:var(--ink);text-align:left}
+.servo-ledger strong{font-size:14px;font-weight:700}
+.servo-joint-id{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:22px;border:1px solid var(--line);border-radius:4px;color:var(--moss);font:14px var(--mono)}
+.servo-ledger tr.selected td,.servo-ledger tr.selected th{background:var(--accent-soft)}
+.servo-ledger tr.selected td:first-child{box-shadow:inset 3px 0 var(--accent)}
+.servo-draft-status{font-size:14px;color:var(--muted)}
+.servo-ledger-note{padding:12px 20px;margin:0;font-size:13px;line-height:1.7;color:var(--muted)}
+.servo-joint-selector{display:flex;align-items:center;gap:16px;font-size:14px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.servo-joint-selector select{flex:1;min-width:0}
+.servo-editor-panel input[type=number],.servo-editor-panel select{min-height:40px;width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font:14px/1.6 var(--mono)}
+.servo-editor-fields{padding:18px 20px}
+.servo-editor-intro h4{font-size:16px}
+.servo-editor-intro p{font-size:14px;color:var(--muted);margin:8px 0 18px}
+.servo-parameter-group{border:0;border-top:1px solid var(--line);padding:10px 0 16px;margin:0;min-width:0}
+.servo-parameter-group legend{padding:0 10px 0 0;color:var(--ink);font-size:16px;font-weight:700}
+.servo-parameter-field{display:grid;grid-template-columns:minmax(0,1.5fr) 65px minmax(80px,1fr) auto;align-items:center;gap:12px;padding:8px 0}
+.servo-parameter-field>div:first-child label{font-size:14px;display:block}
+.servo-parameter-field>div:first-child>span{font-size:12px;color:var(--muted);display:block}
+.servo-readback span{font-size:12px;color:var(--muted);display:block}
+.servo-readback strong{font:16px var(--mono)}
+.servo-batch-check{display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px;color:var(--muted)}
+.servo-batch-check input{width:16px;height:16px;accent-color:var(--moss);margin:0}
+.servo-calibration-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px}
+.servo-calibration-field>label:first-child{display:block;font-size:14px;margin-bottom:7px}
+.servo-calibration-field small{font:12px var(--mono);color:var(--muted)}
+.servo-calibration-field .servo-batch-check{margin-top:8px;white-space:normal}
+.servo-calculator{margin-top:22px;padding:18px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+.servo-calculator>div:first-child{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.servo-calculator h4{font-size:16px}
+.servo-calculator p{font-size:14px;line-height:1.7;color:var(--muted);margin:10px 0 14px}
+.servo-calculator-input{display:grid;grid-template-columns:auto minmax(80px,1fr) auto;align-items:center;gap:12px;font-size:14px}
+.servo-calculator-input>span,.servo-calculator-input small{font-size:12px;color:var(--muted)}
+.servo-calculator-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+.servo-calculator-values dt{font-size:13px;color:var(--muted)}
+.servo-calculator-values dd{font:18px/1.8 var(--mono);margin:0;overflow-wrap:anywhere}
+.servo-calculator code{display:block;font:12px/1.8 var(--mono);overflow-wrap:anywhere;color:var(--muted)}
+.servo-disabled-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.servo-disabled-actions .button{min-height:42px;padding:8px 14px}
+.servo-disabled-actions>span,.servo-disabled-actions details{width:100%;font-size:14px;color:var(--muted)}
+.servo-disabled-actions summary{cursor:pointer;padding:6px 0}
+.servo-disabled-actions details p{margin:10px 0}
+.servo-batch-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:16px 20px;font-size:14px}
+.servo-batch-toolbar>span{margin-right:auto;color:var(--muted)}
+.servo-batch-toolbar .button{min-height:44px;padding:9px 16px}
+.servo-batch-results{overflow-x:auto}
+.servo-batch-results table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.6}
+.servo-batch-results th,.servo-batch-results td{padding:8px 20px;text-align:left;border-top:1px solid var(--line)}
+.servo-batch-results thead th{font-weight:500;background:var(--paper);color:var(--muted)}
+.servo-batch-results tbody th{font-weight:700;white-space:nowrap}
+.servo-batch-results td:last-child{white-space:nowrap;color:var(--moss)}
+.servo-batch-empty{padding:0 20px 18px;margin:0;font-size:14px;color:var(--muted)}
+.servo-parameters-notice{font-size:14px;color:var(--muted);margin:0;padding:12px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);overflow-wrap:anywhere}
+@media(max-width:1340px){.servo-parameters-grid{grid-template-columns:minmax(0,1fr)}.servo-profile-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.servo-parameter-field{grid-template-columns:minmax(0,1.5fr) 90px minmax(100px,1fr) auto}}
+@media(max-width:760px){.servo-parameters-heading{align-items:flex-start;flex-direction:column;padding:18px}.servo-profile-facts{padding:18px;gap:16px}.servo-profile-facts dd{font-size:16px}.servo-profile-note{padding:12px 18px}.servo-scope-panel{padding:14px}.servo-scope-panel>[data-servo-selection-count]{margin-left:0}.servo-scope-buttons{width:100%}.servo-scope-buttons button{flex:1}.servo-parameters-tabs button{padding:10px 14px}.servo-section-heading{padding:16px}.servo-section-heading h3{font-size:18px}.servo-editor-fields{padding:16px}.servo-joint-selector{padding:14px 16px}.servo-parameter-field{grid-template-columns:minmax(0,1fr) 70px minmax(70px,1fr);gap:10px}.servo-parameter-field>.servo-batch-check{grid-column:1/-1;justify-self:end}.servo-calibration-fields{gap:16px 12px}.servo-calculator{padding:14px}.servo-calculator-input{grid-template-columns:1fr 1fr}.servo-calculator-input>span{grid-column:2}.servo-calculator-values{grid-template-columns:minmax(0,1fr)}.servo-calculator-values>div{display:flex;justify-content:space-between;align-items:center;gap:12px}.servo-batch-toolbar{padding:14px 16px}.servo-batch-results th,.servo-batch-results td{padding:8px 14px}.servo-batch-empty{padding:0 16px 16px}}

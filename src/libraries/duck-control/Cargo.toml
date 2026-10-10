@@ -1,0 +1,10 @@
+[package]
+name = "duck-control"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+duck-ipc-proto.workspace = true
+serialport.workspace = true

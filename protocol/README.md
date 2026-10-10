@@ -2,9 +2,9 @@
 
 `protocol/` 是仓库根目录的前后端共享契约模块，独立于 `web/` 和设备驱动。当前已有本地样例壳的 `hatchery-shell/0` 草案、标准 15 关节映射及缺测夹具；这不是生产协议冻结，也不是上游 servo-web 或 robotd 的原有协议。
 
-协议定义数据如何表达，**正式执行资格和真实状态由 `src/` 的 robotd / duck-control 裁定**，目前这些模块仅预留目录。前端不能通过修改共享文件、UI 排序或缓存使设备接受未验证目标。
+协议定义数据如何表达，**正式执行资格和真实状态由 `src/` 的 robotd / duck-control 裁定**。当前已建立最小只读维护子集，完整整机资格与写入仍未实现；前端不能通过修改共享文件、UI 排序或缓存使设备接受未验证目标。
 
-按 [架构 v2](../docs/microduck-hatchery-architecture-v2.md) 预留 [duck-ipc-proto/](duck-ipc-proto/README.md) 和 [duck-ble/](duck-ble/README.md)，均没有引入官方源码或 Cargo manifest。下列 JSON 是已有样例工具的辅助文件，不是这两个正式 crate 的替代实现。
+按 [架构 v2](../docs/microduck-hatchery-architecture-v2.md) 保留 [duck-ipc-proto/](duck-ipc-proto/README.md) 和 [duck-ble/](duck-ble/README.md)。前者已有独立 `hatchery-maintenance/1` Rust 只读契约，后者仍为说明位置；完整官方协议未迁入。下列 JSON 是旧样例工具的辅助文件，不是维护 RPC 的消息格式。接口与边界见 [维护后端](../docs/MAINTENANCE_BACKEND.md)。
 
 ## 当前文件
 
