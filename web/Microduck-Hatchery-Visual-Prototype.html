@@ -590,6 +590,34 @@
 @media(max-width:760px){.sensor-page-heading{align-items:flex-start;flex-wrap:wrap}.sensor-card-header,.sensor-card-body{padding:18px}.sensor-card-header{flex-wrap:wrap;gap:12px}.sensor-card-header h3{font-size:20px}.sensor-attitude-row{gap:14px;grid-template-columns:120px minmax(0,1fr)}.sensor-attitude svg{width:120px;height:120px}.sensor-angles{grid-template-columns:minmax(0,1fr);gap:0}.sensor-angles>div{grid-template-columns:1fr auto 12px;padding:2px 0}.sensor-angles>div>span{grid-column:auto}.sensor-angles strong{font-size:22px}.sensor-camera-layout{grid-template-columns:minmax(0,1fr);padding:18px}.sensor-card-footer{padding:14px 18px}.sensor-tof>.sensor-card-body{display:block}.sensor-distance-summary{grid-template-columns:1fr 1fr .8fr;gap:8px;margin:0 0 14px}.sensor-distance-summary strong{font-size:22px}.sensor-tof-grid button{font-size:11px}.sensor-zone-detail{margin-top:12px}.sensor-zone-detail small{margin-left:0}.sensor-plot-toolbar label{flex-wrap:wrap}.sensor-camera-empty svg{height:65px}}
 
 </style>
+<style>
+.device-workspace{display:flex;flex-direction:column;gap:24px;min-width:0}
+.device-workspace .console-page-intro{margin-bottom:0}
+.device-panel-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:20px 24px;border-bottom:1px solid var(--line)}
+.device-panel-heading h3{font-size:21px}
+.device-monitor-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px}
+.device-fields{margin:0;padding:18px 24px;font-size:14px}
+.device-fields>div{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid var(--line)}
+.device-fields>div:last-child{border-bottom:0}.device-fields dt{color:var(--muted);flex-shrink:0}.device-fields dd{margin:0;text-align:right;overflow-wrap:anywhere;min-width:0}
+.device-summary [data-device-host-info]>.device-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 32px}
+.device-local-labels{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;padding:20px 24px;border-top:1px solid var(--line)}
+.device-local-labels label{display:flex;flex-direction:column;gap:6px;flex:1;min-width:180px;color:var(--muted);font-size:13px}
+.device-local-labels input,.device-local-labels select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);font-size:14px}
+.device-local-labels p{flex-basis:100%;margin:0;font-size:12px;color:var(--muted)}
+.device-system-metrics{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:24px}
+.device-system-metric>span{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+.device-system-metric strong{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;font-size:24px;line-height:1.4;font-weight:500}.device-system-metric small{font:12px var(--mono);color:var(--muted)}
+.device-system-metric meter{display:block;width:100%;height:8px;margin-top:12px;accent-color:var(--moss)}
+.device-system-metric meter::-webkit-meter-bar{border:0;background:var(--line);border-radius:4px}.device-system-metric meter::-webkit-meter-optimum-value{background:var(--moss)}
+.device-panel-note{font-size:13px;color:var(--muted);margin:0;padding:14px 24px 20px;line-height:1.7}
+.device-empty{padding:20px 24px;margin:0;font-size:14px;color:var(--muted)}
+.device-interface-table{overflow-x:auto}.device-interface-table table{width:100%;border-collapse:collapse;font-size:14px;text-align:left}.device-interface-table th{padding:12px 24px;background:#e9ece3;font-size:13px;color:var(--muted);white-space:nowrap}.device-interface-table td{padding:12px 24px;border-bottom:1px solid var(--line);vertical-align:top}.device-interface-table small{display:block;color:var(--muted);font-size:12px}
+.device-bluetooth{padding:20px 24px 0}.device-bluetooth h4{font-size:16px}.device-bluetooth p{font-size:13px;color:var(--muted);margin:8px 0}.device-bluetooth .device-fields{padding:4px 0}
+.device-form-message{font-size:14px;color:var(--moss);margin:0}
+@media(max-width:1000px){.device-monitor-grid{grid-template-columns:minmax(0,1fr)}.device-summary [data-device-host-info]>.device-fields{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){.device-panel-heading,.device-fields,.device-local-labels,.device-system-metrics{padding:16px}.device-local-labels label{flex-basis:100%;min-width:0}.device-panel-note{padding:14px 16px}.device-system-metrics{gap:18px}.device-system-metric strong{font-size:22px}.device-interface-table td,.device-interface-table th{padding:10px 16px}.device-bluetooth{padding:16px 16px 0}.device-fields>div{flex-wrap:wrap;gap:4px 12px}.device-fields dd{text-align:left}}
+
+</style>
 </head>
 <body>
 <a class="skip" href="#main">跳到正文</a>
@@ -3997,18 +4025,188 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   'use strict';
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.DeviceSession = api;
+})(typeof window !== 'undefined' ? window : globalThis, function (root) {
+  'use strict';
+  // One same-origin, read-only host session for the entire console.
+  let data = null, status = 'idle', error = '', timer = null, controller = null, generation = 0;
+  let receivedAt = null, receivedMono = null;
+  const listeners = new Set();
+  const text = v => typeof v === 'string' && v.length <= 512;
+  const optionalText = v => v === null || text(v);
+  const number = v => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+  const optionalNumber = v => v === null || number(v);
+  const plain = v => v && typeof v === 'object' && !Array.isArray(v);
+  function validate(v) {
+    if (!plain(v) || v.protocol_version !== 'hatchery-device/1' || v.source !== 'host-system' || !Number.isSafeInteger(v.generated_unix_ms) || v.generated_unix_ms < 0) return null;
+    const id = v.identity, s = v.system, service = v.service;
+    if (!plain(id) || !['id','name','hostname','model','kernel'].every(k => optionalText(id[k])) || !text(id.id_source) || !text(id.os) || !text(id.architecture)) return null;
+    if (!plain(s) || !['cpu_percent','load_one','memory_total_bytes','memory_available_bytes','uptime_seconds','hottest_zone_celsius'].every(k => optionalNumber(s[k])) || (s.cpu_percent !== null && s.cpu_percent > 100) || (s.memory_total_bytes !== null && s.memory_available_bytes !== null && s.memory_available_bytes > s.memory_total_bytes)) return null;
+    if (!plain(service) || !text(service.name) || !text(service.version) || !text(service.bus_owner) || !['fixture','hardware','disconnected'].includes(service.servo_source) || !['fixture','open','disconnected'].includes(service.servo_connection) || service.servo_fake !== (service.servo_source === 'fixture') || typeof service.control_enabled !== 'boolean' || !optionalText(service.serial_port) || !optionalNumber(service.baud)) return null;
+    if ((service.servo_source === 'fixture' && service.servo_connection !== 'fixture') || (service.control_enabled && (service.servo_source !== 'hardware' || service.servo_connection !== 'open'))) return null;
+    if (v.interfaces !== null && (!Array.isArray(v.interfaces) || v.interfaces.length > 64 || v.interfaces.some(n => !plain(n) || !text(n.name) || !['wifi','usb-network','network','loopback'].includes(n.kind) || !text(n.state) || (n.carrier !== null && typeof n.carrier !== 'boolean') || (n.addresses !== null && (!Array.isArray(n.addresses) || n.addresses.length > 16 || !n.addresses.every(text)))))) return null;
+    if (v.bluetooth !== null && (!Array.isArray(v.bluetooth) || v.bluetooth.length > 16 || v.bluetooth.some(n => !plain(n) || !text(n.name) || !optionalText(n.address) || (n.blocked !== null && typeof n.blocked !== 'boolean')))) return null;
+    return JSON.parse(JSON.stringify(v));
+  }
+  const available = () => root.HATCHERY_BACKEND?.apiBase === '/api/v1/maintenance' && root.HATCHERY_BACKEND?.readOnly === true;
+  function snapshot() {
+    const fresh = status === 'online' && receivedMono !== null && root.performance.now() - receivedMono <= 6000;
+    return { data: data ? JSON.parse(JSON.stringify(data)) : null, status: status === 'online' && !fresh ? 'stale' : status, fresh, error, receivedAt, available: available() };
+  }
+  function emit() { const view = snapshot(); listeners.forEach(fn => fn(view)); }
+  async function refresh() {
+    if (!available() || controller) return;
+    const ticket = generation, request = new root.AbortController(); controller = request;
+    const timeout = root.setTimeout(() => request.abort(), 4500);
+    if (!data) { status = 'connecting'; emit(); }
+    try {
+      const reply = await root.fetch('/api/v1/maintenance/device', { method: 'GET', credentials: 'same-origin', cache: 'no-store', signal: request.signal });
+      if (!reply.ok) throw new Error(reply.status === 404 ? '当前后端缺少设备接口，请更新代码并重新编译。' : reply.status === 401 ? '会话已失效，请刷新网页重新建立会话。' : '设备后端暂不可用。');
+      const body = await reply.text();
+      if (body.length > 131072) throw new Error('设备回复超过限制。');
+      const next = validate(JSON.parse(body));
+      if (!next) throw new Error('设备协议或数据来源校验失败。');
+      if (ticket !== generation) return;
+      data = next; status = 'online'; error = ''; receivedAt = Date.now(); receivedMono = root.performance.now();
+    } catch (failure) {
+      if (ticket !== generation) return;
+      status = data ? 'stale' : 'offline'; error = failure.name === 'AbortError' ? '设备请求超时。' : failure.message;
+    } finally {
+      root.clearTimeout(timeout);
+      if (ticket === generation) { controller = null; emit(); }
+    }
+  }
+  function start() {
+    if (timer !== null) { emit(); return; }
+    if (!available()) { status = 'static'; emit(); return; }
+    refresh(); timer = root.setInterval(() => { emit(); refresh(); }, 2000);
+  }
+  function stop() {
+    generation++; controller?.abort(); controller = null;
+    if (timer !== null) root.clearInterval(timer); timer = null;
+    data = null; receivedAt = null; receivedMono = null; status = 'idle'; error = '';
+  }
+  function subscribe(fn) { listeners.add(fn); fn(snapshot()); return () => listeners.delete(fn); }
+  return Object.freeze({ validate, start, stop, refresh, subscribe, snapshot });
+});
+
+</script>
+<script>
+(function (root, factory) {
+  'use strict';
+  const api = factory(root);
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.DeviceWorkspace = api;
+})(typeof window !== 'undefined' ? window : globalThis, function (root) {
+  'use strict';
+  const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  const storageKey = 'hatchery-device-preferences/1';
+  let host = null, unsubscribe = null, view = null, page = 'device', labelsLoaded = false;
+  const routes = { unknown:'未注明', ssh:'SSH 转发', usb:'USB 网络', wifi:'Wi-Fi', local:'电脑本地维护' };
+  let preferences = { aliases: Object.create(null), paths: Object.create(null) };
+  try {
+    const saved = JSON.parse(root.localStorage?.getItem(storageKey) || 'null');
+    if (saved && typeof saved === 'object') {
+      for (const key of ['aliases','paths']) if (saved[key] && typeof saved[key] === 'object' && !Array.isArray(saved[key])) preferences[key] = Object.assign(Object.create(null), Object.fromEntries(Object.entries(saved[key]).slice(0,64).filter(([k,v]) => k.length <= 256 && typeof v === 'string' && v.length <= 80 && (key === 'aliases' || Object.hasOwn(routes,v)))));
+    }
+  } catch (_) { /* Browser storage may be unavailable; current session still works. */ }
+  const endpoint = () => ['http:','https:'].includes(root.location?.protocol) ? root.location.origin : '离线文件';
+  const identityKey = snapshot => snapshot?.data?.identity.id || endpoint();
+  const nameFor = snapshot => preferences.aliases[identityKey(snapshot)] || snapshot?.data?.identity.name || snapshot?.data?.identity.hostname || 'Hatchery · 等待设备身份';
+  const value = (v, digits=1) => typeof v === 'number' && Number.isFinite(v) ? v.toFixed(digits) : '—';
+  const bytes = v => typeof v === 'number' ? `${value(v / 1024 / 1024,0)} MiB` : '—';
+  const clock = v => typeof v === 'number' ? `${Math.floor(v / 3600)}h ${Math.floor(v % 3600 / 60)}m` : '—';
+  function busText(service) { return !service ? '状态待获取' : service.servo_fake ? 'fixture · 非硬件' : service.servo_connection === 'open' ? '串口已打开' : '串口未连接'; }
+  function headerMarkup() {
+    return `<div class="devicebar"><div class="device-id"><span class="device-icon" aria-hidden="true">⌁</span><div><strong data-device-name>Hatchery · 等待设备身份</strong><p class="mono" data-device-identity>设备 ID — / 主机 —</p></div><span class="badge draft" data-device-online>状态待获取</span></div><div class="device-stats"><div>当前入口<strong class="mono" data-device-endpoint>${escape(endpoint())}</strong></div><div>连接方式<strong data-device-path>未注明 · 可在设备页备注</strong></div><div>总线状态<strong data-device-bus>状态待获取</strong></div><div>数据来源<strong data-device-source>状态待获取</strong></div></div></div>`;
+  }
+  function render() {
+    return `<div class="device-workspace"><div class="console-page-intro"><h2>设备</h2><p>先确认正在访问哪台设备，再查看系统与连接状态。</p><button type="button" class="button secondary" data-device-refresh>刷新状态</button></div>
+      <section class="panel device-summary"><div class="device-panel-heading"><h3 data-device-page-name>设备身份</h3><span class="badge readonly">只读系统状态</span></div><div data-device-host-info></div><form class="device-local-labels" data-device-label-form><label>本地显示名称<input data-device-alias maxlength="80" placeholder="例如 George · Radxa"></label><label>当前连接方式备注<select data-device-path-choice>${Object.entries(routes).map(([key,label])=>`<option value="${key}">${label}</option>`).join('')}</select></label><button class="button secondary" type="submit">保存本地备注</button><p>仅保存在当前浏览器，不修改主机名、网络配置或权威设备 ID。</p></form></section>
+      <div class="device-monitor-grid"><section class="panel"><div class="device-panel-heading"><h3>系统状态</h3><span class="badge draft" data-device-system-status>待获取</span></div><div data-device-system></div></section><section class="panel"><div class="device-panel-heading"><h3>服务与连接</h3><span class="badge draft" data-device-service-status>待获取</span></div><div data-device-services></div></section></div>
+      <section class="panel"><div class="device-panel-heading"><h3>网络与蓝牙</h3><span class="small muted">当前服务主机的实际接口</span></div><div class="device-interface-table" data-device-interfaces></div><div class="device-bluetooth" data-device-bluetooth></div><p class="device-panel-note">接口有地址不等于能访问公网；蓝牙控制器存在不等于已配对或已实现 BLE 控制桥。当前页面只读，不更改 Wi-Fi、蓝牙和 USB 配置。</p></section>
+      <p class="device-form-message" data-device-message role="status"></p></div>`;
+  }
+  function fields(rows) { return `<dl class="device-fields">${rows.map(([k,v])=>`<div><dt>${escape(k)}</dt><dd>${escape(v ?? '—')}</dd></div>`).join('')}</dl>`; }
+  function banner(snapshot) {
+    if (!snapshot.available) return '静态预览 · 尚未连接设备后端，系统与接口状态保留未知。';
+    if (!snapshot.fresh) return (snapshot.data ? '设备状态陈旧 · ' : '设备后端未连接 · ') + (snapshot.error || '正在获取状态。');
+    const source = snapshot.data.service.servo_fake ? '舵机仍使用 fixture 假数据，未连接硬件。' : snapshot.data.service.servo_connection === 'open' ? '串口已打开，不代表关节标定或实机到位。' : '舵机串口未连接。';
+    return page === 'device' || page === 'parameters' ? `系统信息来自当前后端主机；${source}` : `设备栏显示后端系统状态；当前${page === 'sensors' ? 'IMU / ToF' : '联调、曲线与 3D'}仍为浏览器样例。${source}`;
+  }
+  function paint(snapshot) {
+    if (!host) return;
+    view = snapshot;
+    const put = (key,text) => host.querySelectorAll('[data-device-'+key+']').forEach(n => { n.textContent=text; });
+    const data = snapshot.data, live = snapshot.fresh ? data : null;
+    const name = nameFor(snapshot), id = data?.identity;
+    put('name', snapshot.available ? name : 'Hatchery · 静态预览'); put('page-name', name);
+    put('identity', `${id?.id || '设备 ID 未提供'} / ${id?.hostname || '主机名待获取'}${data && !live ? ' · 上次身份' : ''}`);
+    put('endpoint', endpoint()); put('path', (routes[preferences.paths[endpoint()]] || routes.unknown) + ' · 本地备注');
+    put('bus', live ? busText(live.service) : '状态未知');
+    put('source', live ? `系统实读 / 舵机${live.service.servo_fake ? 'fixture' : live.service.servo_source === 'hardware' ? '硬件回读' : '未连接'}` : '尚无有效快照');
+    const online = host.querySelector('[data-device-online]');
+    if (online) { online.textContent = snapshot.fresh ? '后端已连接' : snapshot.status === 'stale' ? '连接失效 / 陈旧' : snapshot.status === 'connecting' ? '连接中' : snapshot.available ? '后端不可达' : '静态预览'; online.className = 'badge ' + (snapshot.fresh ? 'readonly' : snapshot.status === 'stale' ? 'stale' : 'draft'); }
+    const statusBanner = host.querySelector('[data-device-banner]');
+    if (statusBanner) { statusBanner.textContent = banner(snapshot); statusBanner.className = 'status-banner ' + (snapshot.available && !snapshot.fresh && snapshot.status !== 'connecting' ? 'offline' : ''); }
+    const panel = host.querySelector('.device-workspace'); if (!panel) return;
+    if (data && !labelsLoaded) {
+      const alias = panel.querySelector('[data-device-alias]');
+      if (alias && !alias.value && root.document?.activeElement !== alias) alias.value = preferences.aliases[identityKey(snapshot)] || '';
+      labelsLoaded = true;
+    }
+    const inject = (key,markup) => { const node=panel.querySelector('[data-device-'+key+']'); if(node)node.innerHTML=markup; };
+    inject('host-info',fields([['设备 ID',id?.id],['身份来源',id?.id_source === 'configured' ? '板端配置' : id?.id_source === 'machine-id-derived' ? '系统 machine-id 派生 · 非认证凭据' : '未提供'],['主机名',id?.hostname],['板卡型号',id?.model],['操作系统',id?.os],['内核 / 架构',id ? `${id.kernel || '—'} / ${id.architecture}` : '—']]));
+    const s = live?.system, used = s?.memory_total_bytes !== null && s?.memory_available_bytes !== null && s ? s.memory_total_bytes - s.memory_available_bytes : null;
+    const metric = (title,v,unit,percent) => `<div class="device-system-metric"><span>${title}</span><strong class="mono">${v}<small>${unit}</small></strong>${typeof percent === 'number' ? `<meter min="0" max="100" value="${percent}" aria-label="${title}"></meter>` : ''}</div>`;
+    inject('system',`<div class="device-system-metrics">${metric('CPU 使用率',value(s?.cpu_percent),'%',s?.cpu_percent)}${metric('内存使用',bytes(used),s?.memory_total_bytes !== null && s ? '/ '+bytes(s.memory_total_bytes) : '',used !== null && s.memory_total_bytes > 0 ? used / s.memory_total_bytes * 100 : null)}${metric('板载最高温度',value(s?.hottest_zone_celsius),'°C')}${metric('系统运行时间',clock(s?.uptime_seconds),'')}</div><p class="device-panel-note">Load 1 min：${value(s?.load_one,2)} · CPU 首次采样和平台未提供的指标显示“—”。${snapshot.fresh ? '系统读数独立于舵机 fixture。' : '当前没有有效系统快照。'}</p>`);
+    put('system-status',snapshot.fresh ? '系统实读' : '缺测'); put('service-status',snapshot.fresh ? '后端可达' : '不可确认');
+    const service=live?.service;
+    inject('services',fields([['浏览器入口',endpoint()],['robotd 服务',service ? `${service.name} / ${service.version}` : null],['舵机来源',service ? busText(service) : null],['串口路径',service?.serial_port],['波特率',service?.baud],['控制权限',service ? service.control_enabled ? '台架控制已开放 · 后端裁定' : '只读 / 控制关闭' : null],['总线所有者',service?.bus_owner],['浏览器接收时间',snapshot.receivedAt ? new Date(snapshot.receivedAt).toLocaleTimeString() + (snapshot.fresh ? '' : ' · 陈旧') : null]]));
+    inject('interfaces',!live || live.interfaces === null ? '<p class="device-empty">网络接口尚未取得，或当前平台未提供。</p>' : `<table><thead><tr><th>接口</th><th>类型</th><th>链路状态</th><th>地址</th></tr></thead><tbody>${live.interfaces.map(n=>`<tr><td class="mono">${escape(n.name)}</td><td>${escape({wifi:'Wi-Fi','usb-network':'USB 网络（接口识别）',network:'网络接口',loopback:'Loopback'}[n.kind])}</td><td>${escape(n.carrier === true ? '链路在线' : n.carrier === false ? '链路离线' : n.state)}<small>${escape(n.state)}</small></td><td class="mono">${n.addresses === null ? '地址未知' : n.addresses.length ? n.addresses.map(escape).join('<br>') : '未分配地址'}</td></tr>`).join('')}</tbody></table>`);
+    inject('bluetooth',`<h4>蓝牙控制器</h4>${!live || live.bluetooth === null ? '<p>状态未提供。</p>' : !live.bluetooth.length ? '<p>系统尚未枚举蓝牙控制器；不据此断言硬件不支持。</p>' : fields(live.bluetooth.map(n=>[n.name,`${n.address || '地址未提供'} · ${n.blocked === null ? '无线开关未知' : n.blocked ? '无线被阻断' : '未被 rfkill 阻断'} · 配对状态未读取`]))}`);
+  }
+  function save() {
+    try { root.localStorage.setItem(storageKey,JSON.stringify(preferences)); return true; } catch (_) { return false; }
+  }
+  function message(text) { const n=host?.querySelector('[data-device-message]'); if(n)n.textContent=text; }
+  function submit(event) {
+    if(event.target.matches('[data-device-label-form]')) {
+      event.preventDefault(); const alias=host.querySelector('[data-device-alias]').value.trim();
+      if(alias)preferences.aliases[identityKey(view)]=alias;else delete preferences.aliases[identityKey(view)];
+      preferences.paths[endpoint()]=host.querySelector('[data-device-path-choice]').value;
+      const persisted=save(); paint(view); message(persisted?'本地备注已保存；设备配置没有改变。':'浏览器禁止持久存储；备注仅保留在本页面会话。');
+
+    }
+  }
+  function click(event) {
+    const button=event.target.closest('button');if(!button || !host?.contains(button))return;
+    if(button.matches('[data-device-refresh]'))root.DeviceSession.refresh();
+  }
+  function mount(options) {
+    unmount(); host=options?.container;page=options?.view||'device';labelsLoaded=false;if(!host)return;
+    host.addEventListener('submit',submit);host.addEventListener('click',click);
+    unsubscribe=root.DeviceSession.subscribe(paint);
+    const alias=host.querySelector('[data-device-alias]');if(alias)alias.value=preferences.aliases[identityKey(view)]||'';
+    const path=host.querySelector('[data-device-path-choice]');if(path)path.value=preferences.paths[endpoint()]||'unknown';
+    root.DeviceSession.start();
+  }
+  function unmount() { unsubscribe?.();unsubscribe=null;host?.removeEventListener('submit',submit);host?.removeEventListener('click',click);host=null; }
+  return Object.freeze({render,headerMarkup,mount,unmount});
+});
+
+</script>
+<script>
+(function (root, factory) {
+  'use strict';
+  const api = factory(root);
+  if (typeof module === 'object' && module.exports) module.exports = api;
   else root.ConsoleWorkspace = api;
 })(typeof window !== 'undefined' ? window : globalThis, function (root) {
   'use strict';
 
-  // Page navigation and a browser sample session. No device transport or commands.
+  // Navigation composes sample workspaces with independent read-only host status.
   const stateNames = { example: '示例数据', offline: '未连接', stale: '数据陈旧', readonly: '只读' };
-  const stateDescriptions = {
-    example: '示例视图 · 所有数值与日志由原型生成，未连接设备。',
-    offline: '未连接设备 · 尚未取得服务信息或实时状态。',
-    stale: '数据陈旧 · 仅保留最后一次样例回读，实机操作不可用。',
-    readonly: '只读样例视图 · 未连接设备，实机操作不可用。'
-  };
   const servoViews = ['joint', 'single', 'parameters'];
   const titles = { joint: '关节联调', single: '单舵机调试', parameters: '参数与标定', charts: '曲线', overview: '总控', device: '设备', sensors: '传感器', logs: '日志' };
   const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -4030,13 +4228,13 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     const servos = servoViews.includes(view);
     return `<nav class="console-navigation" aria-label="调试台导航">
       ${link('#console/overview', '总控 <small>待实现</small>', view === 'overview')}
+      ${link('#console/device', '设备', view === 'device')}
       <div class="console-nav-group ${servos ? 'active-group' : ''}"><a href="#console/servos" class="console-nav-parent" ${servos ? 'aria-current="true"' : ''}>舵机</a><div class="console-nav-children">
         ${link('#console/servos/joint', '关节联调', view === 'joint')}
         ${link('#console/servos/single', '单舵机调试', view === 'single')}
         ${link('#console/servos/parameters', '参数与标定', view === 'parameters')}
       </div></div>
       ${link('#console/charts', '曲线', view === 'charts')}
-      ${link('#console/device', '设备', view === 'device')}
       ${link('#console/sensors', '传感器', view === 'sensors')}
       ${link('#console/logs', '日志', view === 'logs')}
       <hr class="divider">${link('#records', '实验记录', false)}${link('#learn', '教程', false)}
@@ -4047,9 +4245,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   function baseMarkup(options) {
     const { state, jointId } = options;
     const isMaintenance = options.view === 'parameters';
-    const isSensors = options.view === 'sensors';
-    const sensorDescription = state === 'offline' ? 'IMU / ToF 遥测尚未接入；摄像头可手动指定媒体服务，只读查看快照。' : state === 'stale' ? 'IMU / ToF 保留陈旧样例；摄像头独立显示画面来源与接收时间。' : 'IMU / ToF 为浏览器样例，未接入硬件；摄像头独立显示画面来源与接收时间。';
-    const backendAvailable = root.HATCHERY_BACKEND?.readOnly === true;
+    const isDevice = options.view === 'device';
     const model = root.JointDrafts;
     const joint = model.metadata.find(item => item.id === jointId) || model.metadata[0];
     const store = root.JointConsole.store;
@@ -4061,9 +4257,9 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
       const f = store.getFeedback(item.id, state);
       return `<tr class="${item.id === joint.id ? 'selected' : ''}"><td><button class="joint-select" data-joint="${item.id}" aria-pressed="${item.id === joint.id}"><strong>${escape(item.name)}</strong><span>#${root.ServoParameters?.boundId(item.id) ?? item.id} · ${escape(item.raw)}</span></button></td><td class="mono">${f.available ? numberText(f.value) : '—'}</td><td class="mono">${f.available ? numberText(f.temp) : '—'}</td><td class="joint-status">${f.available ? (f.stale ? '陈旧' : '样例') : '缺测'}</td></tr>`;
     }).join('')).join('');
-    return `<div class="console-wrap"><section class="console-heading"><div><span class="eyebrow">DEVICE WORKSPACE</span><h1>调试台</h1><p>先核对设备与反馈，再进行台架操作。</p></div><div>${isMaintenance ? '' : `<label for="state-select" class="small muted">预览状态</label><select id="state-select" class="design-state-select">${Object.keys(stateNames).map(value => `<option value="${value}" ${value === state ? 'selected' : ''}>${stateNames[value]}</option>`).join('')}</select>`}<button class="button secondary" data-connect-open ${isMaintenance ? 'data-connect-default="maintenance"' : ''}>连接说明</button></div></section>
-      ${isMaintenance ? `<div class="devicebar"><div class="device-id"><span class="device-icon" aria-hidden="true">⌁</span><div><strong>Hatchery · 台架维护</strong><p class="mono">设备型号 / 固件身份尚未核对</p></div>${badge(backendAvailable ? '本机服务入口' : '静态预览', 'readonly')}</div><div class="device-stats"><div>连接路径<strong>本机 USB 串口</strong></div><div>总线模式<strong>由后端裁定</strong></div><div>数据来源<strong>${backendAvailable ? '下方后端快照' : '尚未取得快照'}</strong></div></div></div>` : `<div class="devicebar"><div class="device-id"><span class="device-icon" aria-hidden="true">⌁</span><div><strong>${offline ? '等待设备身份' : 'Microduck · 样例设备'}</strong><p class="mono">${offline ? 'device_id — / service —' : 'device_id EXAMPLE-01 / service 0.15.4（源码参考）'}</p></div>${badge(stateNames[state], state)}</div><div class="device-stats"><div>连接路径<strong>${offline ? '—' : 'Wi-Fi（样例）'}</strong></div><div>总线模式<strong>${offline ? '—' : '校准台（样例）'}</strong></div><div>数据来源<strong>浏览器样例 · 非硬件</strong></div></div></div>`}
-      <div class="status-banner ${!isMaintenance && offline ? 'offline' : ''}">${isMaintenance ? '参数与标定读取真实后端状态；联调、曲线与 3D 仍使用浏览器样例。' : isSensors ? sensorDescription : stateDescriptions[state]}</div>
+    return `<div class="console-wrap"><section class="console-heading"><div><span class="eyebrow">DEVICE WORKSPACE</span><h1>调试台</h1><p>先核对设备与反馈，再进行台架操作。</p></div><div>${isMaintenance || isDevice ? '' : `<label for="state-select" class="small muted">预览状态</label><select id="state-select" class="design-state-select">${Object.keys(stateNames).map(value => `<option value="${value}" ${value === state ? 'selected' : ''}>${stateNames[value]}</option>`).join('')}</select>`}<button class="button secondary" data-connect-open ${isMaintenance ? 'data-connect-default="maintenance"' : ''}>连接说明</button></div></section>
+      ${root.DeviceWorkspace.headerMarkup()}
+      <div class="status-banner" data-device-banner>正在核对设备身份与后端状态…</div>
       <div class="console-grid"><aside class="console-sidebar"></aside>
         <section class="panel joint-panel"><div class="panel-title"><h2>单舵机调试</h2><span class="small muted">配置 15 个关节</span></div><div class="joint-list-scroll" tabindex="0" role="region" aria-label="关节列表，可滚动"><table class="joint-table"><thead><tr><th>名称 / ID</th><th>位置 ticks</th><th>温度 °C</th><th>状态</th></tr></thead><tbody>${rows}</tbody></table></div><p class="joint-note">完整列出 15 个关节；ID 读取参数与标定的关联草稿；实机校准仍待核对。</p></section>
         <div class="console-detail"><section class="panel"><div class="detail-title"><div><h2>${escape(joint.name)}</h2><p class="mono">#${root.ServoParameters?.boundId(joint.id) ?? joint.id} / ${escape(joint.raw)}</p></div>${badge(feedback.available ? '样例回读' : '回读待获取', feedback.available ? 'example' : 'draft')}</div><div class="metrics"><div class="metric"><span>样例位置回读</span><strong>${feedback.available ? numberText(feedback.value) : '—'}<small>ticks</small></strong></div><div class="metric"><span>样例目标回读</span><strong>${feedback.available ? numberText(feedback.goal) : '—'}<small>ticks</small></strong></div><div class="metric"><span>舵机电压</span><strong>${feedback.available ? numberText(feedback.volt) : '—'}<small>V</small></strong></div></div><div class="detail-chart"><div class="chart-controls"><span>曲线位于独立页面</span></div></div><div class="command-box"></div></section>
@@ -4073,8 +4269,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
 
   function placeholder(view) {
     const copy = {
-      overview: ['整机总控尚未实现', '整机总览与全局操作仍在审查方案中。当前状态栏仅为样例，没有控制权、健康或真实在线状态。'],
-      device: ['设备信息待接入', '当前没有设备发现或真实身份核对。连接说明中的地址是占位符。'],
+      overview: ['整机总控尚未实现', '整机总览与全局操作仍在审查方案中。设备栏独立显示后端身份与系统状态；整机健康与全局控制仍待实现。'],
       logs: ['设备日志待接入', '正式事件和运行日志尚未接入。单舵机页的示例事件不能作为执行确认或正式记录。']
     }[view];
     return `<section class="panel console-placeholder"><div class="panel-title"><h2>${titles[view]}</h2><span class="badge draft">待实现</span></div><div class="empty-state"><h3>${copy[0]}</h3><p>${copy[1]}</p><a class="button secondary" href="#console/servos/joint">打开关节联调样例</a></div></section>`;
@@ -4087,6 +4282,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     template.innerHTML = markup;
     const wrap = template.content.querySelector('.console-wrap');
     if (view === 'parameters') template.content.querySelector('.console-navigation-tools span').textContent = '参数与标定 · 按实际总线 ID 调试';
+    if (view === 'device') template.content.querySelector('.console-navigation-tools span').textContent = '设备系统与连接状态 · 只读';
     if (view === 'sensors') template.content.querySelector('.console-navigation-tools span').textContent = '只读观察 · IMU / ToF 样例 · 相机独立来源';
     wrap.dataset.consolePage = view;
     wrap.classList.add('wide-console', 'console-layout');
@@ -4126,6 +4322,8 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
         content.innerHTML = `<div class="console-page-intro"><h2>曲线</h2><p>独立选择需要观察的关节与数据；目标调节位于舵机页。</p><a href="#console/servos/joint">返回关节联调</a></div><div id="joint-charts">${root.JointCharts.render(options)}</div>`;
       } else if (view === 'parameters') {
         content.innerHTML = `<div id="servo-parameters">${root.ServoParameters.render(options)}</div>`;
+      } else if (view === 'device') {
+        content.innerHTML = `<div id="device-workspace">${root.DeviceWorkspace.render(options)}</div>`;
       } else if (view === 'sensors') {
         content.innerHTML = `<div id="sensor-workspace">${root.SensorWorkspace.render(options)}</div>`;
       }
@@ -4149,6 +4347,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     root.ServoParameters.unmount();
     root.ServoBackend.unmount();
     root.SensorWorkspace.unmount();
+    root.DeviceWorkspace.unmount();
     context = { ...options };
     root.JointSession.start({ state: context.state, onFrame: onSampleFrame });
     const container = root.document.querySelector('#joint-charts');
@@ -4164,6 +4363,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     if (context.view === 'parameters' && parameters) root.ServoBackend.mount({ container:parameters, onFrame:frame => root.ServoParameters.updateBackend(frame) });
     const sensors = root.document.querySelector('#sensor-workspace');
     if (context.view === 'sensors' && sensors) root.SensorWorkspace.mount({ container:sensors, state:context.state });
+    root.DeviceWorkspace.mount({ container:root.document.querySelector('#main'), view:context.view });
     root.JointConsole.restoreScroll();
   }
 
@@ -4184,11 +4384,12 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     if (workbench) workbench.innerHTML = root.JointConsole.detailControls(options.jointId, options.state);
   }
 
-  function unmountView() { root.JointCharts.unmount(); root.JointViewer.unmount(); root.JointFeedback.unmount(); root.SingleJointChart.unmount(); root.ServoParameters.unmount(); root.ServoBackend.unmount(); root.SensorWorkspace.unmount(); }
+  function unmountView() { root.JointCharts.unmount(); root.JointViewer.unmount(); root.JointFeedback.unmount(); root.SingleJointChart.unmount(); root.ServoParameters.unmount(); root.ServoBackend.unmount(); root.SensorWorkspace.unmount(); root.DeviceWorkspace.unmount(); }
 
   function leave() {
     unmountView();
     root.JointSession.stop();
+    root.DeviceSession.stop();
     context = null;
   }
 

@@ -7,6 +7,67 @@ pub const DISPLAY_IDS: [u8; 15] = [20, 21, 22, 23, 24, 10, 11, 12, 13, 14, 30, 3
 pub const RUNTIME_IDS: [u8; 15] = [20, 21, 22, 23, 24, 30, 31, 32, 33, 34, 10, 11, 12, 13, 14];
 pub const POLICY_IDS: [u8; 14] = [20, 21, 22, 23, 24, 30, 31, 32, 33, 10, 11, 12, 13, 14];
 
+/// Host telemetry is independent of servo fixtures and never grants control.
+pub const DEVICE_VERSION: &str = "hatchery-device/1";
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeviceSnapshot {
+    pub protocol_version: String,
+    pub source: String,
+    pub generated_unix_ms: u64,
+    pub identity: DeviceIdentity,
+    pub system: DeviceSystem,
+    pub interfaces: Option<Vec<DeviceInterface>>,
+    pub bluetooth: Option<Vec<DeviceBluetooth>>,
+    pub service: DeviceService,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeviceIdentity {
+    pub id: Option<String>,
+    pub id_source: String,
+    pub name: Option<String>,
+    pub hostname: Option<String>,
+    pub model: Option<String>,
+    pub os: String,
+    pub kernel: Option<String>,
+    pub architecture: String,
+}
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DeviceSystem {
+    pub cpu_percent: Option<f64>,
+    pub load_one: Option<f64>,
+    pub memory_total_bytes: Option<u64>,
+    pub memory_available_bytes: Option<u64>,
+    pub uptime_seconds: Option<f64>,
+    /// Maximum across readable thermal zones, not CPU temperature alone.
+    pub hottest_zone_celsius: Option<f64>,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeviceInterface {
+    pub name: String,
+    pub kind: String,
+    pub state: String,
+    pub carrier: Option<bool>,
+    pub addresses: Option<Vec<String>>,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeviceBluetooth {
+    pub name: String,
+    pub address: Option<String>,
+    pub blocked: Option<bool>,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeviceService {
+    pub name: String,
+    pub version: String,
+    pub servo_source: Source,
+    pub servo_connection: String,
+    pub servo_fake: bool,
+    pub serial_port: Option<String>,
+    pub baud: Option<u32>,
+    pub control_enabled: bool,
+    pub bus_owner: String,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Request {

@@ -1,5 +1,17 @@
 # 舵机台架维护后端
 
+## 当前设备与系统状态
+
+设备页使用 `GET /api/v1/maintenance/device` → `maintenance.device` → robotd 的只读主机采集，协议为 `hatchery-device/1`。复用现有同源、会话 cookie 和 RPC 认证，接口不接受写入，不扫描舵机或占用串口。只有当前设备，没有多设备入口、发现或切换。
+
+Radxa/Linux 从系统读取主机名、板卡型号、操作系统与内核、CPU 采样差值、内存、运行时间及网络接口；最高温度复用既有 `soc.rs`，代表可读 thermal zones 的最高值，不单独认定为 CPU 温度。地址通过已有 `ip -j address show` 读取；Wi-Fi / USB 类型属于接口识别，不能据此推断浏览器实际经过哪条链路。蓝牙显示系统枚举及可读的 rfkill 状态，不进行配对或配置。缺失工具、未提供字段、首次 CPU 采样和不支持的平台均保留缺测。
+
+系统 `source=host-system` 与 `service.servo_source/servo_fake` 独立。因此 `--fixture` 可显示板子真实系统信息，同时明确舵机为假数据。网页约每 2 秒读取一次；超过 6 秒没有有效回复或请求失败时标为陈旧，保留上次身份并隐藏旧系统数值。协议时间为 Unix 毫秒，浏览器使用自己的单调时钟判断新鲜度。
+
+设备名称默认采用主机名；板端可配置 `HATCHERY_DEVICE_NAME`，可选 `HATCHERY_DEVICE_ID`。未配置 ID 时 Linux 使用 machine-id 派生的展示标识，不返回原始 machine-id，也不作为认证凭据。设备页的显示名称和连接方式备注仅影响当前浏览器。顶部设备栏在所有调试页读取同一会话；静态预览不请求设备接口，不生成虚构的系统数值。
+
+旧版二进制没有此接口，需要同步工作区代码并重新编译、重启维护服务。Radxa fixture 验证方式见 [Radxa 指南](RADXA_RUNTIME.md#无外设的设备状态验证)。本地 Windows 构建和只读 RPC / HTTP 契约已验证；Linux/ARM64 系统采集和实际板端连接仍由 George 验证。
+
 ## 轻量台架工作台（2026-10-11）
 
 “参数与标定”统一承载扫描、选择 ID、舵机调节、参数和软件标定；`servo-device.js/css` 保留独立模块，已归类与未归类舵机都按总线 ID 操作。无需先给 ID 1 绑定关节；15 关节、runtime / policy 索引保持独立。前端维持原生 JS，后端仍为 gateway → RPC → robotd → duck-control，没有新增依赖或第二串口控制器。

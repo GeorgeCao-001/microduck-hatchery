@@ -77,6 +77,29 @@ class Contract(unittest.TestCase):
             self.assertEqual(self.rpc(method)['error']['code'],-32601)
         self.assertEqual(self.rpc('maintenance.state','wrong')['error']['code'],-32001)
 
+    def test_host_status_is_independent_of_servo_fixture(self):
+        device=json.load(self.client.open(self.base+'/api/v1/maintenance/device',timeout=3))
+        self.assertEqual(device['protocol_version'],'hatchery-device/1')
+        self.assertEqual(device['source'],'host-system')
+        self.assertTrue(device['identity']['architecture'])
+        self.assertTrue(device['identity']['os'])
+        self.assertEqual(device['service']['servo_source'],'fixture')
+        self.assertTrue(device['service']['servo_fake'])
+        self.assertFalse(device['service']['control_enabled'])
+        self.assertIsNone(device['service']['serial_port'])
+        if os.name=='nt':
+            self.assertIsNone(device['system']['cpu_percent'])
+            self.assertIsNone(device['interfaces'])
+            self.assertIsNone(device['bluetooth'])
+        self.assertEqual(self.rpc('maintenance.device','wrong')['error']['code'],-32001)
+
+    def test_host_status_is_authenticated_and_read_only(self):
+        url=self.base+'/api/v1/maintenance/device'
+        with self.assertRaises(urllib.error.HTTPError) as error:urllib.request.urlopen(url,timeout=2)
+        self.assertEqual(error.exception.code,401)
+        with self.assertRaises(urllib.error.HTTPError) as error:self.client.open(urllib.request.Request(url,data=b'{}',method='POST'),timeout=2)
+        self.assertEqual(error.exception.code,405)
+
     def test_gateway_requires_session_host_origin_and_get(self):
         url=self.base+'/api/v1/maintenance/state'
         with self.assertRaises(urllib.error.HTTPError) as error:urllib.request.urlopen(url,timeout=2)

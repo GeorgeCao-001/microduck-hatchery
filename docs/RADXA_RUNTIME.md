@@ -2,6 +2,26 @@
 
 本轮目标是 Radxa Zero 3W 的摄像头和舵机代码迁移。保留官方 crate 和主循环；硬件测试由 George 在板上执行。本文件说明交付范围和启动方式，不把编译结果当作实机验收。
 
+## 无外设的设备状态验证
+
+George 已报告在 Radxa 上完成维护入口的 release 编译和 fixture 启动；这是用户提供的结果，不代表摄像头或舵机验收。当前没有外设，可以先核对板子身份和系统状态。新增设备接口需先将本轮代码同步到板子，再在仓库根目录重新启动：
+
+```sh
+# 先用 Ctrl+C 停止旧的维护进程
+export HATCHERY_DEVICE_NAME="George-Radxa"
+python3 scripts/hatchery-maintenance.py --release --fixture
+```
+
+服务仍只监听 loopback。Windows 的另一个终端保持 SSH 转发：
+
+```powershell
+ssh -N -L 8088:127.0.0.1:8088 duck@192.168.8.2
+```
+
+浏览器打开 `http://127.0.0.1:8088/#console/device`；核对主机名、aarch64、系统读数和板端网络接口。顶部应同时显示“后端已连接”与“fixture · 非硬件”。USB-C 当前只提供到板子的网络链路；设备页可备注“SSH 转发”，网页入口 localhost 不代表服务运行在 Windows。Wi-Fi / 蓝牙仅显示可读系统状态，不配置网络或配对。设备状态缺测或旧后端 404 时按页面提示处理，不据此补入样例。
+
+不设置显示名称也可运行，默认使用板端主机名；上述 `export` 仅影响当前 shell 及其启动的进程。未连接外设时保持 `--fixture`，不添加串口、动作或摄像头选项。
+
 ## 来源与范围
 
 | 来源 | 固定提交 | 使用范围 |

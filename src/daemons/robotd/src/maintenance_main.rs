@@ -1,5 +1,7 @@
 //! Desktop maintenance subset; explicitly enabled bounded bench operations.
 mod maintenance;
+mod device;
+mod soc;
 use duck_control::{
     bus::{BusError, MaintenanceBus},
     io::{REFERENCE_PROFILE, decode_reference},
@@ -53,6 +55,10 @@ fn response(
     let result = match request.method.as_str() {
         "maintenance.state" => serde_json::to_value(state.lock().unwrap().clone()).unwrap(),
         "maintenance.ports" => ports(),
+        "maintenance.device" => {
+            let current = state.lock().unwrap().clone();
+            serde_json::to_value(device::snapshot(&current)).unwrap()
+        }
         "maintenance.command" => match request.params {
             Some(command) => maintenance::dispatch(command, state, queue),
             None => {

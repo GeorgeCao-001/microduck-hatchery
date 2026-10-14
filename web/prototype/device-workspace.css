@@ -1,0 +1,25 @@
+.device-workspace{display:flex;flex-direction:column;gap:24px;min-width:0}
+.device-workspace .console-page-intro{margin-bottom:0}
+.device-panel-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:20px 24px;border-bottom:1px solid var(--line)}
+.device-panel-heading h3{font-size:21px}
+.device-monitor-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px}
+.device-fields{margin:0;padding:18px 24px;font-size:14px}
+.device-fields>div{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid var(--line)}
+.device-fields>div:last-child{border-bottom:0}.device-fields dt{color:var(--muted);flex-shrink:0}.device-fields dd{margin:0;text-align:right;overflow-wrap:anywhere;min-width:0}
+.device-summary [data-device-host-info]>.device-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 32px}
+.device-local-labels{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;padding:20px 24px;border-top:1px solid var(--line)}
+.device-local-labels label{display:flex;flex-direction:column;gap:6px;flex:1;min-width:180px;color:var(--muted);font-size:13px}
+.device-local-labels input,.device-local-labels select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);font-size:14px}
+.device-local-labels p{flex-basis:100%;margin:0;font-size:12px;color:var(--muted)}
+.device-system-metrics{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:24px}
+.device-system-metric>span{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+.device-system-metric strong{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;font-size:24px;line-height:1.4;font-weight:500}.device-system-metric small{font:12px var(--mono);color:var(--muted)}
+.device-system-metric meter{display:block;width:100%;height:8px;margin-top:12px;accent-color:var(--moss)}
+.device-system-metric meter::-webkit-meter-bar{border:0;background:var(--line);border-radius:4px}.device-system-metric meter::-webkit-meter-optimum-value{background:var(--moss)}
+.device-panel-note{font-size:13px;color:var(--muted);margin:0;padding:14px 24px 20px;line-height:1.7}
+.device-empty{padding:20px 24px;margin:0;font-size:14px;color:var(--muted)}
+.device-interface-table{overflow-x:auto}.device-interface-table table{width:100%;border-collapse:collapse;font-size:14px;text-align:left}.device-interface-table th{padding:12px 24px;background:#e9ece3;font-size:13px;color:var(--muted);white-space:nowrap}.device-interface-table td{padding:12px 24px;border-bottom:1px solid var(--line);vertical-align:top}.device-interface-table small{display:block;color:var(--muted);font-size:12px}
+.device-bluetooth{padding:20px 24px 0}.device-bluetooth h4{font-size:16px}.device-bluetooth p{font-size:13px;color:var(--muted);margin:8px 0}.device-bluetooth .device-fields{padding:4px 0}
+.device-form-message{font-size:14px;color:var(--moss);margin:0}
+@media(max-width:1000px){.device-monitor-grid{grid-template-columns:minmax(0,1fr)}.device-summary [data-device-host-info]>.device-fields{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){.device-panel-heading,.device-fields,.device-local-labels,.device-system-metrics{padding:16px}.device-local-labels label{flex-basis:100%;min-width:0}.device-panel-note{padding:14px 16px}.device-system-metrics{gap:18px}.device-system-metric strong{font-size:22px}.device-interface-table td,.device-interface-table th{padding:10px 16px}.device-bluetooth{padding:16px 16px 0}.device-fields>div{flex-wrap:wrap;gap:4px 12px}.device-fields dd{text-align:left}}

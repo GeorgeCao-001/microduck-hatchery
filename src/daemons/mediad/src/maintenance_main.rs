@@ -203,6 +203,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let method = match url.as_str() {
                 "/api/v1/maintenance/state" => "maintenance.state",
                 "/api/v1/maintenance/ports" => "maintenance.ports",
+                "/api/v1/maintenance/device" => "maintenance.device",
                 "/api/v1/maintenance/command" if command => "maintenance.command",
                 _ => {
                     send(
