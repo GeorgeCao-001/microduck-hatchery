@@ -1,6 +1,8 @@
 # FT 只读边界来源审核
 
-2026-10-10 按已批准 FD1985 阶段 C 核对已有 FT 实现后复用只读部分，没有迁入完整官方 daemon 或新建 drivers framework。
+2026-10-11 补充：以下为原只读移植的来源记录。当前 bus 另扩展有界 READ 和 FD1985 HLSXX 参考 SRAM 白名单：输出 40、加速度 41、位置 42、速度 46。依据是本地 `tools/FD1985-250729/ft_setup_bat/setup.log`，未将 HLS 地址 44 的目标扭矩当作其他系列的时间字段。命令仅在显式台架模式开放；参考表尚不是实机核实的 HD 固件 profile，新增单颗 ID / 锁位事务：仅在实际身份匹配 FD HLS 3.40–3.59、输出关闭、新 ID 未占用且操作者确认只接一颗时开放地址 5 / 55；不提供通用 EEPROM、模式、偏移或固件写入。包和原参考解码继续复用冻结 FT 边界，依赖未增加，详见 [维护后端](MAINTENANCE_BACKEND.md)。
+
+2026-10-10 的维护适配保留在 bus_maintenance.rs / io_maintenance.rs，默认 bus / io 重导出这些接口。2026-10-11 已另行迁入官方 daemon，并复用 FT 分支和 kissqy 固件的整机只读通信；它与本文维护协议分开，见 [Radxa 指南](RADXA_RUNTIME.md) 和 [导入清单](UPSTREAM_IMPORT.json)。两者不能同时占总线，没有新建 drivers framework。
 
 | 项目 | 固定证据 |
 |---|---|

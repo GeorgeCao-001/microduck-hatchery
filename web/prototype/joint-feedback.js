@@ -51,7 +51,7 @@
       const position = profiles.referencePosition(actual, options);
       const target = profiles.referencePosition(goal, options);
       return {
-        id: joint.id, name: joint.name, raw: joint.raw, group: joint.group,
+        id: joint.id, deviceId:root.ServoParameters?.mappingFor(joint.id)?.deviceId ?? joint.id, name: joint.name, raw: joint.raw, group: joint.group,
         source: fixtureValid ? 'browser-hd-reference-fixture' : 'browser-sample', sampleOnly: true,
         fake: true, simulated: false, hardwareConfirmed: false,
         fixtureId: fixtureValid ? fixture.fixtureId : null,
@@ -87,7 +87,7 @@
 
   function modeLabel() { return referenceMode ? 'HD参考样例 · 未连接' : '只读样例'; }
   function modeNote() {
-    return referenceMode ? '独立 HD counts 样例 · 参考角非实机关节角 · 草稿、曲线与 3D 不变' : '原交互样例 ticks · 与 HD counts 无关 · 校准与使能未知';
+    return 'ID 来自参数与标定关联草稿 · ' + (referenceMode ? '独立 HD counts 样例 · 参考角非实机关节角 · 草稿、曲线与 3D 不变' : '原交互样例 ticks · 与 HD counts 无关 · 校准与使能未知');
   }
 
   function valueTitle(row, key) {
@@ -101,7 +101,7 @@
   function matches(row, selectedFilter, search) {
     const group = groups[selectedFilter];
     const normalized = String(search || '').trim().toLocaleLowerCase();
-    return (!group || row.group === group) && (!normalized || [row.id, row.name, row.raw].join(' ').toLocaleLowerCase().includes(normalized));
+    return (!group || row.group === group) && (!normalized || [row.id, row.deviceId, row.name, row.raw].join(' ').toLocaleLowerCase().includes(normalized));
   }
 
   function csvCell(value) {
@@ -114,13 +114,13 @@
   function toCsv(rows) {
     // Keep the original columns in order for existing readers. Their legacy
     // *_ticks labels carry raw values; raw_unit identifies ticks versus counts.
-    const columns = ['sample', 'source', 'id', 'joint', 'feedback_state', 'actual_ticks', 'goal_readback_ticks', 'error_ticks', 'raw_load', 'voltage_v', 'temperature_c', 'actual_angle_deg', 'zero_ticks', 'physical_min_deg', 'physical_max_deg', 'enabled', 'raw_unit', 'profile_id', 'raw_position', 'raw_goal_readback', 'encoder_reference_deg', 'center_reference_deg', 'goal_encoder_reference_deg', 'goal_center_reference_deg', 'actual_joint_angle_deg', 'goal_joint_angle_deg', 'calibration_status', 'calibration_version', 'angle_reason', 'reference_reason', 'goal_reference_reason', 'fake', 'simulated', 'hardware_confirmed', 'fixture_id', 'resolution_confirmed', 'single_turn'];
-    return columns.join(',') + '\r\n' + rows.map(row => [row.sampleOnly, row.source, row.id, row.raw, row.state, row.actual, row.goal, row.error, row.load, row.volt, row.temp, row.angle, row.zero, row.min, row.max, row.enabled, row.unit, row.profileId, row.rawPos, row.rawGoal, row.encoderAngle, row.centerAngle, row.goalEncoderAngle, row.goalCenterAngle, row.actualAngle, row.goalAngle, row.calibrationStatus, row.calibrationVersion, row.angleReason, row.referenceReason, row.goalReferenceReason, row.fake, row.simulated, row.hardwareConfirmed, row.fixtureId, row.resolutionConfirmed, row.singleTurn].map(csvCell).join(',')).join('\r\n') + '\r\n';
+    const columns = ['sample', 'source', 'id', 'joint', 'feedback_state', 'actual_ticks', 'goal_readback_ticks', 'error_ticks', 'raw_load', 'voltage_v', 'temperature_c', 'actual_angle_deg', 'zero_ticks', 'physical_min_deg', 'physical_max_deg', 'enabled', 'raw_unit', 'profile_id', 'raw_position', 'raw_goal_readback', 'encoder_reference_deg', 'center_reference_deg', 'goal_encoder_reference_deg', 'goal_center_reference_deg', 'actual_joint_angle_deg', 'goal_joint_angle_deg', 'calibration_status', 'calibration_version', 'angle_reason', 'reference_reason', 'goal_reference_reason', 'fake', 'simulated', 'hardware_confirmed', 'fixture_id', 'resolution_confirmed', 'single_turn', 'configured_device_id', 'mapping_source'];
+    return columns.join(',') + '\r\n' + rows.map(row => [row.sampleOnly, row.source, row.id, row.raw, row.state, row.actual, row.goal, row.error, row.load, row.volt, row.temp, row.angle, row.zero, row.min, row.max, row.enabled, row.unit, row.profileId, row.rawPos, row.rawGoal, row.encoderAngle, row.centerAngle, row.goalEncoderAngle, row.goalCenterAngle, row.actualAngle, row.goalAngle, row.calibrationStatus, row.calibrationVersion, row.angleReason, row.referenceReason, row.goalReferenceReason, row.fake, row.simulated, row.hardwareConfirmed, row.fixtureId, row.resolutionConfirmed, row.singleTurn, row.deviceId, 'local-configuration-draft'].map(csvCell).join(',')).join('\r\n') + '\r\n';
   }
 
   function rowMarkup(row, jointId) {
     const label = stateLabels[row.state];
-    return `<tr data-feedback-row="${row.id}" class="${row.id === jointId ? 'selected' : ''}" ${matches(row, filter, query) ? '' : 'hidden'}><th scope="row"><button type="button" data-feedback-select="${row.id}" aria-pressed="${row.id === jointId}" title="${escape(row.raw)}" aria-label="${escape(row.name)}，ID ${row.id}，${escape(row.raw)}"><span class="feedback-id">${row.id}</span><strong>${escape(row.name)}</strong></button></th><td data-feedback-status><span class="feedback-state ${row.state}">${label}</span></td>${fields.map(([key, , , extra]) => `<td data-feedback-value="${key}" title="${escape(valueTitle(row, key))}" ${extra ? `data-feedback-extra ${expanded ? '' : 'hidden'}` : ''}>${numberText(row[key])}</td>`).join('')}</tr>`;
+    return `<tr data-feedback-row="${row.id}" class="${row.id === jointId ? 'selected' : ''}" ${matches(row, filter, query) ? '' : 'hidden'}><th scope="row"><button type="button" data-feedback-select="${row.id}" aria-pressed="${row.id === jointId}" title="${escape(row.raw)}" aria-label="${escape(row.name)}，配置 ID ${row.deviceId}，${escape(row.raw)}"><span class="feedback-id" title="参数与标定关联草稿；关节键 ${row.id}">${row.deviceId}</span><strong>${escape(row.name)}</strong></button></th><td data-feedback-status><span class="feedback-state ${row.state}">${label}</span></td>${fields.map(([key, , , extra]) => `<td data-feedback-value="${key}" title="${escape(valueTitle(row, key))}" ${extra ? `data-feedback-extra ${expanded ? '' : 'hidden'}` : ''}>${numberText(row[key])}</td>`).join('')}</tr>`;
   }
 
   function render(options) {
@@ -137,6 +137,7 @@
       if (!element) return;
       element.hidden = !matches(row, filter, query);
       if (!element.hidden) visible += 1;
+      element.querySelector('.feedback-id').textContent=row.deviceId;
       const selected = row.id === context.jointId;
       element.classList.toggle('selected', selected);
       element.querySelector('[data-feedback-select]').setAttribute('aria-pressed', String(selected));

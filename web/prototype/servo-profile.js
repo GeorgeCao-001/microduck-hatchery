@@ -14,7 +14,7 @@
     registerProfileConfirmed: false, hardwareConfirmed: false
   });
   const defaultIds = Object.freeze([20, 21, 22, 23, 24, 10, 11, 12, 13, 14, 30, 31, 32, 33, 34]);
-  const maxImportBytes = 128 * 1024;
+  const maxImportBytes = 512 * 1024;
   const numericDraftBound = 1000000000;
   const calibrationKeys = Object.freeze(['zeroCounts', 'referenceDeg', 'direction', 'minDeg', 'maxDeg']);
   const fields = Object.freeze([
@@ -148,7 +148,7 @@
 
   function normalizedIds(idsOrMetadata) {
     const input = idsOrMetadata === undefined ? defaultIds : idsOrMetadata;
-    if (!Array.isArray(input) || !input.length || input.length > 253) throw new TypeError('关节 ID 列表必须为非空、有界数组');
+    if (!Array.isArray(input) || !input.length || input.length > 254) throw new TypeError('关节 ID 列表必须为非空、有界数组');
     const ids = input.map(function (entry) {
       const id = plainObject(entry) ? entry.id : entry;
       if (!Number.isInteger(id) || id < 0 || id > 253) throw new RangeError('关节 ID 无效');
@@ -206,16 +206,22 @@
     return '';
   }
 
-  function createDraftStore(idsOrMetadata) {
+  function createDraftStore(idsOrMetadata, options = {}) {
     const ids = normalizedIds(idsOrMetadata);
     const records = new Map();
     let selection = new Set(ids);
-    ids.forEach(function (id) {
+    function ensure(id) {
+      if (!Number.isInteger(id) || id < 0 || id > 253) return false;
+      if (records.has(id)) return true;
+      if (!options.allowNewIds && !ids.includes(id)) return false;
+      if (!ids.includes(id)) ids.push(id);
       records.set(id, {
-        id: id, parameters: blank(parameterKeys), calibration: blank(calibrationKeys),
+        id, parameters: blank(parameterKeys), calibration: blank(calibrationKeys),
         version: 0, sampleOnly: true, hardwareConfirmed: false
       });
-    });
+      return true;
+    }
+    ids.slice().forEach(ensure);
 
     function get(id) { return records.has(id) ? copy(records.get(id)) : null; }
     function list() { return ids.map(get); }
@@ -297,7 +303,7 @@
     function importJSON(text) {
       const rejected = function (reason) { return { valid: false, applied: false, results: [], reason: reason }; };
       if (typeof text !== 'string' || text.length > maxImportBytes || utf8Length(text) > maxImportBytes) {
-        return rejected('导入仅接受不超过 128 KiB 的 JSON 文本');
+        return rejected('导入仅接受不超过 512 KiB 的 JSON 文本');
       }
       let document;
       try { document = JSON.parse(text); }
@@ -310,7 +316,7 @@
           document.sampleOnly !== true || document.hardwareConfirmed !== false) {
         return rejected('草稿版本 / 型号 / profile 或样例声明不匹配；不接受硬件标定声明');
       }
-      if (!Array.isArray(document.joints) || !document.joints.length || document.joints.length > ids.length) {
+      if (!Array.isArray(document.joints) || !document.joints.length || document.joints.length > (options.allowNewIds ? 254 : ids.length)) {
         return rejected('关节草稿列表无效或超出资源界限');
       }
       const seen = new Set();
@@ -319,7 +325,7 @@
       for (const row of document.joints) {
         const rowReason = keysReason(row, ['id', 'parameters', 'calibration', 'version', 'sampleOnly', 'hardwareConfirmed'], true);
         if (rowReason) return rejected(rowReason);
-        if (!records.has(row.id) || seen.has(row.id)) return rejected('导入含未知或重复关节 ID');
+        if ((!records.has(row.id) && (!options.allowNewIds || !Number.isInteger(row.id) || row.id < 0 || row.id > 253)) || seen.has(row.id)) return rejected('导入含未知或重复舵机 ID');
         seen.add(row.id);
         if (row.sampleOnly !== true || row.hardwareConfirmed !== false ||
             !Number.isInteger(row.version) || row.version < 0 || row.version > numericDraftBound) {
@@ -329,15 +335,14 @@
         const calibrationShape = keysReason(row.calibration, calibrationKeys, true);
         const calReason = calibrationShape || calibrationReason(row.calibration, false);
         if (parameterReason || calReason) return rejected(parameterReason || calReason);
-        const parameterResult = preview(row.id, 'parameters', row.parameters);
-        const calibrationResult = preview(row.id, 'calibration', row.calibration);
-        const changes = parameterResult.changes.map(function (change) { return Object.assign({ section: 'parameters' }, change); })
-          .concat(calibrationResult.changes.map(function (change) { return Object.assign({ section: 'calibration' }, change); }));
+        const current = records.get(row.id) || { parameters: blank(parameterKeys), calibration: blank(calibrationKeys) };
+        const changes = ['parameters','calibration'].flatMap(section => Object.keys(row[section]).filter(field => current[section][field] !== row[section][field]).map(field => ({ section, field, before: current[section][field], after: row[section][field] })));
         results.push({ id: row.id, valid: true, changed: changes.length > 0, changes: changes, reason: '' });
         replacements.push({ id: row.id, parameters: copy(row.parameters), calibration: copy(row.calibration), changed: changes.length > 0 });
       }
       // Validation is complete before the first mutation; file revisions are never authoritative.
       replacements.forEach(function (replacement) {
+        ensure(replacement.id);
         const current = records.get(replacement.id);
         if (replacement.changed) {
           current.parameters = replacement.parameters;
@@ -356,7 +361,7 @@
     }
 
     return Object.freeze({
-      get: get, list: list, select: select, selectedIds: selectedIds,
+      ensure: ensure, get: get, list: list, select: select, selectedIds: selectedIds,
       setParameters: function (id, patch) { return set(id, 'parameters', patch); },
       setCalibration: function (id, patch) { return set(id, 'calibration', patch); },
       previewBatch: previewBatch, applyBatch: applyBatch,

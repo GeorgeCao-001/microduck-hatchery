@@ -4,10 +4,10 @@
     ? require('./joint-drafts.js') : root.JointDrafts;
   const session = typeof module === 'object' && module.exports
     ? require('./joint-session.js') : root.JointSession;
-  const api = factory(model, session);
+  const api = factory(root, model, session);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.JointCharts = api;
-})(typeof window !== 'undefined' ? window : globalThis, function (model, session) {
+})(typeof window !== 'undefined' ? window : globalThis, function (root, model, session) {
   'use strict';
 
   // A read-only view of the shared browser sample session. DOM ownership never
@@ -28,6 +28,7 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
     });
   };
+  const deviceId = id => root.ServoParameters?.mappingFor(id)?.deviceId ?? id;
   const colorFor = function (id) { return colors[joints.findIndex(function (joint) { return joint.id === id; })] || colors[0]; };
   const numberText = function (value) { return finite(value) ? Number(value.toFixed(2)).toString() : '—'; };
 
@@ -80,7 +81,7 @@
   function selectionMarkup() {
     return `<details class="chart-selection-tools" ${selectionExpanded ? 'open' : ''}><summary data-chart-selection-summary>${selectionSummary()}</summary><div class="chart-picker-row"><fieldset class="chart-joint-picker"><legend>显示关节 <span>独立于草稿应用范围</span></legend><div class="chart-joint-groups">${['左腿', '右腿', '头颈'].map(function (group) {
       return `<div class="chart-joint-group"><strong>${group === '头颈' ? '头颈与嘴部' : group}</strong>${joints.filter(function (joint) { return joint.group === group; }).map(function (joint) {
-        return `<label><input type="checkbox" data-chart-joint="${joint.id}" ${visibleJointIds.has(joint.id) ? 'checked' : ''}><i style="--joint-chart-color:${colorFor(joint.id)}" aria-hidden="true"></i>${escape(joint.name)} <small>#${joint.id}</small></label>`;
+        return `<label><input type="checkbox" data-chart-joint="${joint.id}" ${visibleJointIds.has(joint.id) ? 'checked' : ''}><i style="--joint-chart-color:${colorFor(joint.id)}" aria-hidden="true"></i>${escape(joint.name)} <small title="参数与标定关联草稿">#${deviceId(joint.id)}</small></label>`;
       }).join('')}</div>`;
     }).join('')}</div><div class="chart-picker-actions"><button type="button" data-chart-all-joints>显示全部</button><button type="button" data-chart-clear-joints>清空显示</button><span data-chart-count>已选 ${visibleJointIds.size} / 15</span></div></fieldset><fieldset class="chart-channel-picker"><legend>显示数据</legend>${Object.keys(channels).map(function (key) {
       const label = { position: '目标回读 / 实测位置', error: '跟踪误差', load: 'raw load', volt: '电压', temp: '温度' }[key];
@@ -132,10 +133,10 @@
         return item.joint.id === joint.id && item.points.some(function (point) { return finite(point.value); });
       });
     });
-    const missingMarkup = missing.length ? `<p class="chart-missing" data-chart-missing="${key}">${missing.map(function (joint) { return escape(joint.name) + ' #' + joint.id; }).join('、')}：无${key === 'load' ? ' raw load' : ''}数据</p>` : '';
+    const missingMarkup = missing.length ? `<p class="chart-missing" data-chart-missing="${key}">${missing.map(function (joint) { return escape(joint.name) + ' #' + deviceId(joint.id); }).join('、')}：无${key === 'load' ? ' raw load' : ''}数据</p>` : '';
     const legend = `<div class="large-chart-legend">${series.map(function (item, index) {
       const suffix = item.key === 'goal' ? '目标回读' : item.key === 'actual' ? '实测' : '';
-      return `<span data-chart-legend-joint="${item.joint.id}"><i class="${item.key === 'goal' ? 'goal' : ''}" style="--joint-chart-color:${colorFor(item.joint.id)}" aria-hidden="true"></i>${escape(item.joint.name)} #${item.joint.id}${suffix ? ' · ' + suffix : ''}<b>${numberText(latestValues[index])}</b></span>`;
+      return `<span data-chart-legend-joint="${item.joint.id}"><i class="${item.key === 'goal' ? 'goal' : ''}" style="--joint-chart-color:${colorFor(item.joint.id)}" aria-hidden="true"></i>${escape(item.joint.name)} #${deviceId(item.joint.id)}${suffix ? ' · ' + suffix : ''}<b>${numberText(latestValues[index])}</b></span>`;
     }).join('')}</div>`;
     if (!extent) return `<section class="large-chart-track chart-${key}" data-chart-track="${key}"><div class="chart-track-heading"><h3>${channel.title}</h3><span>${channel.unit}</span></div><div class="chart-empty chart-empty-track" style="--chart-height:${channel.height}px"><strong>暂无可绘制数据</strong><p>缺测保留为空，不生成替代值。</p></div>${legend}${missingMarkup}</section>`;
     const plotElement = container && container.querySelector('[data-chart-plots]');

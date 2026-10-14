@@ -2,6 +2,8 @@
 
 核对日期：2026-10-05。下列链接均指向固定提交；用于说明本次架构取舍，不替代实机测试或完整 FT runtime 冻结。
 
+2026-10-11 运行源码迁入：官方 0.15.1 固定 `9136aa4ee88e81edf2bcaf3527e90b65da25f1eb`；FT 总线 / RobotIo 参考 fanhao375/microduck `8db8f00c8fc5278d0bdf43f96934531c37ee2780`；HD 原生包 / 有界读取复用 kissqy/Microduck-kissqy 的 Apache-2.0 Rust 固件部分 `94328f5b43c8ac825c90f0e564e7d1b926cd770d`。范围、硬件限制和启动见 [Radxa 指南](RADXA_RUNTIME.md)，逐文件来源和哈希见 [导入清单](UPSTREAM_IMPORT.json)，署名与修改见 [NOTICE-UPSTREAM](../src/NOTICE-UPSTREAM.md)。这不替换已有维护包和官方 docs 的独立冻结记录，也不引入 FT6 / 第三方 console / 训练实现。
+
 ## 官方 Microduck
 
 仓库：[pollen-robotics/microduck](https://github.com/pollen-robotics/microduck/tree/9136aa4ee88e81edf2bcaf3527e90b65da25f1eb)。本次读取 main 元数据时 HEAD 为 `9136aa4ee88e81edf2bcaf3527e90b65da25f1eb`，与交接基线相同。

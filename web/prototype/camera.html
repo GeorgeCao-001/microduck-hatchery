@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Camera · Microduck Hatchery</title><link rel="stylesheet" href="/camera.css"><script defer src="/camera.js"></script></head>
+<body><main>
+  <header><a href="http://localhost:8088/#console/servos/parameters">Microduck Hatchery</a><span>Camera · Radxa Zero 3W</span></header>
+  <section><div class="toolbar"><h1>摄像头预览</h1><label><input id="refresh" type="checkbox" checked> 每秒读取一帧</label><button id="capture">读取当前帧</button></div>
+    <p id="status" role="status">等待板端摄像头反馈。</p>
+    <div class="frame"><img id="frame" alt="板端摄像头最新帧" hidden></div>
+    <p class="note">本页显示 mediad 的只读快照。数据源和画面方向由板端配置决定，请核对实际安装方向；未标定相机不发布内参。</p>
+  </section>
+</main></body></html>

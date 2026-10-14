@@ -4,7 +4,7 @@
 
 协议定义数据如何表达，**正式执行资格和真实状态由 `src/` 的 robotd / duck-control 裁定**。当前已建立最小只读维护子集，完整整机资格与写入仍未实现；前端不能通过修改共享文件、UI 排序或缓存使设备接受未验证目标。
 
-按 [架构 v2](../docs/microduck-hatchery-architecture-v2.md) 保留 [duck-ipc-proto/](duck-ipc-proto/README.md) 和 [duck-ble/](duck-ble/README.md)。前者已有独立 `hatchery-maintenance/1` Rust 只读契约，后者仍为说明位置；完整官方协议未迁入。下列 JSON 是旧样例工具的辅助文件，不是维护 RPC 的消息格式。接口与边界见 [维护后端](../docs/MAINTENANCE_BACKEND.md)。
+按 [架构 v2](../docs/microduck-hatchery-architecture-v2.md) 保留 [duck-ipc-proto/](duck-ipc-proto/README.md) 和 [duck-ble/](duck-ble/README.md)。前者已迁入官方 IPC，并在 maintenance 子模块保留独立 hatchery-maintenance/1；后者仍为说明位置。下列 JSON 是旧样例工具文件，不是官方 robot.* 或维护 RPC 的格式。接口与边界见 [维护后端](../docs/MAINTENANCE_BACKEND.md) 和 [Radxa 指南](../docs/RADXA_RUNTIME.md)。
 
 ## 当前文件
 

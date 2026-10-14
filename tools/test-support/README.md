@@ -1,7 +1,7 @@
 # test-support
 
-共享测试辅助代码的预留位置。未来随完整来源 crate 导入，不降低测试断言来适应目录变化。
+已迁入官方共享测试辅助 crate，作为 robotd 的 dev-dependency；保留断言与 examples，不部署到机器人。来源见 [导入清单](../../docs/UPSTREAM_IMPORT.json)，本轮未执行测试。
 
-当前未导入官方 test-support crate，无 Cargo manifest 或 binary。[maintenance_contract.py](maintenance_contract.py) 使用 Python 标准库启动实际 Rust binary，以明确 fixture 检查只读 RPC、gateway 会话 / 路径、15 关节映射及启动失败；不访问真实串口，不表示已有硬件验收。先构建 robotd / mediad，再在根目录执行 `python tools/test-support/maintenance_contract.py`。
+[maintenance_contract.py](maintenance_contract.py) 使用标准库启动实际维护 binary，以明确 fixture 检查只读 RPC、会话 / 路径、15 关节和启动失败；不访问实机。已同步到 robotd-maintenance / mediad-maintenance 名称，本轮未执行；后续由操作者先构建维护入口，再按需要运行。官方 OTA-dependent 集成测试不在本次 workspace 范围。
 
 Rust workspace 位于 `src/`，测试默认读取 `src/target/debug/`，自定义 `CARGO_TARGET_DIR` 的相对路径按 `src/` 解析；未分配 ID 的 fixture 另验证它不会替代关节或策略索引。

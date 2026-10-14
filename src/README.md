@@ -4,7 +4,7 @@
 
 ```text
 src/
-├─ Cargo.toml    4 成员维护 workspace；协议成员位于 ../protocol/
+├─ Cargo.toml    12 成员 workspace；IPC / 测试辅助位于顶层对应模块
 ├─ Cargo.lock    解析依赖锁定
 ├─ rust-toolchain.toml
 ├─ daemons/      robotd、updater、configd、btd、padd、mediad、tof
@@ -12,9 +12,9 @@ src/
                 sounds、pet-detect、duck-detect、pad-imu、uyvy
 ```
 
-[daemon 说明](daemons/README.md)与 [library 说明](libraries/README.md)列出各模块职责。Radxa Zero 3W 是整机主要运行平台；电脑台架维护只复用必要控制边界。当前 robotd、mediad、duck-control 与根协议库已有可构建的 Rust 只读子集，其他位置仍仅说明；完整官方源码未迁入，没有设备部署或实机验收。运行范围见 [维护后端](../docs/MAINTENANCE_BACKEND.md)。Python [样例工具](../tools/hatchery-shell/README.md)继续独立，不占串口。
+[daemon 说明](daemons/README.md)与 [library 说明](libraries/README.md)列出各模块职责。已按完整 crate 迁入官方 robotd / mediad、duck-control、robotd-params、kinematics、odometry、sounds、uyvy、pet-detect、duck-detect、共享 IPC 与 test-support。Radxa Zero 3W 是主要运行平台，FT 本轮只读，设备路径显式配置；其他 daemon 和 pad-imu 尚未迁入。构建 / 配置见 [Radxa 指南](../docs/RADXA_RUNTIME.md)，来源及修改见 [导入清单](../docs/UPSTREAM_IMPORT.json)。上板和动作尚未验收。
 
-Rust 命令在 `src/` 中执行，例如 `cargo test --workspace --locked`；根目录启动器 `python scripts/hatchery-maintenance.py --build-only` 会自动选择该 workspace。默认构建输出为 `src/target/`；环境变量 `CARGO_TARGET_DIR` 可覆盖，相对路径按 `src/` 解析。
+轻量电脑入口使用 `python scripts/hatchery-maintenance.py --build-only`，只构建 `robotd-maintenance` / `mediad-maintenance`；不要求 GStreamer、IMU 或策略库。Linux 板端用 `sh scripts/build-radxa.sh` 显式启用 `board-runtime`，同时构建四个入口。默认输出 `src/target/`；环境变量 `CARGO_TARGET_DIR` 可覆盖，相对路径按 `src/` 解析。Python [样例工具](../tools/hatchery-shell/README.md)继续独立，不占串口。
 
 ## 权威控制链
 

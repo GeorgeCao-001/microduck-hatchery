@@ -1,6 +1,6 @@
 # 设备库
 
-按 [v2 架构](../../docs/microduck-hatchery-architecture-v2.md) 分类，库被 daemon 调用，不另设运行进程；未来完整源码内部结构尽量保持。duck-control 当前已有 FT 只读 bus / io，其他库只有说明文件；完整整机实现与硬件验收尚未完成。
+按 [v2 架构](../../docs/microduck-hatchery-architecture-v2.md) 分类，库被 daemon 调用，不另设运行进程。本轮已迁入下表中除 pad-imu 外的官方 crate，保留内部结构和原许可；FT 适配留在 duck-control 的 bus / io 边界。源码到位不表示板端硬件验收完成，来源见 [导入清单](../../docs/UPSTREAM_IMPORT.json)。
 
 | 模块 | 预期职责 |
 |---|---|

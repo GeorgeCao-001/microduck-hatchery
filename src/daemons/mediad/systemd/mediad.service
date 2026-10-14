@@ -1,0 +1,26 @@
+# Hatchery: adapted startup, explicit hardware configuration and non-root ownership.
+[Unit]
+Description=Microduck Hatchery camera and media gateway
+After=local-fs.target network.target
+
+[Service]
+Type=simple
+User=robot
+Group=robot
+SupplementaryGroups=video
+RuntimeDirectory=robot
+RuntimeDirectoryMode=0750
+RuntimeDirectoryPreserve=yes
+EnvironmentFile=/etc/robot/hatchery.env
+WorkingDirectory=/opt/microduck-hatchery
+ExecStart=/usr/bin/python3 /opt/microduck-hatchery/scripts/run-radxa.py media
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/run/robot
+UMask=0007
+
+[Install]
+WantedBy=multi-user.target

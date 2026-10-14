@@ -1,0 +1,31 @@
+# Camera/servo bring-up. Device paths are supplied by hatchery.env / --port.
+[bus]
+protocol = "feetech-hd1910"
+port = ""
+read_only = true
+fast_sync_read = false
+# feetech_calibration = "/etc/robot/feetech-calibration.json"
+
+[control]
+hz = 50
+publish_velocity_and_load = false
+
+[policy]
+enabled = false
+
+[audio]
+enabled = false
+greet = false
+
+[safety]
+battery_empty_shutdown = false
+limp_fall = false
+
+[media]
+source = "camera"
+quality = "720p15"
+congestion_control = "disabled"
+# Write [media.intrinsics] only after calibrating this Camera8M219.
+
+[duck_detector]
+enabled = false

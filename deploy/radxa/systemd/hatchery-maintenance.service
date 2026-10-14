@@ -1,0 +1,23 @@
+[Unit]
+Description=Microduck Hatchery servo maintenance and Web
+Conflicts=robotd.service
+After=local-fs.target network.target
+
+[Service]
+Type=simple
+User=robot
+Group=robot
+SupplementaryGroups=dialout
+EnvironmentFile=/etc/robot/hatchery.env
+WorkingDirectory=/opt/microduck-hatchery
+ExecStart=/usr/bin/python3 /opt/microduck-hatchery/scripts/run-radxa.py maintenance
+Restart=on-failure
+RestartSec=3
+KillMode=control-group
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,27 @@
+# Hatchery: adapted startup, explicit hardware configuration and non-root ownership.
+[Unit]
+Description=Microduck Hatchery robot control daemon
+Conflicts=hatchery-maintenance.service
+After=local-fs.target
+
+[Service]
+Type=simple
+User=robot
+Group=robot
+SupplementaryGroups=dialout
+RuntimeDirectory=robot
+RuntimeDirectoryMode=0750
+RuntimeDirectoryPreserve=yes
+EnvironmentFile=/etc/robot/hatchery.env
+WorkingDirectory=/opt/microduck-hatchery
+ExecStart=/usr/bin/python3 /opt/microduck-hatchery/scripts/run-radxa.py robot
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/run/robot
+UMask=0007
+
+[Install]
+WantedBy=multi-user.target

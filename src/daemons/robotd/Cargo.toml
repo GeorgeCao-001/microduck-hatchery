@@ -1,12 +1,76 @@
+# Hatchery: paths relocated; desktop maintenance entrypoints retained.
 [package]
 name = "robotd"
 version.workspace = true
 edition.workspace = true
-rust-version.workspace = true
-publish.workspace = true
+license.workspace = true
+description = "Robot control daemon — skeleton"
 
 [dependencies]
-duck-ipc-proto.workspace = true
-duck-control.workspace = true
-serde_json.workspace = true
 serialport.workspace = true
+duck-ipc-proto = { path = "../../../protocol/duck-ipc-proto" }
+duck-control = { path = "../../libraries/duck-control" }
+robotd-params = { path = "../../libraries/robotd-params", optional = true }
+kinematics = { path = "../../libraries/kinematics", optional = true }
+odometry = { path = "../../libraries/odometry", optional = true }
+pet-detect = { path = "../../libraries/pet-detect", optional = true }
+# The voice, for the live synth the theremin plays through. The bank's wavs cover every
+# sound whose whole shape is known in advance; a theremin's pitch is a hand's distance and
+# is not, so `robotd` renders that one itself. Pure Rust, no vendored anything.
+sounds = { path = "../../libraries/sounds", optional = true }
+clap = { workspace = true, features = ["derive"], optional = true }
+serde = { workspace = true, optional = true }
+serde_json.workspace = true
+tokio = { workspace = true, features = [
+    "rt-multi-thread",
+    "macros",
+    "net",
+    "time",
+    "io-util",
+    "signal",
+    "sync",
+], optional = true }
+tracing = { workspace = true, optional = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"], optional = true }
+libc = { version = "0.2", optional = true }
+thiserror = { workspace = true, optional = true }
+toml = { version = "0.9", optional = true }
+# Lock-free single-value slots for the intent hand-off: the control loop does one
+# atomic load per tick and can never be held up by an IPC task writing the other side.
+arc-swap = { version = "1", optional = true }
+
+# Test-only. `tests/updater_gate.rs` drives the real update engine against this binary,
+# which is why `updater` appears here: the test asserts that robotd upholds the contract
+# the engine depends on. A dev-dependency, so none of it reaches the shipped binary, and
+# the direction is one-way — `updater` does not depend on `robotd`.
+#
+# The test lives in *this* package rather than in `updater/tests/` for one concrete
+# reason: only here does cargo define `CARGO_BIN_EXE_robotd` and guarantee the binary is
+# built and up to date. In `updater/tests/` the path had to be guessed from the test
+# binary's location, and `cargo test --test <name>` does not rebuild sibling binaries —
+# so the test silently ran a stale robotd. That produced a confidently wrong result once
+# already.
+[dev-dependencies]
+test-support = { path = "../../../tools/test-support" }
+# `start_paused` for the startup-retry tests: the retry interval is a second of real time,
+# which is right on a robot and far too slow in a test. Dev-only — `cargo build` does not
+# pull dev-dependencies, so the shipped binary has no test-util in it.
+tokio = { workspace = true, features = ["test-util"] }
+minisign = "0.9.1"
+semver.workspace = true
+sha2 = "0.11.0"
+tar = "0.4.46"
+tempfile = "3.27.0"
+zstd = "0.13"
+
+[features]
+board-runtime = ["duck-control/runtime", "dep:robotd-params", "dep:kinematics", "dep:odometry", "dep:pet-detect", "dep:sounds", "dep:clap", "dep:serde", "dep:tokio", "dep:tracing", "dep:tracing-subscriber", "dep:libc", "dep:thiserror", "dep:toml", "dep:arc-swap"]
+
+[[bin]]
+name = "robotd"
+path = "src/main.rs"
+required-features = ["board-runtime"]
+
+[[bin]]
+name = "robotd-maintenance"
+path = "src/maintenance_main.rs"

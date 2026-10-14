@@ -22,8 +22,7 @@ test('maintenance snapshots keep 15 mappings, raw values and source without alte
   result.joints[0].raw_bytes[0]=123;
   assert.equal(input.joints[0].raw_bytes[0],0);
   assert.deepEqual(store.snapshot(),before);
-  assert.match(backend.render(),/Radxa Zero 3W/);
-  assert.match(backend.render(),/当前为静态预览/);
+  assert.equal(backend.render,undefined); // Transport attaches to the parameter editor; no separate panel.
 });
 
 test('invalid sources, control claims, identity mappings and raw frames fail before display', () => {
@@ -75,4 +74,16 @@ test('leaving maintenance aborts pending reads and cannot mount late state or ow
     backend.unmount();globalThis.fetch=old.fetch;
     if(old.config===undefined)delete globalThis.HATCHERY_BACKEND;else globalThis.HATCHERY_BACKEND=old.config;
   }
+});
+
+// Full bus discovery does not alter the fixed logical joint / policy arrays.
+test('all unicast IDs fit the snapshot and malformed scan progress is rejected', () => {
+  const input=fixture();
+  const logical = new Set(input.joints.map(row => row.id));
+  input.unassigned_devices=Array.from({length:254},(_,id)=>id).filter(id=>!logical.has(id)).map(id=>({ ...input.joints[0], id }));
+  input.unassigned_devices.forEach(row=>{delete row.runtime_index;delete row.policy_index;});
+  input.scan={active:false,start_id:0,end_id:253,completed:254,found_ids:Array.from({length:254},(_,id)=>id),status:'complete'};
+  assert.equal(backend.validate(input).unassigned_devices.length,239);
+  input.scan.found_ids[0]=254;
+  assert.equal(backend.validate(input),null);
 });

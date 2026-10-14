@@ -1,0 +1,2 @@
+# Keep board shell entrypoints executable with sh after a Windows checkout.
+*.sh text eol=lf

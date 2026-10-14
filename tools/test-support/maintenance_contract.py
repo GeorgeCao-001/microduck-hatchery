@@ -30,8 +30,8 @@ class Contract(unittest.TestCase):
         if not target.is_absolute():target=WORKSPACE/target
         cls.env=env
         cls.commands=[
-            [str(target/'debug'/('robotd'+suffix)),'--rpc',f'127.0.0.1:{cls.rpc_port}','--fixture'],
-            [str(target/'debug'/('mediad'+suffix)),'--http',f'127.0.0.1:{cls.http_port}','--rpc',f'127.0.0.1:{cls.rpc_port}','--web-root',str(ROOT/'web/prototype')],
+            [str(target/'debug'/('robotd-maintenance'+suffix)),'--rpc',f'127.0.0.1:{cls.rpc_port}','--fixture'],
+            [str(target/'debug'/('mediad-maintenance'+suffix)),'--http',f'127.0.0.1:{cls.http_port}','--rpc',f'127.0.0.1:{cls.rpc_port}','--web-root',str(ROOT/'web/prototype')],
         ]
         cls.processes=[]
         cls.addClassCleanup(cls.stop)

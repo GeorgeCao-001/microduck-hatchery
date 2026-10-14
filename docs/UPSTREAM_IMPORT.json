@@ -1,0 +1,893 @@
+{
+  "repository": "https://github.com/pollen-robotics/microduck",
+  "commit": "9136aa4ee88e81edf2bcaf3527e90b65da25f1eb",
+  "license": "Apache-2.0",
+  "files": [
+    {
+      "upstream_path": "robotd/Cargo.toml",
+      "path": "src/daemons/robotd/Cargo.toml",
+      "upstream_sha256": "e6313a936b549c7bd9214e59f5e96236c484080c84913a8be96c9db77f1ac1d7",
+      "installed_sha256": "cd403e6c31230fb878dd29d5ef0343a39c2fc70c2ebe0b8b67e4a37692204da0",
+      "modified": true
+    },
+    {
+      "upstream_path": "robotd/src/chorale.rs",
+      "path": "src/daemons/robotd/src/chorale.rs",
+      "upstream_sha256": "f4b67edd128fc3d679c76261c3fb342fbd687e65c82991ca802869ada1f40110",
+      "installed_sha256": "f4b67edd128fc3d679c76261c3fb342fbd687e65c82991ca802869ada1f40110",
+      "modified": false
+    },
+    {
+      "upstream_path": "robotd/src/control.rs",
+      "path": "src/daemons/robotd/src/control.rs",
+      "upstream_sha256": "29770985a52c7383f07e1a60c9318fb46ddcd7a695b9192d52c73df5270eb9b4",
+      "installed_sha256": "29770985a52c7383f07e1a60c9318fb46ddcd7a695b9192d52c73df5270eb9b4",
+      "modified": false
+    },
+    {
+      "upstream_path": "robotd/src/intents.rs",
+      "path": "src/daemons/robotd/src/intents.rs",
+      "upstream_sha256": "1deeaa99378ab562aa9938f0f2c8d3073205668fea76033070ced66a2b50dce1",
+      "installed_sha256": "1deeaa99378ab562aa9938f0f2c8d3073205668fea76033070ced66a2b50dce1",
+      "modified": false
+    },
+    {
+      "upstream_path": "robotd/src/main.rs",
+      "path": "src/daemons/robotd/src/main.rs",
+      "upstream_sha256": "29efc8753dbe739607420d5926407d92f920eca369423a36b74009b1afa7faf2",
+      "installed_sha256": "9440b14f158ac5178eb7aba9ea33eb3f2161cd73de9dda5c2966c9cbc6d4cf8a",
+      "modified": true
+    },
+    {
+      "upstream_path": "robotd/src/params.rs",
+      "path": "src/daemons/robotd/src/params.rs",
+      "upstream_sha256": "386305e3ce00a409f6527d2be2048a927c2b448423ed1bb9fc63f29af0ff3064",
+      "installed_sha256": "386305e3ce00a409f6527d2be2048a927c2b448423ed1bb9fc63f29af0ff3064",
+      "modified": false
+    },
+    {
+      "upstream_path": "robotd/src/soc.rs",
+      "path": "src/daemons/robotd/src/soc.rs",
+      "upstream_sha256": "67b8ac4cc1ca97815b461e746473edca2742e63cc35a4f3569abf7b303ac3eb9",
+      "installed_sha256": "67b8ac4cc1ca97815b461e746473edca2742e63cc35a4f3569abf7b303ac3eb9",
+      "modified": false
+    },
+    {
+      "upstream_path": "robotd/src/sound.rs",
+      "path": "src/daemons/robotd/src/sound.rs",
+      "upstream_sha256": "9682c35f6242d86ae0c3a2e9182d2a9a85159bbb0ab6ecff6fe31d049f404c55",
+      "installed_sha256": "9682c35f6242d86ae0c3a2e9182d2a9a85159bbb0ab6ecff6fe31d049f404c55",
+      "modified": false
+    },
+    {
+      "upstream_path": "robotd/src/theremin.rs",
+      "path": "src/daemons/robotd/src/theremin.rs",
+      "upstream_sha256": "498335f69f7ba185fac85bdbc2ad692db7c89d1b729b3a86e06c0254d7f24749",
+      "installed_sha256": "498335f69f7ba185fac85bdbc2ad692db7c89d1b729b3a86e06c0254d7f24749",
+      "modified": false
+    },
+    {
+      "upstream_path": "robotd/systemd/robotd.service",
+      "path": "src/daemons/robotd/systemd/robotd.service",
+      "upstream_sha256": "6a27fe4da782adf0ba677d7605aa79b440500beffde8cbf76ee80d4f3eb0b737",
+      "installed_sha256": "758e19d1b2e3a9dade07b777db0ea7f2d31b6e39a329824d90aaf39ab8e1cd79",
+      "modified": true
+    },
+    {
+      "upstream_path": "mediad/Cargo.toml",
+      "path": "src/daemons/mediad/Cargo.toml",
+      "upstream_sha256": "7be9a57db909d7f75994cc07040d4568e78d36f612bc29670243772e441cc2f6",
+      "installed_sha256": "1587c7613d4842ea9b4647100aaba7b6a3ad5888a2f6b6b8babe98b98d69af92",
+      "modified": true
+    },
+    {
+      "upstream_path": "mediad/src/camera.rs",
+      "path": "src/daemons/mediad/src/camera.rs",
+      "upstream_sha256": "78d24a110db590829844f9aaacdef6c9a8437b84681815bb5945872ce6a90770",
+      "installed_sha256": "f7e08204eba52e342c78626677552577f74ba755451c93866124e59c20f20375",
+      "modified": true
+    },
+    {
+      "upstream_path": "mediad/src/config.rs",
+      "path": "src/daemons/mediad/src/config.rs",
+      "upstream_sha256": "55ff269385152d1778d7c4768f22ec0e7ef27e7021c909a68cf41bbbf594f335",
+      "installed_sha256": "55ff269385152d1778d7c4768f22ec0e7ef27e7021c909a68cf41bbbf594f335",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/src/detect.rs",
+      "path": "src/daemons/mediad/src/detect.rs",
+      "upstream_sha256": "26ed13c649c50045bc93a4a73fe9382b9d79721966c79107f9f2768dec64f492",
+      "installed_sha256": "26ed13c649c50045bc93a4a73fe9382b9d79721966c79107f9f2768dec64f492",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/src/exposure.rs",
+      "path": "src/daemons/mediad/src/exposure.rs",
+      "upstream_sha256": "aa781b7765b127e88469ca1f1677b7a489e3eee7be7e1904405a66228a87b39f",
+      "installed_sha256": "aa781b7765b127e88469ca1f1677b7a489e3eee7be7e1904405a66228a87b39f",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/src/frame.rs",
+      "path": "src/daemons/mediad/src/frame.rs",
+      "upstream_sha256": "b2440af0a98ba8f95c457410b99c935cb672ab0941def49bbcefcdc6043d9647",
+      "installed_sha256": "b2440af0a98ba8f95c457410b99c935cb672ab0941def49bbcefcdc6043d9647",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/src/lib.rs",
+      "path": "src/daemons/mediad/src/lib.rs",
+      "upstream_sha256": "2824e055df0a79a03b2e2d533ca584c53bfd69cb40ce90415a868569c00993a9",
+      "installed_sha256": "f40474d2a526ed95febdd1402b637ec0a5603852fe2a8b2117acaed797df320a",
+      "modified": true
+    },
+    {
+      "upstream_path": "mediad/src/main.rs",
+      "path": "src/daemons/mediad/src/main.rs",
+      "upstream_sha256": "0ff94d227a26b90d982d5d34c3f367ba33e4f713c271f552c2c761d1431d4311",
+      "installed_sha256": "39e6f745ba1b53c2025abd6c0f6884f1b1e24cb6666f41c825bf184db870c8f5",
+      "modified": true
+    },
+    {
+      "upstream_path": "mediad/src/pipeline.rs",
+      "path": "src/daemons/mediad/src/pipeline.rs",
+      "upstream_sha256": "6711c25562467f86d476ab70518a0dc1879e3d17b75cc4076dde40da9865a61c",
+      "installed_sha256": "936103bd148e014666204899e6b93222462be45d56f871c7c4cd14b748da3248",
+      "modified": true
+    },
+    {
+      "upstream_path": "mediad/src/producer.rs",
+      "path": "src/daemons/mediad/src/producer.rs",
+      "upstream_sha256": "3b0abf6f0e6ee696816aba6abe932ef410d73ce6079dd4ec7581644f1dc3cc34",
+      "installed_sha256": "3b0abf6f0e6ee696816aba6abe932ef410d73ce6079dd4ec7581644f1dc3cc34",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/src/relay.rs",
+      "path": "src/daemons/mediad/src/relay.rs",
+      "upstream_sha256": "12593fd4868de5561d28b49f4ee81e14d284ba74e25e2d7c88b1cd1e3c99e795",
+      "installed_sha256": "12593fd4868de5561d28b49f4ee81e14d284ba74e25e2d7c88b1cd1e3c99e795",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/src/route.rs",
+      "path": "src/daemons/mediad/src/route.rs",
+      "upstream_sha256": "2d9622de14ec2bf2ff8d1e8c22acb5b9faabc898033963b528eb9e009dba417d",
+      "installed_sha256": "2d9622de14ec2bf2ff8d1e8c22acb5b9faabc898033963b528eb9e009dba417d",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/src/session.rs",
+      "path": "src/daemons/mediad/src/session.rs",
+      "upstream_sha256": "63d58893e7b65754f30c6fb8a35c4cf3bdb0cb9303b075ca309337c65f73d2d2",
+      "installed_sha256": "63d58893e7b65754f30c6fb8a35c4cf3bdb0cb9303b075ca309337c65f73d2d2",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/src/snapshot.rs",
+      "path": "src/daemons/mediad/src/snapshot.rs",
+      "upstream_sha256": "cd370704aa7f9c8808f491c0f5baeaf464be674e94541ccb8fe53c691c7803c5",
+      "installed_sha256": "cd370704aa7f9c8808f491c0f5baeaf464be674e94541ccb8fe53c691c7803c5",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/src/stream.rs",
+      "path": "src/daemons/mediad/src/stream.rs",
+      "upstream_sha256": "3fb1b1fdf3beef5779628bf91c4813c5623ae2d349bccdb4b11619c4ba2cb60d",
+      "installed_sha256": "3fb1b1fdf3beef5779628bf91c4813c5623ae2d349bccdb4b11619c4ba2cb60d",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/src/turn.rs",
+      "path": "src/daemons/mediad/src/turn.rs",
+      "upstream_sha256": "540e6fd2ec2222e7902371c221bd6908b953f72a14e7179d416465c5fd27f6af",
+      "installed_sha256": "540e6fd2ec2222e7902371c221bd6908b953f72a14e7179d416465c5fd27f6af",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/src/upstream.rs",
+      "path": "src/daemons/mediad/src/upstream.rs",
+      "upstream_sha256": "e0ddf639f880956d1beb770db00d202c82b3b827aa62c899fedbebea6d09e574",
+      "installed_sha256": "e0ddf639f880956d1beb770db00d202c82b3b827aa62c899fedbebea6d09e574",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/src/web.rs",
+      "path": "src/daemons/mediad/src/web.rs",
+      "upstream_sha256": "a0a73401811665a75e3a1afa2b9c77e111b9590924553d46211ba4bc1604aead",
+      "installed_sha256": "579f90d7d593079fb256fbbee9c9eda073b55b5698a0ac84cdd35be75f4225ce",
+      "modified": true
+    },
+    {
+      "upstream_path": "mediad/systemd/mediad.service",
+      "path": "src/daemons/mediad/systemd/mediad.service",
+      "upstream_sha256": "a0509a087e17500706d310189df22f67d8195706a3a79e2c91b6b138f166f4f8",
+      "installed_sha256": "acacff336de2b4b7dc97c6f3702b206293042797195e48ce07a369c078c26282",
+      "modified": true
+    },
+    {
+      "upstream_path": "mediad/systemd/sysusers.d/mediad.conf",
+      "path": "src/daemons/mediad/systemd/sysusers.d/mediad.conf",
+      "upstream_sha256": "8392279e34c3ecabfaa1952aedd6ef099fb0c8032915f3b4f358624b3a0a1d27",
+      "installed_sha256": "8392279e34c3ecabfaa1952aedd6ef099fb0c8032915f3b4f358624b3a0a1d27",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/webclient/index.html",
+      "path": "src/daemons/mediad/webclient/index.html",
+      "upstream_sha256": "c755892f78676100c72d2fcb9ea89791ea454fa640bfc85d355910d592388923",
+      "installed_sha256": "c755892f78676100c72d2fcb9ea89791ea454fa640bfc85d355910d592388923",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/webclient/space/Dockerfile",
+      "path": "src/daemons/mediad/webclient/space/Dockerfile",
+      "upstream_sha256": "fbe3927cc38d29e0dcda048c3ab7f966a74789aea5a88d7afd5495db3cb6e488",
+      "installed_sha256": "fbe3927cc38d29e0dcda048c3ab7f966a74789aea5a88d7afd5495db3cb6e488",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/webclient/space/entrypoint.sh",
+      "path": "src/daemons/mediad/webclient/space/entrypoint.sh",
+      "upstream_sha256": "21c0755a56cd54d6ccb04ac008ff86a5180edab8aea89b29b6047820959f26e7",
+      "installed_sha256": "21c0755a56cd54d6ccb04ac008ff86a5180edab8aea89b29b6047820959f26e7",
+      "modified": false
+    },
+    {
+      "upstream_path": "mediad/webclient/space/README.md",
+      "path": "src/daemons/mediad/webclient/space/README.md",
+      "upstream_sha256": "b1453ef136333ca82deac7e6ee3155d9f4bf5a3d9e32a912ed171f2bac29f77a",
+      "installed_sha256": "b1453ef136333ca82deac7e6ee3155d9f4bf5a3d9e32a912ed171f2bac29f77a",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-ipc-proto/Cargo.toml",
+      "path": "protocol/duck-ipc-proto/Cargo.toml",
+      "upstream_sha256": "c34af99463e6349590b27fb6e99f26cb9f0233020eb0e0e35a1d4ef7b39d938e",
+      "installed_sha256": "05b60004392a742db2d852aa363318fba7a525aa71cd8127a580b791ebad6419",
+      "modified": true
+    },
+    {
+      "upstream_path": "duck-ipc-proto/src/lib.rs",
+      "path": "protocol/duck-ipc-proto/src/lib.rs",
+      "upstream_sha256": "53483806ed6b76eeccdf7930e879ed90fbaa4e8c3b290c4995d4668ab1df74df",
+      "installed_sha256": "6f04c98aab007ab3d419cb020d0f0761d7e3a2ed6ee7cc362ec3c3294b48a390",
+      "modified": true
+    },
+    {
+      "upstream_path": "duck-control/Cargo.toml",
+      "path": "src/libraries/duck-control/Cargo.toml",
+      "upstream_sha256": "bd2a702c68a88308a26cfa236b176d60463284d30b35026b011754eaa8111cfa",
+      "installed_sha256": "7d4269c5ee62d5b8d4ff3142e5411b66822285f7d3bc1ca489944d71ce83894a",
+      "modified": true
+    },
+    {
+      "upstream_path": "duck-control/examples/policy-rehearsal.rs",
+      "path": "src/libraries/duck-control/examples/policy-rehearsal.rs",
+      "upstream_sha256": "b71c6d6695bf2e3f683e75f03ff287cdb4b02553363cfc0e6eef9c3d091c3cbd",
+      "installed_sha256": "b71c6d6695bf2e3f683e75f03ff287cdb4b02553363cfc0e6eef9c3d091c3cbd",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/src/bus.rs",
+      "path": "src/libraries/duck-control/src/bus.rs",
+      "upstream_sha256": "a3b7ea94f22e3bdcbd6076bb867771e83e48b8d003f6483621ecb47dcafe47ab",
+      "installed_sha256": "5731bccf96af458042d24f524f6de6ce65148167ca3e69f8be80329d0e0a77f4",
+      "modified": true
+    },
+    {
+      "upstream_path": "duck-control/src/fall.rs",
+      "path": "src/libraries/duck-control/src/fall.rs",
+      "upstream_sha256": "6560a08585884214ccd3c54e2dd54bffcf378abbf8b4da29f26da7924da51dca",
+      "installed_sha256": "6560a08585884214ccd3c54e2dd54bffcf378abbf8b4da29f26da7924da51dca",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/src/imu.rs",
+      "path": "src/libraries/duck-control/src/imu.rs",
+      "upstream_sha256": "fa8b56fc7f7ceda56c0cd789b6338db492f6b4d4a1796e7ee699118d6f6e8f80",
+      "installed_sha256": "fa8b56fc7f7ceda56c0cd789b6338db492f6b4d4a1796e7ee699118d6f6e8f80",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/src/io.rs",
+      "path": "src/libraries/duck-control/src/io.rs",
+      "upstream_sha256": "2fdbb954b5c8edfb2cdbbc70251a8fa7f5a0679eebb0659bce67268cb1e46e20",
+      "installed_sha256": "d631bd8f0df24d3e281aa52fa8ccf114f7c7943d47d79bead78fc29f231402bd",
+      "modified": true
+    },
+    {
+      "upstream_path": "duck-control/src/lib.rs",
+      "path": "src/libraries/duck-control/src/lib.rs",
+      "upstream_sha256": "b58f044d2451ec0a2e392750b21adc5c57949bb9a6119bb78256482de1a6edd7",
+      "installed_sha256": "2e8d3c7288fa6be99f2947ed2ca1b33d0a5aebdbce939d0963bab4c790cb8952",
+      "modified": true
+    },
+    {
+      "upstream_path": "duck-control/src/model.rs",
+      "path": "src/libraries/duck-control/src/model.rs",
+      "upstream_sha256": "6fa45a1a335e9e17dfff8c2d739d462efc2b35d54f75afeb1a734a2264d50a4a",
+      "installed_sha256": "6fa45a1a335e9e17dfff8c2d739d462efc2b35d54f75afeb1a734a2264d50a4a",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/src/obs.rs",
+      "path": "src/libraries/duck-control/src/obs.rs",
+      "upstream_sha256": "9545dae40e6a324cea153d2dc8d79563ba105c348f96e00128fb2e55d27f26a6",
+      "installed_sha256": "9545dae40e6a324cea153d2dc8d79563ba105c348f96e00128fb2e55d27f26a6",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/src/policy.rs",
+      "path": "src/libraries/duck-control/src/policy.rs",
+      "upstream_sha256": "ffdc144a97ccec60a725ebae5a534b054af4f4e8b2f1d247f648fcf00cde8014",
+      "installed_sha256": "ffdc144a97ccec60a725ebae5a534b054af4f4e8b2f1d247f648fcf00cde8014",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/src/safety.rs",
+      "path": "src/libraries/duck-control/src/safety.rs",
+      "upstream_sha256": "e160869badeed46c4ab0de5ee4097c5de9113b21834287d06bb562c6dd16503e",
+      "installed_sha256": "e4c1111887d7460a3a2086822878db6af3b77a1847902b07294530799e87fc92",
+      "modified": true
+    },
+    {
+      "upstream_path": "duck-control/src/sim.rs",
+      "path": "src/libraries/duck-control/src/sim.rs",
+      "upstream_sha256": "898d835c9e06af348aab97b7cf2992d8c7ff5427adcb3bc74a890e40498392ca",
+      "installed_sha256": "898d835c9e06af348aab97b7cf2992d8c7ff5427adcb3bc74a890e40498392ca",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/bad_action_count.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/bad_action_count.onnx",
+      "upstream_sha256": "b0e1204240bd7d73a19ceb6c21df8c8b0e3a20285c619eee2840bf426cf64c57",
+      "installed_sha256": "b0e1204240bd7d73a19ceb6c21df8c8b0e3a20285c619eee2840bf426cf64c57",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/bad_batch.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/bad_batch.onnx",
+      "upstream_sha256": "52f08b383c02b88815fc46f8ce86479798fb32a3eaae6399c41eb64da84f35d1",
+      "installed_sha256": "52f08b383c02b88815fc46f8ce86479798fb32a3eaae6399c41eb64da84f35d1",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/bad_rank.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/bad_rank.onnx",
+      "upstream_sha256": "eccc59cc1ca6a1e646681bbab7f3acc025e33f24d01a450d2483ddf86a5ba47a",
+      "installed_sha256": "eccc59cc1ca6a1e646681bbab7f3acc025e33f24d01a450d2483ddf86a5ba47a",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/bad_state_shape.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/bad_state_shape.onnx",
+      "upstream_sha256": "cc1d34cb26c07480adc7bc9943d36fbf4499faadc0c38616968980fbcefd913f",
+      "installed_sha256": "cc1d34cb26c07480adc7bc9943d36fbf4499faadc0c38616968980fbcefd913f",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/bad_width.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/bad_width.onnx",
+      "upstream_sha256": "977bfc63a5c4e5546065a709aa5b7728cc4f92d6dc34113c1f8bc27022ae8221",
+      "installed_sha256": "977bfc63a5c4e5546065a709aa5b7728cc4f92d6dc34113c1f8bc27022ae8221",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/dynamic_batch.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/dynamic_batch.onnx",
+      "upstream_sha256": "e71c561b6c7d865b51b70c133d988514daf8d3304b12a9da0bd7b45e9690098e",
+      "installed_sha256": "e71c561b6c7d865b51b70c133d988514daf8d3304b12a9da0bd7b45e9690098e",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/dynamic_hidden.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/dynamic_hidden.onnx",
+      "upstream_sha256": "9abeb2be629b533ac6d7ec61026ca1cd9224aba126f29c000b825c5133eddc4b",
+      "installed_sha256": "9abeb2be629b533ac6d7ec61026ca1cd9224aba126f29c000b825c5133eddc4b",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/extra_input.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/extra_input.onnx",
+      "upstream_sha256": "b064ee4a0cb7ce4a56d57a7fe115be34d07613fff9e33fd8eb7d21e64d7047e1",
+      "installed_sha256": "b064ee4a0cb7ce4a56d57a7fe115be34d07613fff9e33fd8eb7d21e64d7047e1",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/feedforward.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/feedforward.onnx",
+      "upstream_sha256": "35e64f991081632a6d71260e2b1d631aa6c999e8982011a630a1c72498cb6f58",
+      "installed_sha256": "35e64f991081632a6d71260e2b1d631aa6c999e8982011a630a1c72498cb6f58",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/generate.py",
+      "path": "src/libraries/duck-control/tests/fixtures/generate.py",
+      "upstream_sha256": "fd8f328f6c293908b27ea77929f7b4704322050750ea27680922a807d8385a70",
+      "installed_sha256": "fd8f328f6c293908b27ea77929f7b4704322050750ea27680922a807d8385a70",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/lstm.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/lstm.onnx",
+      "upstream_sha256": "f09ce3fd59ae7da7fad71a41bc5c6ef7e815693d13d596280dedf6035afaa3a3",
+      "installed_sha256": "f09ce3fd59ae7da7fad71a41bc5c6ef7e815693d13d596280dedf6035afaa3a3",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/lstm_changed.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/lstm_changed.onnx",
+      "upstream_sha256": "c1b1dc210ec4d91b23134e5c7e4f4e305d3fe366b334b3ae205d1c1c11b0ff66",
+      "installed_sha256": "c1b1dc210ec4d91b23134e5c7e4f4e305d3fe366b334b3ae205d1c1c11b0ff66",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/missing_state.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/missing_state.onnx",
+      "upstream_sha256": "2eaa1886cf1f8888d132518520d132e5c015989ae8a850ea64a55735e0ae1da1",
+      "installed_sha256": "2eaa1886cf1f8888d132518520d132e5c015989ae8a850ea64a55735e0ae1da1",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/nan_state.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/nan_state.onnx",
+      "upstream_sha256": "3e7f3ce7e3b44e5ea5ed0385c284f2d1f0418b14645a3bb993362af3b43fee2a",
+      "installed_sha256": "3e7f3ce7e3b44e5ea5ed0385c284f2d1f0418b14645a3bb993362af3b43fee2a",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/fixtures/wrong_type.onnx",
+      "path": "src/libraries/duck-control/tests/fixtures/wrong_type.onnx",
+      "upstream_sha256": "ae3cace68d65a6a757e6c252fdab7275b34ea0c88eaa4cc0a9af0bd6bb1b1705",
+      "installed_sha256": "ae3cace68d65a6a757e6c252fdab7275b34ea0c88eaa4cc0a9af0bd6bb1b1705",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-control/tests/recurrent_policy.rs",
+      "path": "src/libraries/duck-control/tests/recurrent_policy.rs",
+      "upstream_sha256": "9c57b34b3dd287ceae47944153cd050d5ac6de105ec7cdbb263646771e9bbba1",
+      "installed_sha256": "9c57b34b3dd287ceae47944153cd050d5ac6de105ec7cdbb263646771e9bbba1",
+      "modified": false
+    },
+    {
+      "upstream_path": "robotd-params/Cargo.toml",
+      "path": "src/libraries/robotd-params/Cargo.toml",
+      "upstream_sha256": "fef345ddab3c69cf787360a59e9f5bcad19195a82b72746ddcfc05e25e455001",
+      "installed_sha256": "9b1d0f9cd3dd77faaef27e44155b4288da5c350851c6860d9481e430210af40b",
+      "modified": true
+    },
+    {
+      "upstream_path": "robotd-params/src/edit.rs",
+      "path": "src/libraries/robotd-params/src/edit.rs",
+      "upstream_sha256": "6c8dcbde7153c254c2a9c796ccbda41681e4bbba12e043f698d24306449b83ef",
+      "installed_sha256": "7f3fec30709beee1780721bb4a5084c89b783808f57e02e8e653e230a2cc5f4c",
+      "modified": true
+    },
+    {
+      "upstream_path": "robotd-params/src/lib.rs",
+      "path": "src/libraries/robotd-params/src/lib.rs",
+      "upstream_sha256": "37851373b92a4031096eceae41c783a1f9e53d5476d1da0f6893f593261326b2",
+      "installed_sha256": "ef13e01a27e8709a32d038079b0fae2bb943c7759ae79b6795d2557fd5fbfe01",
+      "modified": true
+    },
+    {
+      "upstream_path": "robotd-params/src/registry.rs",
+      "path": "src/libraries/robotd-params/src/registry.rs",
+      "upstream_sha256": "ebb0a1693efaa859e7cdcf9699180c079912d047fe8415c5c34dab9da5c10941",
+      "installed_sha256": "3011c109f6900cc3e844e8a7b552ca772b22b07a4e349ca2afefb8c7f6452493",
+      "modified": true
+    },
+    {
+      "upstream_path": "kinematics/assets/alpha/robot_walk.xml",
+      "path": "src/libraries/kinematics/assets/alpha/robot_walk.xml",
+      "upstream_sha256": "078693dff3bcd5e69eb6cc483974178e1511a11f762b1a4dd00370bc5d58b8a8",
+      "installed_sha256": "078693dff3bcd5e69eb6cc483974178e1511a11f762b1a4dd00370bc5d58b8a8",
+      "modified": false
+    },
+    {
+      "upstream_path": "kinematics/Cargo.toml",
+      "path": "src/libraries/kinematics/Cargo.toml",
+      "upstream_sha256": "a62537e0a9e2c12a34d469569e46d084623b27084b6a7c9289f8c2245fac7fbc",
+      "installed_sha256": "37d31ae11875424eaccbb35be50911c333ff0fb934df5c76e1bb867546d4fd04",
+      "modified": true
+    },
+    {
+      "upstream_path": "kinematics/src/hand.rs",
+      "path": "src/libraries/kinematics/src/hand.rs",
+      "upstream_sha256": "ce6b4c01a88bfba34cc3f812c2b6ba9636851aa4bc931e74f8f515b452879a32",
+      "installed_sha256": "ce6b4c01a88bfba34cc3f812c2b6ba9636851aa4bc931e74f8f515b452879a32",
+      "modified": false
+    },
+    {
+      "upstream_path": "kinematics/src/head.rs",
+      "path": "src/libraries/kinematics/src/head.rs",
+      "upstream_sha256": "e13f038568395e70b4a92cc5a8e116a27e1b8f414a32fd9a9168f4d1185e0ad2",
+      "installed_sha256": "e13f038568395e70b4a92cc5a8e116a27e1b8f414a32fd9a9168f4d1185e0ad2",
+      "modified": false
+    },
+    {
+      "upstream_path": "kinematics/src/lib.rs",
+      "path": "src/libraries/kinematics/src/lib.rs",
+      "upstream_sha256": "790bad4e44a062b622de6e8134f4d9f98ac5fd4a642dafab9ae654ababe24986",
+      "installed_sha256": "790bad4e44a062b622de6e8134f4d9f98ac5fd4a642dafab9ae654ababe24986",
+      "modified": false
+    },
+    {
+      "upstream_path": "kinematics/src/math.rs",
+      "path": "src/libraries/kinematics/src/math.rs",
+      "upstream_sha256": "d9f33b403eec5196e0f1d57f1ed5ab82b85c3efd1b2c2d081aef7c400eb9724f",
+      "installed_sha256": "d9f33b403eec5196e0f1d57f1ed5ab82b85c3efd1b2c2d081aef7c400eb9724f",
+      "modified": false
+    },
+    {
+      "upstream_path": "kinematics/src/mjcf.rs",
+      "path": "src/libraries/kinematics/src/mjcf.rs",
+      "upstream_sha256": "3a80ce0006e9e8c33be4f88c850516f7ea0ab0c90998be45fbd55700c2f67f2e",
+      "installed_sha256": "3a80ce0006e9e8c33be4f88c850516f7ea0ab0c90998be45fbd55700c2f67f2e",
+      "modified": false
+    },
+    {
+      "upstream_path": "kinematics/src/tof.rs",
+      "path": "src/libraries/kinematics/src/tof.rs",
+      "upstream_sha256": "ac7ca18bb8f5c4edb629e211161447f577eff9fe15e9f91329153822f4c555cd",
+      "installed_sha256": "ac7ca18bb8f5c4edb629e211161447f577eff9fe15e9f91329153822f4c555cd",
+      "modified": false
+    },
+    {
+      "upstream_path": "kinematics/tests/fixtures/fk_alpha.json",
+      "path": "src/libraries/kinematics/tests/fixtures/fk_alpha.json",
+      "upstream_sha256": "dc7b69ac2c2bfe4c527f46bfec2ff7f5740cc4afb69676d9b4fa77f2d5885c2b",
+      "installed_sha256": "dc7b69ac2c2bfe4c527f46bfec2ff7f5740cc4afb69676d9b4fa77f2d5885c2b",
+      "modified": false
+    },
+    {
+      "upstream_path": "kinematics/tests/fk_against_mujoco.rs",
+      "path": "src/libraries/kinematics/tests/fk_against_mujoco.rs",
+      "upstream_sha256": "0d5857a0e77d187316faa71e50dede6ebe448dfa94829e192598d6407ef9ada7",
+      "installed_sha256": "0d5857a0e77d187316faa71e50dede6ebe448dfa94829e192598d6407ef9ada7",
+      "modified": false
+    },
+    {
+      "upstream_path": "kinematics/tests/perf_probe.rs",
+      "path": "src/libraries/kinematics/tests/perf_probe.rs",
+      "upstream_sha256": "df95426f45e23fa124c2f2cb81963ca0eb89f4e04803127c2a00f67cb0ce3891",
+      "installed_sha256": "df95426f45e23fa124c2f2cb81963ca0eb89f4e04803127c2a00f67cb0ce3891",
+      "modified": false
+    },
+    {
+      "upstream_path": "odometry/Cargo.toml",
+      "path": "src/libraries/odometry/Cargo.toml",
+      "upstream_sha256": "67eca960b2b2774656ca3e06491efa994eaa7f14bb41513053222dd91a571f7f",
+      "installed_sha256": "85e4a25243e130530a4392183670523e2d19a9a5132d6a5f93ebb625a95f7c9f",
+      "modified": true
+    },
+    {
+      "upstream_path": "odometry/src/anchors.rs",
+      "path": "src/libraries/odometry/src/anchors.rs",
+      "upstream_sha256": "78c7cf86d09d27b1445fcb819aa7f01bbb0859481dbcea74ccd32e10d332f874",
+      "installed_sha256": "78c7cf86d09d27b1445fcb819aa7f01bbb0859481dbcea74ccd32e10d332f874",
+      "modified": false
+    },
+    {
+      "upstream_path": "odometry/src/lib.rs",
+      "path": "src/libraries/odometry/src/lib.rs",
+      "upstream_sha256": "b32798676309cbbed8d84712d9217dc6da48e38e6e167fb45bb8de453c95c53b",
+      "installed_sha256": "b32798676309cbbed8d84712d9217dc6da48e38e6e167fb45bb8de453c95c53b",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/Cargo.toml",
+      "path": "src/libraries/sounds/Cargo.toml",
+      "upstream_sha256": "7440862f12528dd8b44e285239e84b8e566a8f98ed226329dd1e29c78dc74fdc",
+      "installed_sha256": "8c84b38a81dc19c9ea05431f6f5e05497a11985c9778e06c127c7d3c71f4b137",
+      "modified": true
+    },
+    {
+      "upstream_path": "sounds/scores/duck_strut.mid",
+      "path": "src/libraries/sounds/scores/duck_strut.mid",
+      "upstream_sha256": "221b8a64a9dfe9567909bca372bbeb00b1bf40a1bc96112f503a69651b32eed4",
+      "installed_sha256": "221b8a64a9dfe9567909bca372bbeb00b1bf40a1bc96112f503a69651b32eed4",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/scores/outer_wilds.mid",
+      "path": "src/libraries/sounds/scores/outer_wilds.mid",
+      "upstream_sha256": "1d4852c1485699dc58147f5da90ac81c2143694958e3dfac1ca67514915133ff",
+      "installed_sha256": "1d4852c1485699dc58147f5da90ac81c2143694958e3dfac1ca67514915133ff",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/scores/wistful.duckscore",
+      "path": "src/libraries/sounds/scores/wistful.duckscore",
+      "upstream_sha256": "4baa780c5a90ca6bf92b1a0f20a0ef17dbaa826cbe20ed715484d5a9889d051a",
+      "installed_sha256": "4baa780c5a90ca6bf92b1a0f20a0ef17dbaa826cbe20ed715484d5a9889d051a",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/src/chorale/beat.rs",
+      "path": "src/libraries/sounds/src/chorale/beat.rs",
+      "upstream_sha256": "9bff98288a5e0534ec3a1be6075920b9bcbef87588fb3ae144d0c7efb9147728",
+      "installed_sha256": "9bff98288a5e0534ec3a1be6075920b9bcbef87588fb3ae144d0c7efb9147728",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/src/chorale/midi.rs",
+      "path": "src/libraries/sounds/src/chorale/midi.rs",
+      "upstream_sha256": "b3097ae290c6185a44fc9b03a8e0e8508b18084ccbe91f99d92a5b46fd6a260a",
+      "installed_sha256": "b3097ae290c6185a44fc9b03a8e0e8508b18084ccbe91f99d92a5b46fd6a260a",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/src/chorale/mod.rs",
+      "path": "src/libraries/sounds/src/chorale/mod.rs",
+      "upstream_sha256": "7805f4132a175164f5a07e0b6db770dffc690a5439b0f3d07f30595efcd8b3fc",
+      "installed_sha256": "7805f4132a175164f5a07e0b6db770dffc690a5439b0f3d07f30595efcd8b3fc",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/src/chorale/text.rs",
+      "path": "src/libraries/sounds/src/chorale/text.rs",
+      "upstream_sha256": "3442975227291eb760dc0dba56b2f250b91a63a8a0bd0570232e9993c8ab7223",
+      "installed_sha256": "3442975227291eb760dc0dba56b2f250b91a63a8a0bd0570232e9993c8ab7223",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/src/lib.rs",
+      "path": "src/libraries/sounds/src/lib.rs",
+      "upstream_sha256": "f024a340e33b1dc093894187d17b005ca4da29c2b6e9ccc9b4bfa805c4563c18",
+      "installed_sha256": "f024a340e33b1dc093894187d17b005ca4da29c2b6e9ccc9b4bfa805c4563c18",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/src/main.rs",
+      "path": "src/libraries/sounds/src/main.rs",
+      "upstream_sha256": "c19a5c2bcfce0e1bbc53a3d3b39e012c160f83c717624e7d9a9ed1c741dc66a9",
+      "installed_sha256": "c19a5c2bcfce0e1bbc53a3d3b39e012c160f83c717624e7d9a9ed1c741dc66a9",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/src/personality.rs",
+      "path": "src/libraries/sounds/src/personality.rs",
+      "upstream_sha256": "17f738ab3940ff084a808c61aa5e76e6e7e4f4e0c1fea9323fd0daa090a6c0cd",
+      "installed_sha256": "17f738ab3940ff084a808c61aa5e76e6e7e4f4e0c1fea9323fd0daa090a6c0cd",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/src/rng.rs",
+      "path": "src/libraries/sounds/src/rng.rs",
+      "upstream_sha256": "d697f7b2e318add8547c22360f94bf8be638e0513f69b6847e7cb20c307122be",
+      "installed_sha256": "d697f7b2e318add8547c22360f94bf8be638e0513f69b6847e7cb20c307122be",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/src/stream.rs",
+      "path": "src/libraries/sounds/src/stream.rs",
+      "upstream_sha256": "4adcccd524477659b368fde8d44adef36f9fdb7e8495bb23752ef9700513b564",
+      "installed_sha256": "4adcccd524477659b368fde8d44adef36f9fdb7e8495bb23752ef9700513b564",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/src/synth.rs",
+      "path": "src/libraries/sounds/src/synth.rs",
+      "upstream_sha256": "2cff1e97cac3ae16d6d384ecd25b709a81937654942df2fee5c572b89818b4c6",
+      "installed_sha256": "2cff1e97cac3ae16d6d384ecd25b709a81937654942df2fee5c572b89818b4c6",
+      "modified": false
+    },
+    {
+      "upstream_path": "sounds/src/voices.rs",
+      "path": "src/libraries/sounds/src/voices.rs",
+      "upstream_sha256": "05374c5c557bfd76b7e7c04fadeaf45ff2a9e2d3af70233d2f9e0c99e28ced07",
+      "installed_sha256": "05374c5c557bfd76b7e7c04fadeaf45ff2a9e2d3af70233d2f9e0c99e28ced07",
+      "modified": false
+    },
+    {
+      "upstream_path": "uyvy/Cargo.toml",
+      "path": "src/libraries/uyvy/Cargo.toml",
+      "upstream_sha256": "70c92e633b58b71923d02dd79fec2ac59946979e1d67cc342b8de3831056d061",
+      "installed_sha256": "1c5cb8be90c61af2c0b119e648d20d0545a3409f36b920eda51486718f78d0ab",
+      "modified": true
+    },
+    {
+      "upstream_path": "uyvy/src/lib.rs",
+      "path": "src/libraries/uyvy/src/lib.rs",
+      "upstream_sha256": "e801ad25f39573fb3c398f7584bc0ff88b365d02cf2c4f82aa1b39f8943a64ca",
+      "installed_sha256": "e801ad25f39573fb3c398f7584bc0ff88b365d02cf2c4f82aa1b39f8943a64ca",
+      "modified": false
+    },
+    {
+      "upstream_path": "pet-detect/Cargo.toml",
+      "path": "src/libraries/pet-detect/Cargo.toml",
+      "upstream_sha256": "1af344691e40c4cb4525455ee5dc4cbdfb3f0bb5eb8e97429492e4b94d594c6d",
+      "installed_sha256": "50082cbee4ad1a30a0b04e0230122c6e452dfcf787f843ad3a94c715d92b0dac",
+      "modified": true
+    },
+    {
+      "upstream_path": "pet-detect/models/pet_detect.onnx",
+      "path": "src/libraries/pet-detect/models/pet_detect.onnx",
+      "upstream_sha256": "83dd09973b6bc02d82023e27bc30b07d0d15265e57b6e006ed5894676e2bf016",
+      "installed_sha256": "83dd09973b6bc02d82023e27bc30b07d0d15265e57b6e006ed5894676e2bf016",
+      "modified": false
+    },
+    {
+      "upstream_path": "pet-detect/README.md",
+      "path": "src/libraries/pet-detect/README.md",
+      "upstream_sha256": "111c7febe5c076d5c4286cbb41fd1b7d7f256094a918191894ca2af91b1ec98b",
+      "installed_sha256": "111c7febe5c076d5c4286cbb41fd1b7d7f256094a918191894ca2af91b1ec98b",
+      "modified": false
+    },
+    {
+      "upstream_path": "pet-detect/src/bin/detect.rs",
+      "path": "src/libraries/pet-detect/src/bin/detect.rs",
+      "upstream_sha256": "b9ddb5429ef907af724d37f71a7d3f8fe38efe27582c206f20f3dbca41f6e1f0",
+      "installed_sha256": "b9ddb5429ef907af724d37f71a7d3f8fe38efe27582c206f20f3dbca41f6e1f0",
+      "modified": false
+    },
+    {
+      "upstream_path": "pet-detect/src/bin/features.rs",
+      "path": "src/libraries/pet-detect/src/bin/features.rs",
+      "upstream_sha256": "bfbaddc9f84daaf53c5dcb4bf645e9dfe5c3fd67e4ecfc5d50f3b4a5938c85f5",
+      "installed_sha256": "bfbaddc9f84daaf53c5dcb4bf645e9dfe5c3fd67e4ecfc5d50f3b4a5938c85f5",
+      "modified": false
+    },
+    {
+      "upstream_path": "pet-detect/src/lib.rs",
+      "path": "src/libraries/pet-detect/src/lib.rs",
+      "upstream_sha256": "fb8419b2e12c4cd63b4f93dc1783e8e0d49760077cf7ebf671723d774d985c92",
+      "installed_sha256": "fb8419b2e12c4cd63b4f93dc1783e8e0d49760077cf7ebf671723d774d985c92",
+      "modified": false
+    },
+    {
+      "upstream_path": "pet-detect/src/worker.rs",
+      "path": "src/libraries/pet-detect/src/worker.rs",
+      "upstream_sha256": "e4c50deb28795d86f032527bf58e7e95d119bd75e99a8f61cf8fcd79f21ad614",
+      "installed_sha256": "e4c50deb28795d86f032527bf58e7e95d119bd75e99a8f61cf8fcd79f21ad614",
+      "modified": false
+    },
+    {
+      "upstream_path": "pet-detect/training/train.py",
+      "path": "src/libraries/pet-detect/training/train.py",
+      "upstream_sha256": "7decbc6bac47011a8c2887a3168cd0409f1b69d9f8bb40644cf4c7886450fa78",
+      "installed_sha256": "7decbc6bac47011a8c2887a3168cd0409f1b69d9f8bb40644cf4c7886450fa78",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-detect/Cargo.toml",
+      "path": "src/libraries/duck-detect/Cargo.toml",
+      "upstream_sha256": "d2596af8d09c458adbd91939086f3fcbcc1b0315833086283aa7a006fd2aa6f7",
+      "installed_sha256": "b844968613580557591dbdfd6c1672b9902f2168ee8652039bbc7490feda8d7e",
+      "modified": true
+    },
+    {
+      "upstream_path": "duck-detect/src/bin/duck-bench.rs",
+      "path": "src/libraries/duck-detect/src/bin/duck-bench.rs",
+      "upstream_sha256": "7463f62c66cfa955907bee0d42a15df240156bd9c2e729d2613e992023300b3d",
+      "installed_sha256": "7463f62c66cfa955907bee0d42a15df240156bd9c2e729d2613e992023300b3d",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-detect/src/lib.rs",
+      "path": "src/libraries/duck-detect/src/lib.rs",
+      "upstream_sha256": "d3d3afe330ae81789941cff7ef070ca24db319d3e60a7eaf7babe1d69192dded",
+      "installed_sha256": "d3d3afe330ae81789941cff7ef070ca24db319d3e60a7eaf7babe1d69192dded",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-detect/src/onnx.rs",
+      "path": "src/libraries/duck-detect/src/onnx.rs",
+      "upstream_sha256": "90202a3112fa70bace22bc40596c0582c717bb3b7c7735577d950949c202032a",
+      "installed_sha256": "90202a3112fa70bace22bc40596c0582c717bb3b7c7735577d950949c202032a",
+      "modified": false
+    },
+    {
+      "upstream_path": "duck-detect/src/rknn.rs",
+      "path": "src/libraries/duck-detect/src/rknn.rs",
+      "upstream_sha256": "c0231af64cc10f6e7751bc36c48d296d6e0aa1c39870920f107cbd5e76a3981d",
+      "installed_sha256": "c0231af64cc10f6e7751bc36c48d296d6e0aa1c39870920f107cbd5e76a3981d",
+      "modified": false
+    },
+    {
+      "repository": "https://github.com/fanhao375/microduck",
+      "commit": "8db8f00c8fc5278d0bdf43f96934531c37ee2780",
+      "upstream_path": "duck-control/src/bus_feetech.rs",
+      "path": "src/libraries/duck-control/src/bus_feetech.rs",
+      "upstream_sha256": "bfc73f71cc4a63cf017f11c6ac1f9fffd6a72c5121ecc479ff039b11ac308a89",
+      "license": "Apache-2.0",
+      "scope": "FT RobotIo adapter / native transport excerpt; modified",
+      "installed_sha256": "69f349b20849bf2b55a6fbea033afcb31b24bd638a7e79212a54287c8f1ee323",
+      "modified": true
+    },
+    {
+      "repository": "https://github.com/fanhao375/microduck",
+      "commit": "8db8f00c8fc5278d0bdf43f96934531c37ee2780",
+      "upstream_path": "duck-control/src/bus_select.rs",
+      "path": "src/libraries/duck-control/src/bus_select.rs",
+      "upstream_sha256": "0e778aad0cb6146a40dccea6fd8f1432bc850045645fffb321a7a1c8ca959764",
+      "license": "Apache-2.0",
+      "scope": "FT RobotIo adapter / native transport excerpt; modified",
+      "installed_sha256": "2707137ded87ed137d4cd53b2040669ba93208fb8cd703190edbc179d805118d",
+      "modified": true
+    },
+    {
+      "repository": "https://github.com/kissqy/Microduck-kissqy",
+      "commit": "94328f5b43c8ac825c90f0e564e7d1b926cd770d",
+      "upstream_path": "microduck-hd1910/firmware/duck-control/src/feetech.rs",
+      "path": "src/libraries/duck-control/src/bus_feetech_wire.rs",
+      "upstream_sha256": "6387579ddac4ce5f51edb6e9a328f6c62888515deb21ef72e1c8abd724903314",
+      "license": "Apache-2.0",
+      "scope": "FT RobotIo adapter / native transport excerpt; modified",
+      "installed_sha256": "37eaeba49db1406333d147f4c96f14c73d140099a188bbec18ca4ef8fdcfc1d1",
+      "modified": true
+    },
+    {
+      "upstream_path": "test-support/Cargo.toml",
+      "path": "tools/test-support/Cargo.toml",
+      "upstream_sha256": "1e92f5852f5354cacd4195c46037b17ed3bbb7ca6fd04e38727c9cbc8b509d0e",
+      "installed_sha256": "f2b555570e9200cf231b53150bb9e11206004a59dd3e5fa2d83e77fcc23f954d",
+      "modified": true
+    },
+    {
+      "upstream_path": "test-support/examples/fake-release.rs",
+      "path": "tools/test-support/examples/fake-release.rs",
+      "upstream_sha256": "81d971a761bad67631e9ea8b4668be305d948b4a52cc921a7dd460e6f99878f5",
+      "installed_sha256": "81d971a761bad67631e9ea8b4668be305d948b4a52cc921a7dd460e6f99878f5",
+      "modified": false
+    },
+    {
+      "upstream_path": "test-support/examples/systemd-fixture.rs",
+      "path": "tools/test-support/examples/systemd-fixture.rs",
+      "upstream_sha256": "39eebd8f2cfa0ac434c184a593393ce82062332a95b26cf1034a5ae1143abd2a",
+      "installed_sha256": "39eebd8f2cfa0ac434c184a593393ce82062332a95b26cf1034a5ae1143abd2a",
+      "modified": false
+    },
+    {
+      "upstream_path": "test-support/src/lib.rs",
+      "path": "tools/test-support/src/lib.rs",
+      "upstream_sha256": "5382b6e3636b968971ee03a6d307395d9ce19175a0a6bc14e1997f5db52b557f",
+      "installed_sha256": "5382b6e3636b968971ee03a6d307395d9ce19175a0a6bc14e1997f5db52b557f",
+      "modified": false
+    },
+    {
+      "upstream_path": "deploy/robotd.toml",
+      "path": "src/libraries/robotd-params/tests/fixtures/robotd.toml",
+      "upstream_sha256": "b346d2f2b9b1a6c60fc222e1d1fe1a369ce4b60a7f6d21fac3478d8cea6d5200",
+      "scope": "schema/edit fixture; explicit bus defaults adapted; not a deployment config",
+      "installed_sha256": "d67026276d7b2774704051ae38c2ec73f1a627b80e17360eceee0c6b9b659a5c",
+      "modified": true
+    },
+    {
+      "upstream_path": "scripts/setup-gstreamer.sh",
+      "path": "scripts/setup-gstreamer.sh",
+      "upstream_sha256": "a8ee6034f22aa2a361c7dacdeb8a4552dd4ba5179177b2980c8d725c696c566e",
+      "installed_sha256": "2b1cc0ef778c8adf6be28a36ab7d61e7de8b3bdd3cc39ceb18a07cd042749cc2",
+      "modified": true
+    },
+    {
+      "upstream_path": "Cargo.toml",
+      "path": "src/Cargo.toml",
+      "upstream_sha256": "ac9bc188aeb61bcde560b5818447023f1e3b6af74ce8bff7977565e6f324f111",
+      "installed_sha256": "6ab8848b1927fbab662d6708b526e0f1bf94b6ae2f0868062460d0c2942c5db6",
+      "modified": true
+    },
+    {
+      "upstream_path": "Cargo.lock",
+      "path": "src/Cargo.lock",
+      "upstream_sha256": "fa1668b2e909f80bb4fc6db66a634742f6b42cfe79df6b51c6d5d90db36a08cf",
+      "installed_sha256": "6d41224f0bd538a3f141b218ab7c843e27ea491aaf0df11d339764d6e142ff31",
+      "modified": true
+    }
+  ],
+  "omitted_upstream_tests": [
+    {
+      "path": "robotd/tests/updater_gate.rs",
+      "reason": "requires the OTA updater, outside the camera/servo scope"
+    },
+    {
+      "path": "robotd/tests/single_instance.rs",
+      "reason": "uses updater::robot; retained in the frozen source cache, outside this workspace slice"
+    }
+  ],
+  "hatchery_notice": "src/NOTICE-UPSTREAM.md",
+  "scope": "camera/servo daemon slice; optional features retain the lightweight maintenance entrypoints; hardware validation deferred to the user"
+}

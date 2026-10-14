@@ -4,21 +4,24 @@ Microduck 整机复刻项目，覆盖机械与电气、运控、仿真与 RL、�
 
 架构主要依据 [架构 v2](docs/microduck-hatchery-architecture-v2.md)，保留 Pollen Robotics 官方 Microduck 的运行职责和完整 crate 边界，硬件适配以 **Radxa Zero 3W + FT / Feetech** 的实际配置为准。
 
-**Radxa Zero 3W 是整机的主要运行平台；电脑上的 FD1985 / FE-URT2 用于台架舵机维护。** 已建立最小 Rust 只读维护 workspace，Windows binary 和测试夹具链路可运行；完整官方运行源码、Radxa 部署、真实舵机通信与校准尚未完成。目录存在不表示模块已经实现。
+**Radxa Zero 3W 是整机的主要运行平台；电脑上的 FD1985 / FE-URT2 用于台架舵机维护。** 摄像头和舵机所需的官方 daemon 与依赖 crate 已迁入，保留主循环和媒体链路；FT 适配复用已有实现。已提供 Radxa 构建、配置和启动入口，整机 FT 默认只读；上板、装机校准和动作验收尚未完成。板端操作见 [Radxa 运行指南](docs/RADXA_RUNTIME.md)。
 
 ## 当前状态
 
 | 部分 | 已有内容 | 尚未完成 |
 |---|---|---|
-| 设备软件与协议 | 保留 v2 目录；4 个可构建 Rust crate、只读 robotd / gateway、FT 原码边界与维护 RPC；原样例 JSON | 完整整机源码、板端网络 gateway、HD 固件 / 寄存器确认、真实读取与 Radxa 部署 |
-| Hatchery Web | 原生原型、只读 3D 与 15 关节长滑块、紧凑反馈表 / CSV、单舵机工作台和独立曲线；HD 参考角、参数 / 标定草稿与批量；独立本机只读诊断快照 | 总控界面、实机校准 / 模型映射、完整 FD 调试与维护、正式记录、生产构建；生产前端栈尚未冻结 |
+| 设备软件与协议 | 12 成员 workspace；官方 robotd / mediad、控制 / 参数 / 支撑库与 IPC；独立维护入口及 FT 只读适配 | HD 固件 / 单位确认、实际 IMU、装机运控、板端链接 / 部署与实测；其他 daemon 尚未迁入 |
+| Hatchery Web | 原生原型、只读 3D 与 15 关节长滑块、紧凑反馈表 / CSV、独立曲线；HD 参考角、参数 / 标定草稿；按 ID 的台架工作台含未归类舵机；IMU / ToF 样例与手动相机快照观察页 | 总控、真实传感器接入、装机校准 / 模型映射、完整 FD 与硬件批量调试、正式记录、生产构建 |
 | 教程 | 当前原型仍为六章结构，七章全栈方案已整理为审查稿 | 七章页面及完整教程内容，须先共同审查 |
 | 本地工具 | Python 静态预览、独立的只读 HTTP/WS 样例服务与检查脚本 | 诊断页 `app.js`、schema 对齐、完整的新环境依赖清单 |
 | 硬件 | BOM 采购与选型记录、厂商规格书、照片及 CAD | 实际装配与接口配置核实、校准、上电和实机验收 |
-| 训练与部署 | `training/`、`deploy/` 等职责说明与阶段计划 | 仿真、RL、标准导出、FT 策略闭环及部署实现 |
+| 摄像头与部署 | 官方 V4L2 / GStreamer / WebRTC 源码、Hatchery 快照预览、Radxa 显式配置和 systemd 单元 | 相机 overlay / 节点 / 画面与硬件加速验收；正式 Web 状态订阅和视频整合 |
+| 训练 | `training/` 职责说明与阶段计划 | 仿真、RL、标准导出与 FT 策略闭环 |
 | 参考资料 | 官方 docs 的固定提交快照、来源与许可说明 | 官方文档仅作参考，不代表本项目已经实现或验证 |
 
-原型与 Python 服务的数据均为样例；实机操作按钮保持禁用。已有本地验证的具体范围见 [实际状态](web/docs/LOCAL_STATUS.md)，来源作者结果与本团队验证分别记录。
+原联调、曲线、3D 与 Python 服务仍为样例；独立台架入口消费 Rust 后端状态，控制默认禁用、须显式授权。已有本地验证范围见 [实际状态](web/docs/LOCAL_STATUS.md)，来源作者结果与本团队结果分别记录。
+
+完整的 [未迁入与待完成清单](docs/RADXA_RUNTIME.md#尚未迁入与待完成项) 区分源码缺口、硬件适配、Web 通信和板端验收；后续优先补 FT 装机控制及实际 IMU，其余模块按 [阶段计划](docs/PLAN.md) 推进。
 
 ## 目录与控制边界
 
@@ -58,7 +61,7 @@ Browser / Hatchery Web
 
 `web/` 只负责页面、目标草稿、展示缓存和只读回放。控制权、校准、限位、执行与确认由 `src/` 中的对应模块裁定。官方 `mediad/webclient` 作为通信与控制语义参考，Hatchery 保留自己的 UI。
 
-Rust 构建文件统一位于 `src/`；workspace 只包括 duck-ipc-proto、duck-control、robotd、mediad 的最小只读子集，源码和顶层协议位置保持架构 v2。其他模块仍是说明位置。电脑维护后端与 Radxa 整机共用这些职责边界，完整整机源码迁移仍须核对 path dependency、脚本与部署路径。详见 [架构与边界](docs/ARCHITECTURE.md)。
+Rust 构建文件统一位于 `src/`；workspace 包含本轮两个 daemon、八个 library、共享 IPC 和测试辅助 crate，源码和顶层协议位置保持架构 v2。`board-runtime` 显式启用板端源码；默认构建保留轻量电脑维护入口。其余 daemon、pad-imu、BLE 与训练源码仍为后续范围。详见 [架构与边界](docs/ARCHITECTURE.md) 和 [固定来源及文件清单](docs/UPSTREAM_IMPORT.json)。
 
 ## 本地运行
 
@@ -98,7 +101,7 @@ python tools/check_shell.py --transport-only
 
 检查脚本需要 `websockets`；当前依赖清单尚未完整列出检查与 WS 所需依赖。此检查覆盖样例 HTTP/WS、只读拒绝及静态资源；默认完整检查仍会因诊断页脚本缺失失败，schema 与实际消息也有待对齐。运行细节见 [样例工具说明](tools/hatchery-shell/README.md)。这些检查不构成实机验收。
 
-### 本机只读维护后端
+### 本机台架维护后端
 
 需要 Rust 1.99.0 及该平台的链接环境；Python 只负责启动两个 Rust 程序：
 
@@ -106,7 +109,7 @@ python tools/check_shell.py --transport-only
 python scripts/hatchery-maintenance.py --fixture
 ```
 
-打开 <http://127.0.0.1:8088/#console/servos/maintenance>。`--fixture` 是明确的 fake 原码夹具；不提供 `--fixture` 或 `--port` 则保持未连接。原联调、曲线与 3D 仍为浏览器样例。
+打开 <http://127.0.0.1:8088/#console/servos/parameters>。`--fixture` 是明确的 fake 原码夹具；不提供 `--fixture` 或 `--port` 则保持未连接。原联调、曲线与 3D 仍为浏览器样例。
 
 USB 台架实际连接：先给舵机供电并在 FD1985 中关闭串口，再按实际端口、ID、波特率启动。下面是本机单颗 ID 1 的设置示例，其他电脑以枚举结果为准：
 
@@ -116,6 +119,8 @@ python scripts/hatchery-maintenance.py --port COM5 --ids 1 --baud 1000000
 ```
 
 仍打开上面的 **8088 维护网页**，静态预览 5173 或直接双击 HTML 不连接设备。默认只 PING；ID 1 独立显示为“未分配关节的舵机”，不会自动绑定到整机的 15 关节。2026-10-10 已实测 Windows / COM5 / 1 Mbps 下 ID 1 成功应答；位置原码、HD 寄存器、实际角度与控制仍待核对，没有发送目标或参数写入。`Ctrl+C` 停止后端并释放串口；使用与平台验收见 [维护后端](docs/MAINTENANCE_BACKEND.md)。
+
+2026-10-11 新增按 ID 台架工作台，未归类舵机也可回读原始寄存器和调节目标草稿。`--reference-feedback` 开放参考反馈；裸机且已核对 FD 参考表时，另加 `--bench-control --profile fd-hlsxx` 开放受限单颗原值动作与输出开关。软件可构建，未实机执行写入；装机控制、批量硬件动作和完整 FD 功能仍待完成。详细限制与命令见 [台架工作台](docs/MAINTENANCE_BACKEND.md#轻量台架工作台2026-10-11)。
 
 ## 硬件与实现约束
 
@@ -136,6 +141,7 @@ python scripts/hatchery-maintenance.py --port COM5 --ids 1 --baud 1000000
 | Web 运行、状态与共同设计 | [Web README](web/README.md)、[Web 文档索引](web/docs/README.md)、[联调说明](web/docs/JOINT_COORDINATION.md)、[总控、七章与联调审查稿](web/docs/LOCAL_REVIEW_PROPOSAL.md) |
 | HD 舵机调试扩展 | [FD1985 接入方案](web/docs/FD1985_INTEGRATION_PROPOSAL.md)、[只读维护后端](docs/MAINTENANCE_BACKEND.md)：B 已完成，C 软件基础可运行，硬件验收待完成 |
 | 正式模块与本地样例 | [src](src/README.md)、[protocol](protocol/README.md)、[hatchery-shell](tools/hatchery-shell/README.md) |
+| Radxa 摄像头与舵机 | [构建、配置、启动与验收](docs/RADXA_RUNTIME.md)、[源码导入清单](docs/UPSTREAM_IMPORT.json) |
 | 来源、冻结与参考范围 | [SOURCES](docs/SOURCES.md)、[设备协议源码审核](web/docs/PROTOCOL_SOURCE_AUDIT.md)、[官方文档快照](docs/official-microduck/README.md) |
 | 开发约束与记录 | [AGENTS](AGENTS.md)、[项目日志](logs/PROJECT_LOG.md)、[日志规则](logs/README.md) |
 | 全部文档入口 | [docs 索引](docs/README.md) |

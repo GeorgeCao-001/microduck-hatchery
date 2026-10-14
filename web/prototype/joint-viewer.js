@@ -97,8 +97,8 @@
     const detail = instance.container.querySelector('[data-viewer-missing]');
     detail.hidden = missing.length === 0;
     detail.querySelector('summary').textContent = `缺测 ${pose.summary.missing} · 陈旧 ${pose.summary.stale} / 15`;
-    detail.querySelector('ul').innerHTML = missing.map(joint => `<li>#${joint.id} ${escape(joint.name)}：${escape(joint.reason)}</li>`).join('');
-    instance.container.querySelector('[data-viewer-source]').textContent = `${mode === 'draft' ? '目标草稿' : '样例反馈'} · 可显示 ${pose.summary.available} / 15${pose.summary.stale ? ' · 含陈旧样例' : ''}；灰色透明关节保留中性参考姿态，不代表实测。当前选中 #${instance.options.jointId}。`;
+    detail.querySelector('ul').innerHTML = missing.map(joint => `<li>#${root.ServoParameters?.mappingFor(joint.id)?.deviceId ?? joint.id} ${escape(joint.name)}：${escape(joint.reason)}</li>`).join('');
+    instance.container.querySelector('[data-viewer-source]').textContent = `${mode === 'draft' ? '目标草稿' : '样例反馈'} · 可显示 ${pose.summary.available} / 15${pose.summary.stale ? ' · 含陈旧样例' : ''}；灰色透明关节保留中性参考姿态，不代表实测。当前配置 ID #${root.ServoParameters?.mappingFor(instance.options.jointId)?.deviceId ?? instance.options.jointId}。`;
     instance.pose = pose;
     schedule(instance);
   }

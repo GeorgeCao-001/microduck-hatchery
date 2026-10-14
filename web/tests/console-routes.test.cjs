@@ -11,7 +11,7 @@ test('legacy console links resolve to the joint page without changing its canoni
 });
 
 test('console child pages have separate render keys and remain distinct from article anchors', () => {
-  const hashes = ['#console/servos/joint', '#console/servos/single', '#console/charts', '#console/overview', '#console/device', '#console/sensors', '#console/logs', '#console/servos/parameters', '#console/servos/maintenance'];
+  const hashes = ['#console/servos/joint', '#console/servos/single', '#console/charts', '#console/overview', '#console/device', '#console/sensors', '#console/logs', '#console/servos/parameters'];
   const routes = hashes.map(workspace.resolve);
   assert.equal(new Set(routes.map(route => route.key)).size, hashes.length);
   assert.equal(routes[1].view, 'single');
@@ -22,6 +22,6 @@ test('console child pages have separate render keys and remain distinct from art
 
 test('servo parameter and maintenance routes keep canonical keys and legacy fallback', () => {
   assert.deepEqual(workspace.resolve('#console/servos/parameters'), { view: 'parameters', key: 'console/servos/parameters', title: '参数与标定', anchor: '' });
-  assert.deepEqual(workspace.resolve('#console/servos/maintenance'), { view: 'maintenance', key: 'console/servos/maintenance', title: '通信与维护', anchor: '' });
+  assert.deepEqual(workspace.resolve('#console/servos/maintenance'), workspace.resolve('#console/servos/parameters'));
   assert.deepEqual(workspace.resolve('#console/servos/unknown'), workspace.resolve('#console/servos/joint'));
 });

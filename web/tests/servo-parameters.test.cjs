@@ -33,9 +33,9 @@ test('the parameter page keeps all 15 joints and unknown device values in every 
     assert.deepEqual([...html.matchAll(/data-servo-row="(\d+)"/g)].map(match => Number(match[1])), [20,21,22,23,24,10,11,12,13,14,30,31,32,33,34]);
     assert.match(html, /嘴部/);
     assert.match(html, /左髋 Yaw/);
-    assert.match(html, /设备未连接/);
-    assert.match(html, /实机标定 0 \/ 15/);
-    assert.match(html, /权威串口后端尚未接通/);
+    assert.match(html, /等待读取后端/);
+    assert.match(html, /实机未确认/);
+    assert.match(html, /参数寄存器映射与回读尚未接通/);
     assert.equal((html.match(/data-servo-parameter=/g) || []).length, 15);
     assert.match(html, /data-servo-parameter="speedRaw"[^>]+/);
   }
@@ -120,7 +120,7 @@ test('calibration previews remain local drafts and distinguish the encoder refer
   }
   assert.match(ui.container.innerHTML, /data-servo-draft-angle>5°/);
   assert.match(ui.container.innerHTML, /data-servo-ready-count>1 \/ 15/);
-  assert.match(ui.container.innerHTML, /实机标定 0 \/ 15/);
+  assert.match(ui.container.innerHTML, /实机未确认/);
   ui.dispatch('change', node({ 'data-servo-counts': '' }, '3072'));
   assert.match(ui.container.innerHTML, /data-servo-draft-angle>-85°/);
   assert.match(ui.container.innerHTML, /超出填写的机械限位/);
@@ -186,7 +186,7 @@ test('file imports reject forged hardware claims and late reads cannot replace n
     assert.equal(draft(23).parameters.speedRaw, 80);
     assert.equal(draft(23).hardwareConfirmed, false);
     const readersBefore = pending.length;
-    importText('{}', 128 * 1024 + 1);
+    importText('{}', 512 * 1024 + 1);
     assert.equal(pending.length, readersBefore);
     importText(JSON.stringify(fileDocument));
     const afterUnmount = pending.pop();
