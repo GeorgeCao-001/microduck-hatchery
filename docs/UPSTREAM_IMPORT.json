@@ -49,8 +49,8 @@
       "upstream_path": "robotd/src/soc.rs",
       "path": "src/daemons/robotd/src/soc.rs",
       "upstream_sha256": "67b8ac4cc1ca97815b461e746473edca2742e63cc35a4f3569abf7b303ac3eb9",
-      "installed_sha256": "67b8ac4cc1ca97815b461e746473edca2742e63cc35a4f3569abf7b303ac3eb9",
-      "modified": false
+      "installed_sha256": "4ec2311a5903d7fcaef5daf685d613d40d20fc228b280669902d762a7ae4bad1",
+      "modified": true
     },
     {
       "upstream_path": "robotd/src/sound.rs",

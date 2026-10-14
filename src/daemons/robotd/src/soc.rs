@@ -9,14 +9,19 @@
 //! `None` by simply finding no files, which is why there is no `cfg` here: a laptop dev build
 //! reports no board temperature and says so, rather than failing to compile.
 
+// Hatchery: maintenance reuses temperature reads; throttle helpers belong to the
+// full board runtime and its tests.
+#[cfg(any(feature = "board-runtime", test))]
 use std::path::Path;
 
+#[cfg(any(feature = "board-runtime", test))]
 use duck_ipc_proto as proto;
 
 /// Where the kernel exposes every thermal sensor it knows about.
 const THERMAL_ROOT: &str = "/sys/class/thermal";
 
 /// Where the kernel exposes each CPU cluster's frequency policy.
+#[cfg(any(feature = "board-runtime", test))]
 const CPUFREQ_ROOT: &str = "/sys/devices/system/cpu/cpufreq";
 
 /// Millidegrees Celsius, per the kernel's thermal sysfs ABI.
@@ -72,12 +77,14 @@ pub fn hottest_zone_c() -> Option<f64> {
 /// `None` when there is no `cpufreq` sysfs to read — not Linux, or a kernel without it. A
 /// missing *cooling device* is not `None`: the ceiling is still worth reporting, and the level
 /// comes back as `0 of 0`.
+#[cfg(any(feature = "board-runtime", test))]
 pub fn cpu_throttle() -> Option<proto::CpuThrottle> {
     throttle_in(Path::new(CPUFREQ_ROOT), Path::new(THERMAL_ROOT))
 }
 
 /// [`cpu_throttle`] against given roots, so the selection can be tested against a fixture.
 /// A real board's numbers are whatever the room is doing, which is untestable by definition.
+#[cfg(any(feature = "board-runtime", test))]
 fn throttle_in(cpufreq_root: &Path, thermal_root: &Path) -> Option<proto::CpuThrottle> {
     let (khz, max_khz) = clock_ceiling(cpufreq_root)?;
     let (level, max_level) = cooling_level(thermal_root).unwrap_or((0, 0));
@@ -96,6 +103,7 @@ fn throttle_in(cpufreq_root: &Path, thermal_root: &Path) -> Option<proto::CpuThr
 /// board running freely while the cores the control loop is on are halved. Same argument as
 /// [`hottest_zone_c`]: take the reading that is worst, and it cannot silently omit the one that
 /// was moving.
+#[cfg(any(feature = "board-runtime", test))]
 fn clock_ceiling(root: &Path) -> Option<(u32, u32)> {
     let mut worst: Option<(u32, u32)> = None;
 
@@ -135,6 +143,7 @@ fn clock_ceiling(root: &Path) -> Option<(u32, u32)> {
 /// throttle too, and a GPU wound down to its floor says nothing about the control loop.
 ///
 /// `None` when no such device exists; deepest wins, for the reason [`clock_ceiling`] gives.
+#[cfg(any(feature = "board-runtime", test))]
 fn cooling_level(root: &Path) -> Option<(u32, u32)> {
     let mut deepest: Option<(u32, u32)> = None;
 
@@ -173,6 +182,7 @@ fn cooling_level(root: &Path) -> Option<(u32, u32)> {
 
 /// One `sysfs` integer. Absent file, unreadable file and junk contents are all the same
 /// answer here — there is no number — and every caller skips the entry either way.
+#[cfg(any(feature = "board-runtime", test))]
 fn read_u32(path: &Path) -> Option<u32> {
     std::fs::read_to_string(path).ok()?.trim().parse().ok()
 }
