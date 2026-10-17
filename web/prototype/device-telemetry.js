@@ -43,7 +43,7 @@
     if (row.state === 'failed') return {label:'启动失败',tone:'error',running:false,hint:row.process_pid?'systemd 失败；另检测到同名进程':'systemd 报告服务失败'};
     if (row.sub_state?.startsWith('stop') || row.sub_state==='final-sigterm') return {label:'停止中',tone:'pending',running:false,hint:'systemd 正在停止服务'};
     if (row.state === 'active') return {label:row.sub_state==='exited'?'已启动':'运行中',tone:'online',running:true,hint:'由 systemd 管理'};
-    if (row.process_pid) return {label:'运行中',tone:'online',running:true,hint:'已检测到独立进程'};
+    if (row.process_pid) return {label:'独立运行',tone:'online',running:true,hint:'服务单元未运行，程序进程仍在'};
     if (row.state === 'inactive') return {label:'已停止',tone:'quiet',running:false,hint:'systemd 服务未运行'};
     if (row.state === 'absent') return {label:'未安装服务',tone:'quiet',running:false,hint:'未找到 systemd 服务单元'};
     return {label:'未知',tone:'quiet',running:false,hint:'暂时无法取得启动状态'};

@@ -22,7 +22,7 @@
   }
   function canEdit(data,key,fresh=true){
     const p=data?.controls.find(p=>p.key===key);
-    return !!(fresh&&data?.source==='hardware'&&p?.writable&&p.value!==null&&!(data.auto_exposure&&['exposure','analogue_gain','gain','digital_gain'].includes(key)));
+    return !!(fresh&&data?.source==='hardware'&&p?.writable&&p.value!==null&&!(data.auto_exposure&&['exposure','analogue_gain','gain','digital_gain'].includes(key))&&(!['red_balance','blue_balance','white_balance_temperature'].includes(key)||data.controls.find(c=>['auto_white_balance','white_balance_automatic'].includes(c.key))?.value!==1));
   }
   function change(data,key,value,id){
     if(key==='auto_exposure'){

@@ -34,7 +34,7 @@ microduck-hatchery/
 └─ logs/
 ```
 
-目录位置保持 v2。workspace 当前 12 成员：robotd、mediad、duck-control、robotd-params、kinematics、odometry、sounds、uyvy、pet-detect、duck-detect、duck-ipc-proto、test-support。完整 crate 保留内部结构；其余 daemon、pad-imu、BLE 和工具尚未迁入。hooks / spaces / training 不生成空实现。
+目录位置保持 v2。workspace 当前 13 成员：robotd、mediad、configd、duck-control、robotd-params、kinematics、odometry、sounds、uyvy、pet-detect、duck-detect、duck-ipc-proto、test-support。完整 crate 保留内部结构；其余 daemon、pad-imu、BLE 和工具尚未迁入。hooks / spaces / training 不生成空实现。
 
 分类不拆 crate、不改 crate 名，不创建 drivers / runtime / robot_io 框架。官方 obs / policy / safety 已迁入；FT bus_select / bus_feetech 复用现有分支，原生 FT 包实现复用 kissqy 的 Apache-2.0 固件部分。硬件差异留在 bus / io，上层不用 FT 寄存器。
 
@@ -59,7 +59,7 @@ flowchart TD
     C --> B[motor bus]
 ```
 
-web/ 只负责页面、目标草稿、展示缓存和只读回放。板端 gateway 位于 mediad；官方 webclient 已保留在 crate 内，显式 `/reference` 提供参考入口，不替代 Hatchery UI。媒体根页面是本项目的浅色只读相机预览。协议库不依赖前端、硬件寄存器或 RL。 相机参数由同源维护 gateway 转发本机媒体 RPC，mediad 独占 V4L2 写入并仲裁自动 / 手动曝光；前端不直接调用驱动，采集帧率、分辨率与模式仍只读。见 [相机实时参数](CAMERA_CONTROLS.md)。
+web/ 只负责页面、目标草稿、展示缓存和只读回放。板端 gateway 位于 mediad；官方 webclient 已保留在 crate 内，显式 `/reference` 提供参考入口，不替代 Hatchery UI。媒体根页面是本项目的浅色只读相机预览。协议库不依赖前端、硬件寄存器或 RL。 网络操作由同源维护 gateway 转发官方 configd 的 Unix RPC，NetworkManager / BlueZ 持有系统配置；见 [设备连接](DEVICE_CONNECTIONS.md)。传感器视频复用官方 WebRTC。相机参数由同源维护 gateway 转发本机媒体 RPC，mediad 独占 V4L2 / RKAIQ 写入并仲裁自动 / 手动曝光；前端不直接调用驱动，采集帧率、分辨率与模式仍只读。见 [相机实时参数](CAMERA_CONTROLS.md)。
 
 `robotd` 与 `duck-control` 保留官方的上层职责：生命周期、模式、状态、执行、控制循环和安全裁决。前端或 gateway 不能成为第二个权威控制器，不能直接写总线。命令接收、应用/读回和物理到位分别定义，逐关节结果由设备端产生。
 
@@ -84,7 +84,7 @@ Python 只读样例位于 [tools/hatchery-shell/](../tools/hatchery-shell/README
 
 ## 构建与路径
 
-src/Cargo.toml / Cargo.lock / rust-toolchain.toml 管理 12 个成员，锁定官方依赖基线与维护所需的小量补充。daemon / library 分类后修正 path dependency；顶层 IPC 和 test-support 显式指向 ../../src。默认输出 src/target/，维护启动器区分 debug / release 和维护 binary；板端脚本显式构建 board-runtime。参数配置与资源 include 路径同步调整，未导入的模块不生成空 manifest。
+src/Cargo.toml / Cargo.lock / rust-toolchain.toml 管理 13 个成员，锁定官方依赖基线与维护所需的小量补充。daemon / library 分类后修正 path dependency；顶层 IPC 和 test-support 显式指向 ../../src。默认输出 src/target/，维护启动器区分 debug / release 和维护 binary；板端脚本显式构建 board-runtime。参数配置与资源 include 路径同步调整，未导入的模块不生成空 manifest。
 
 尚未分配关节的台架 ID（如 ID 1）只进入维护协议的 `unassigned_devices`，没有 runtime / policy 索引；15 个物理关节的映射不会由串口枚举或 PING 改写。只读维护允许显式指定最多 32 个独立总线 ID，拒绝重复和广播 ID，不进行自动扫描。
 

@@ -62,6 +62,8 @@ pub type ExposureGate = Arc<Mutex<ExposureRuntime>>;
 pub struct CameraControls(Arc<Inner>);
 struct Inner {
     device: Option<String>,
+    isp_device: Option<String>,
+    isp: crate::rkaiq::Client,
     source: String,
     width: u32,
     height: u32,
@@ -81,6 +83,10 @@ impl CameraControls {
     ) -> Self {
         Self(Arc::new(Inner {
             device,
+            isp_device: std::env::var("HATCHERY_CAMERA_ISP_DEVICE")
+                .ok()
+                .filter(|s| !s.trim().is_empty()),
+            isp: crate::rkaiq::Client::new(),
             source: source.into(),
             width,
             height,
@@ -98,11 +104,48 @@ impl CameraControls {
         }))
     }
     fn parameters(&self) -> Result<Vec<CameraParameter>, String> {
+        self.probe().map(|(controls, _)| controls)
+    }
+    fn probe(
+        &self,
+    ) -> Result<
+        (
+            Vec<CameraParameter>,
+            std::collections::HashMap<String, String>,
+        ),
+        String,
+    > {
+        let mut controls = Vec::new();
+        let mut targets = std::collections::HashMap::new();
         let Some(device) = self.0.device.as_ref() else {
-            return Ok(Vec::new());
+            return Ok((controls, targets));
         };
-        let output = tool(&["-d", device, "--list-ctrls-menus"])?;
-        Ok(parse_controls(&output))
+        for (path, isp) in std::iter::once((device, false)).chain(
+            self.0
+                .isp_device
+                .as_ref()
+                .filter(|p| *p != device)
+                .map(|p| (p, true)),
+        ) {
+            let output = tool(&["-d", path, "--list-ctrls-menus"])?;
+            for mut parameter in parse_controls(&output) {
+                if targets.contains_key(&parameter.key) {
+                    continue;
+                }
+                if isp {
+                    parameter.source = "isp".into();
+                }
+                targets.insert(parameter.key.clone(), path.clone());
+                controls.push(parameter);
+            }
+        }
+        for parameter in self.0.isp.parameters() {
+            if !targets.contains_key(&parameter.key) {
+                targets.insert(parameter.key.clone(), "rkaiq".into());
+                controls.push(parameter);
+            }
+        }
+        Ok((controls, targets))
     }
     fn acquire_gate(&self) -> Result<std::sync::MutexGuard<'_, ExposureRuntime>, String> {
         let deadline = Instant::now() + Duration::from_millis(250);
@@ -117,8 +160,9 @@ impl CameraControls {
         }
     }
     pub fn state(&self) -> Result<CameraState, String> {
+        let parameters = self.parameters()?;
         let gate = self.acquire_gate()?;
-        Ok(self.assemble(self.parameters()?, &gate))
+        Ok(self.assemble(parameters, &gate))
     }
     fn assemble(&self, mut controls: Vec<CameraParameter>, gate: &ExposureRuntime) -> CameraState {
         let auto = controls
@@ -164,11 +208,12 @@ impl CameraControls {
         {
             return Err("Camera session changed".into());
         }
-        let device = self.0.device.as_ref().ok_or("No physical camera")?;
+        self.0.device.as_ref().ok_or("No physical camera")?;
         let mut seen = self.0.requests.try_lock().map_err(|_| "Camera is busy")?;
         if seen.contains(&change.request_id) {
             return Err("Duplicate camera request".into());
         }
+        let (controls, targets) = self.probe()?;
         let mut gate = self.acquire_gate()?;
         if change.key == "auto_exposure" && change.value == 0 {
             gate.enabled = false;
@@ -179,7 +224,6 @@ impl CameraControls {
             drop(seen);
             return Ok(state);
         }
-        let controls = self.parameters()?;
         // Validate before remembering or writing. Never accept arbitrary V4L2 names.
         if change.key == "auto_exposure" {
             if ![0, 1].contains(&change.value) {
@@ -224,11 +268,18 @@ impl CameraControls {
             }
             // Remember before the write: a timeout is not permission to repeat it.
             remember(&mut seen, change.request_id.clone());
-            tool(&[
-                "-d",
-                device,
-                &format!("--set-ctrl={}={}", change.key, change.value),
-            ])?;
+            let target = targets
+                .get(&change.key)
+                .ok_or("Camera parameter target unavailable")?;
+            if target == "rkaiq" {
+                self.0.isp.set(&change.key, change.value)?;
+            } else {
+                tool(&[
+                    "-d",
+                    target,
+                    &format!("--set-ctrl={}={}", change.key, change.value),
+                ])?;
+            }
             let readback = self.parameters()?;
             if readback
                 .iter()

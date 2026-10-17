@@ -4,14 +4,14 @@
 
 ## 接入与运行
 
-画面继续读取 mediad 的 `/frame`。参数链路为浏览器 → 同源维护 gateway → 本机媒体 Unix socket → mediad，V4L2 和自动曝光始终由 mediad 持有。没有新增运行依赖，不打开第二路视频采集，也不经过舵机总线。
+传感器页通过 `camera-stream.js` 复用官方 mediad WebRTC 信令、SDP / ICE 和视频轨道，不再轮询 PNG。快照按钮从当前视频帧导出 PNG；暂停只冻结本地播放，离页关闭会话、轨道与信令。独立媒体根页面仍保留 `/frame` 诊断预览。参数链路为浏览器 → 同源维护 gateway → 本机媒体 Unix socket → mediad，V4L2 和自动曝光始终由 mediad 持有。没有新增运行依赖，不打开第二路视频采集，也不经过舵机总线。
 
 本轮同时修改了媒体程序与维护 gateway；同步后分别重新编译、重启。仓库根目录执行：
 
 ```sh
 cd src
-cargo build --locked --release -j 1 -p mediad --features board-runtime --bin mediad
-cargo build --locked --release -j 1 --bin robotd-maintenance --bin mediad-maintenance
+cargo build --locked --release -j 2 -p mediad --features board-runtime --bin mediad
+cargo build --locked --release -j 2 --bin robotd-maintenance --bin mediad-maintenance
 cd ..
 ```
 
@@ -25,9 +25,9 @@ cd ..
 
 - 原生参数从当前采集节点的 `v4l2-ctl --list-ctrls-menus` 查询，使用设备报告的范围、步长、菜单及只读 / inactive / grabbed 状态。曝光以 lines、增益以 raw 显示，不套用其他内核的数值比例。
 - 自动曝光复用现有计量与收敛算法。已确认的固定模式保留原策略；未固定模式只调曝光，按驱动范围 / 步长限制，并保留既有 1200 行曝光预算。自动模式锁定手动曝光和增益写入；切换时从实际回读值开始，与手动写入共用同一把锁。
-- 自动模式的亮度是曝光计量目标；手动模式采用设备原生 brightness。没有原生 brightness 时，手动模式禁用亮度。目标亮度与原生亮度单位分别保留，不用浏览器 CSS 模拟相机修改。
-- 高级设置只显示实际枚举出的数字增益、对比度、饱和度、锐度、Gamma、白平衡及降噪控制。未提供的项目不补入；当前没有通用 RKAIQ 私有控制接口，不承诺仅由 RKAIQ 提供的参数已可调。
-- 只读 FPS 为已配置的采集目标，不是实测视频帧率或网页约每秒一次的快照刷新率。分辨率和 UYVY 模式来自当前采集配置。
+- 自动模式的亮度是曝光计量目标；手动模式采用设备原生 brightness 或 RKAIQ ISP brightness。两者都不可用时禁用亮度。目标亮度与原生亮度单位分别保留，不用浏览器 CSS 模拟相机修改。
+- 高级设置展示实际提供的数字增益、对比度、饱和度、锐度、Gamma、白平衡及降噪。RKAIQ 已接入 CPROC 的亮度 / 对比度 / 饱和度及 AWB 的自动 / 手动、红 / 蓝增益；白平衡增益按 ×0.001 显示，自动白平衡时锁定手动增益。没有把色温转换成猜测的 RGB 增益；厂商未提供色温控制时不显示该项。
+- 只读 FPS 为已配置的采集目标，不是实测视频帧率或浏览器刷新率。分辨率和 UYVY 模式来自当前采集配置。
 - 设置作用于当前运行会话，不改启动配置；重新启动后沿用原配置。没有固件刷写或持久参数写入。
 
 ## 接口与边界
@@ -39,3 +39,21 @@ cd ..
 打开页面、轮询、恢复连接和切页不提交设置；离页清理读请求与待处理的网页请求。已交给设备的写入不能由浏览器取消撤销。没有设备或 Windows 本地维护入口无法访问 Radxa socket 时，参数保持不可调；模拟 / test 来源不会冒充实体相机。
 
 本地验证使用明确的浏览器快照和临时 V4L2 工具模拟器；不代表 Radxa 驱动、ISP 控制、曝光效果或实际视频帧率已验收。验证结果见 [Web 状态](../web/docs/LOCAL_STATUS.md)。
+
+## RKAIQ 与流式视频
+
+已确认用户板上的 `rkaiq_3A_server` 监听 `/tmp/UNIX.domain0`。mediad 的 `rkaiq.rs` 按 Rockchip SDK 的 packet / hash / CPROC / AWB 协议做窄接口适配，来源和原文件哈希见 [RKAIQ_IMPORT.json](RKAIQ_IMPORT.json)。沿用板上既有 ISP 服务，不另起 ISP 引擎，不替换调色 / 白平衡算法。Radxa 官方 5.0x1.2-rc2 安装包的离线检查确认包含 AWB unified API；这不是用户板上的读写验收。
+
+默认 socket 可用 `HATCHERY_RKAIQ_SOCKET` 覆盖；另有原生 V4L2 ISP 控制节点时可显式设置 `HATCHERY_CAMERA_ISP_DEVICE`。查询成功才启用能力。CPROC 只接受厂商明确的 4 / 12 字节布局，保留其他字段；JSON 写入只开放白平衡固定路径。设置后必须回读确认，不因未收到结果而重发。当前不把 RKAIQ 调节写入 IQ 文件或持久配置。
+
+mediad 的运行用户须有该 socket 的读写权限。先在板上检查 `ls -l /tmp/UNIX.domain0`；若无权限，需为实际 mediad 用户配置该 socket 的最小访问权限，不能用全局 777 或把 Web 服务改为 root。RKAIQ 重建 socket 后权限可能重置，本轮没有修改板端权限或服务单元。
+
+SSH 使用相同端口转发网页和信令，例如在 Windows / macOS 执行：
+
+```bash
+ssh -N -L 8088:127.0.0.1:8088 -L 8080:127.0.0.1:8080 -L 8443:127.0.0.1:8443 duck@192.168.8.2
+```
+
+打开 `http://127.0.0.1:8088/#console/sensors`，点击连接。WebRTC 还需要浏览器能够到达板端 ICE 地址，USB 网络 / Wi-Fi 地址可达才可能传输视频；仅有 SSH 的 TCP 转发不保证 UDP 路径。无信令、无 producer、协商超时、断线均显示失败，不自动回退成 PNG 并冒充直播。`run-radxa.py media` 已补入 `/usr/local/lib/gstreamer-1.0` 插件搜索路径。
+
+本轮本地验证包括 WebRTC 信令与 ICE 顺序、轨道清理、参数门控和 SDK 报文检查，ARM64 仅做类型检查（本机 DOCS_RS 跳过 GStreamer 原生链接）；板上流式画面、ISP 效果、socket 权限和实际帧率仍由用户验证。

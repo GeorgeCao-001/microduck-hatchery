@@ -39,7 +39,7 @@ def binary(name):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['robot', 'media', 'maintenance'])
+    parser.add_argument('mode', choices=['robot', 'media', 'maintenance', 'config'])
     parser.add_argument('--env-file', type=Path, default=Path('/etc/robot/hatchery.env'))
     args = parser.parse_args()
     if sys.platform != 'linux':
@@ -49,7 +49,7 @@ def main():
     if not os.environ.get('INVOCATION_ID'):
         load_environment(args.env_file)
     runtime = os.environ.get('DUCK_RUNTIME_DIR')
-    if runtime is None and args.mode != 'maintenance':
+    if runtime is None and args.mode not in ('maintenance', 'config'):
         runtime = '/run/robot' if os.environ.get('INVOCATION_ID') else str(Path.home() / '.local/state/microduck-hatchery/run')
         Path(runtime).mkdir(parents=True, exist_ok=True)
         os.environ['DUCK_RUNTIME_DIR'] = runtime
@@ -57,13 +57,20 @@ def main():
     if args.mode == 'robot':
         command = [binary('robotd'), '--params', params, '--port', required('HATCHERY_SERIAL_PORT'),
                    '--socket', os.environ.get('HATCHERY_ROBOT_SOCKET', str(Path(runtime) / 'robotd.sock')), '--no-policy']
+    elif args.mode == 'config':
+        socket=os.environ.get('HATCHERY_CONFIG_SOCKET', '/run/configd.sock')
+        command=[binary('configd'), '--socket', socket, '--allow-user', os.environ.get('HATCHERY_CONFIG_ALLOW_USER', 'duck')]
     elif args.mode == 'media':
+        extra='/usr/local/lib/gstreamer-1.0'
+        existing=os.environ.get('GST_PLUGIN_PATH', '').split(os.pathsep)
+        os.environ['GST_PLUGIN_PATH']=os.pathsep.join([extra]+[p for p in existing if p and p!=extra])
         command = [binary('mediad'), '--config', params, '--camera-device', required('HATCHERY_CAMERA_DEVICE'),
                    '--host', os.environ.get('HATCHERY_MEDIA_HOST', '127.0.0.1'),
                    '--web-port', os.environ.get('HATCHERY_CAMERA_HTTP_PORT', '8080'),
                    '--port', os.environ.get('HATCHERY_SIGNALLING_PORT', '8443'),
                    '--rotate', os.environ.get('HATCHERY_CAMERA_ROTATE', '90'),
                    '--robot-socket', os.environ.get('HATCHERY_ROBOT_SOCKET', str(Path(runtime) / 'robotd.sock')),
+                   '--config-socket', os.environ.get('HATCHERY_CONFIG_SOCKET', str(Path(runtime) / 'configd.sock') if not os.environ.get('INVOCATION_ID') else '/run/configd.sock'),
                    '--frame-socket', os.environ.get('HATCHERY_FRAME_SOCKET', str(Path(runtime) / 'media-frame.sock')), '--no-remote']
         if os.environ.get('HATCHERY_CONFIGURE_SENSOR', '0') == '1':
             command.append('--configure-sensor')

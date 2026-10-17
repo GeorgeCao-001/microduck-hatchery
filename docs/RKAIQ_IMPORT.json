@@ -1,0 +1,72 @@
+{
+  "license": "Apache-2.0",
+  "adapted_path": "src/daemons/mediad/src/rkaiq.rs",
+  "parts": [
+    "socket packet encoding and bounded decoding",
+    "MurmurHash2, seed 97",
+    "CPROC v1/v2 attribute layouts and command IDs",
+    "AWB unified JSON API paths and schemas"
+  ],
+  "sources": [
+    {
+      "repository": "https://github.com/khadas/android_external_camera_engine_rkaiq",
+      "commit": "0b90e61d639da6eda015b156d95644a7115394a7",
+      "upstream_path": "ipc_server/MessageParser.hpp",
+      "upstream_sha256": "3656be895dbffc3028fcdc7ab3e255aeb5f84bc8e49cb98ba4794c87d6d71e70"
+    },
+    {
+      "repository": "https://github.com/khadas/android_external_camera_engine_rkaiq",
+      "commit": "0b90e61d639da6eda015b156d95644a7115394a7",
+      "upstream_path": "ipc_server/MessageParser.cpp",
+      "upstream_sha256": "d13b400672cc50e046a5702fe2318430f69a6772279a05667016389d1215cb4e"
+    },
+    {
+      "repository": "https://github.com/khadas/android_external_camera_engine_rkaiq",
+      "commit": "0b90e61d639da6eda015b156d95644a7115394a7",
+      "upstream_path": "ipc_server/socket_server.cpp",
+      "upstream_sha256": "bb12450c7cfcb834b8859b41403231461d9e04cb995ec34a1514ef7cffcb033f"
+    },
+    {
+      "repository": "https://github.com/khadas/android_external_camera_engine_rkaiq",
+      "commit": "0b90e61d639da6eda015b156d95644a7115394a7",
+      "upstream_path": "ipc_server/command_process.cpp",
+      "upstream_sha256": "478913b47573dbe8116e981f0d11a11f83268133ffc951f423890a8ee19e9416"
+    },
+    {
+      "repository": "https://github.com/khadas/android_external_camera_engine_rkaiq",
+      "commit": "0b90e61d639da6eda015b156d95644a7115394a7",
+      "upstream_path": "include/ipc_server/socket_server.h",
+      "upstream_sha256": "c44f751eb735e48bf5586af213864754a15e0c3f87718f9547ade2894ea5a6e7"
+    },
+    {
+      "repository": "https://github.com/khadas/android_external_camera_engine_rkaiq",
+      "commit": "0b90e61d639da6eda015b156d95644a7115394a7",
+      "upstream_path": "include/iq_parser_v2/acp_uapi_head.h",
+      "upstream_sha256": "de668b40067106119ed3c835e5b461b2d681aa6d96c5ec303bd843f5af923cfb"
+    },
+    {
+      "repository": "https://github.com/khadas/android_external_camera_engine_rkaiq",
+      "commit": "0b90e61d639da6eda015b156d95644a7115394a7",
+      "upstream_path": "include/iq_parser_v2/awb_uapi_head.h",
+      "upstream_sha256": "44085b6766ba57d308d821a273db3bc672bb6c2d74da67ba6593d1cd57bf405c"
+    },
+    {
+      "repository": "https://github.com/khadas/android_external_camera_engine_rkaiq",
+      "commit": "0b90e61d639da6eda015b156d95644a7115394a7",
+      "upstream_path": "include/uAPI2/rk_aiq_user_api_common.h",
+      "upstream_sha256": "4b1c721c1462bf0d3be8271622c6fe3f1df2b6b2a4e3d43e51513fa6f46cddee"
+    },
+    {
+      "repository": "https://github.com/khadas/android_external_camera_engine_rkaiq",
+      "commit": "0b90e61d639da6eda015b156d95644a7115394a7",
+      "upstream_path": "uAPI2/rk_aiq_user_api2_helper.cpp",
+      "upstream_sha256": "af61b4ea72236b604271bf8e5c78ed15deb6fee9ce08b66a5fa56e7dc7ba375d"
+    },
+    {
+      "repository": "https://github.com/rockchip-toybrick/camera_engine_rkaiq",
+      "commit": "2192a9ecf669a781886f0a927689f8c2c7b2ebad",
+      "upstream_path": "include/algos/acp/rk_aiq_uapi_acp_int.h",
+      "upstream_sha256": "40d8d7b59b18eccc661fec4ff94770f5480776a73733a96d7f12b2a1c7a3c673"
+    }
+  ]
+}

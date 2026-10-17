@@ -616,6 +616,8 @@
 .camera-control-feedback{display:block;min-height:17px;font-size:11px;color:var(--muted)}
 @media(max-width:760px){.camera-advanced>[data-camera-advanced]{max-height:228px}}
 
+.sensor-camera-stage>video{width:100%;height:100%;position:absolute;inset:0;object-fit:contain;background:var(--paper)}
+
 </style>
 <style>
 /* Device overview: the existing paper, moss and mustard palette. */
@@ -857,6 +859,18 @@
 
 .console-wrap[data-console-page="device"] .console-heading>div:last-child{flex-wrap:wrap}
 .console-wrap[data-console-page="device"] .console-heading .button{display:inline-flex;align-items:center;gap:8px}
+
+</style>
+<style>
+.connections-panel{min-width:0;overflow:hidden}.connections-tabs{display:flex;gap:6px;margin:0 22px;border-bottom:1px solid var(--line)}
+.connections-tabs button{display:flex;align-items:center;gap:8px;border:0;border-bottom:2px solid transparent;background:none;padding:12px 16px;color:var(--muted);font:14px var(--body)}
+.connections-tabs button[aria-selected=true]{border-color:var(--moss);color:var(--moss);font-weight:700}
+.connections-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px 16px}.connections-toolbar>div{display:grid;gap:4px}.connections-toolbar strong{font-size:18px}.connections-toolbar span{font-size:12px;color:var(--muted)}
+.connections-switch{border:0;width:43px;height:25px;border-radius:20px;background:var(--line);padding:3px;display:flex;align-items:center;cursor:pointer;flex-shrink:0}.connections-switch i{width:19px;height:19px;background:var(--surface);border-radius:50%;box-shadow:0 1px 3px #0002;transition:transform .15s}.connections-switch[aria-checked=true]{background:var(--moss)}.connections-switch[aria-checked=true] i{transform:translateX(18px)}.connections-switch:disabled{opacity:.5;cursor:default}
+.connections-list{max-height:350px;min-height:170px;overflow-y:auto;padding:0 14px;overscroll-behavior:contain}.connections-row{display:flex;align-items:center;gap:12px;padding:14px 10px;border-bottom:1px solid var(--line);border-radius:5px}.connections-row:last-child{border-bottom:0}.connections-row.is-connected{background:var(--device-soft)}
+.connections-row-icon{color:var(--moss);flex-shrink:0}.connections-row-copy{display:grid;gap:4px;min-width:0;flex:1}.connections-row-copy strong{font-size:14px;overflow-wrap:anywhere}.connections-row-copy small{font-size:11px;color:var(--muted)}.connections-row-actions{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end;max-width:130px}.connections-row-actions button{padding:6px 10px;min-height:30px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--moss);font:12px var(--body);cursor:pointer}.connections-row-actions button:disabled{opacity:.5;cursor:default}.connections-row-actions .connections-more{background:transparent;border-color:transparent;color:var(--muted)}
+.connections-empty{padding:25px 10px;text-align:center;color:var(--muted);font-size:13px}.connections-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:15px 24px;border-top:1px solid var(--line);min-height:55px}.connections-bottom>[role=status]{font-size:12px;color:var(--muted);max-width:100%;overflow-wrap:anywhere}.connections-dialog{width:min(420px,calc(100% - 32px));max-height:85vh;border:1px solid var(--line);border-radius:12px;padding:24px;background:var(--surface);color:var(--ink)}.connections-dialog::backdrop{background:#20281f55}.connections-dialog label{display:grid;gap:7px;font-size:13px;margin:17px 0}.connections-dialog input{width:100%;border:1px solid var(--line);border-radius:6px;padding:11px;background:var(--paper);color:var(--ink)}
+@media(max-width:480px){.connections-row{gap:8px}.connections-row-actions{max-width:100px}.connections-toolbar{padding:18px}.connections-tabs{margin:0 16px}.connections-bottom{padding:14px 18px}}
 
 </style>
 </head>
@@ -4036,7 +4050,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   }
   function canEdit(data,key,fresh=true){
     const p=data?.controls.find(p=>p.key===key);
-    return !!(fresh&&data?.source==='hardware'&&p?.writable&&p.value!==null&&!(data.auto_exposure&&['exposure','analogue_gain','gain','digital_gain'].includes(key)));
+    return !!(fresh&&data?.source==='hardware'&&p?.writable&&p.value!==null&&!(data.auto_exposure&&['exposure','analogue_gain','gain','digital_gain'].includes(key))&&(!['red_balance','blue_balance','white_balance_temperature'].includes(key)||data.controls.find(c=>['auto_white_balance','white_balance_automatic'].includes(c.key))?.value!==1));
   }
   function change(data,key,value,id){
     if(key==='auto_exposure'){
@@ -4134,95 +4148,96 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
 
 </script>
 <script>
-(function (root,factory) {
+/* Adapted from Pollen Robotics Microduck mediad/webclient/index.html at 9136aa4.
+ * Apache-2.0; see src/NOTICE-UPSTREAM.md. Video-only adapter: no robot commands. */
+(function(root,factory){'use strict';const api=factory(root);if(typeof module==='object'&&module.exports)module.exports=api;else root.CameraStream=api;})(typeof window!=='undefined'?window:globalThis,function(root){
   'use strict';
-  const api=factory(root);
-  if (typeof module==='object' && module.exports) module.exports=api;
-  else root.SensorCamera=api;
-})(typeof window!=='undefined'?window:globalThis,function (root) {
-  'use strict';
-  // Preview reads mediad /frame; parameters use the authenticated same-origin gateway.
-  // Opening this page never connects to a camera or changes camera configuration.
-  let host=null,endpoint=null,timer=null,pending=null,generation=0,active=false,paused=false;
-  let frame=null,address='';
-  const put=(key,value)=>{const element=host?.querySelector('[data-camera-'+key+']');if(element)element.textContent=value;};
-  function parseAddress(text) {
-    try {const url=new URL(text);if(!['http:','https:'].includes(url.protocol) || url.username || url.password)return null;url.pathname='/frame';url.search='';url.hash='';return url.href;}catch(_){return null;}
-  }
-  function controls() {
-    if (!host) return;
-    host.querySelector('[data-camera-connect]').textContent=active?'断开':'连接';
-    host.querySelector('[data-camera-address]').disabled=active;
-    host.querySelector('[data-camera-pause]').disabled=!active;
-    host.querySelector('[data-camera-pause]').textContent=paused?'继续':'暂停';
-    host.querySelector('[data-camera-capture]').disabled=!active || !!pending;
-    const badge=host.querySelector('[data-camera-source]');
-    badge.textContent=frame?active?(paused?'画面已暂停':frame.stale?'陈旧快照':'媒体快照'):'历史快照':'尚无画面';
-    badge.className='badge '+(frame?'readonly':'draft');
-  }
-  function cancelRequest() {
-    generation++;
-    if (pending) {root.clearTimeout(pending.timeout);pending.image.onload=null;pending.image.onerror=null;pending.image.src='';pending=null;}
-  }
-  function cancel() {
-    if (timer!==null) root.clearInterval(timer); timer=null;
-    cancelRequest();
-  }
-  function disconnect() {
-    cancel();active=false;paused=false;endpoint=null;
-    put('age',frame?'历史快照':'—');
-    put('status',frame?'已断开 · 保留最后快照及其接收时间。':'尚未读取相机帧。');controls();
-  }
-  function capture() {
-    if (!host || !active || pending || root.document?.hidden) return;
-    const ticket=++generation,image=new root.Image(),url=new URL(endpoint);
-    url.searchParams.set('_hatchery_snapshot',String(Date.now()));
-    const request={image,timeout:null};pending=request;
-    function finish(error) {
-      if (!host || ticket!==generation || pending!==request) return;
-      root.clearTimeout(request.timeout);image.onload=null;image.onerror=null;pending=null;
-      if (error) {if(frame)frame.stale=true;put('status',error+'；'+(frame?'保留上次快照，画面已陈旧。':'暂无画面。'));put('age',frame?'陈旧快照':'—');}
-      else {
-        frame={receivedAt:Date.now(),width:image.naturalWidth,height:image.naturalHeight,endpoint};
-        const display=host.querySelector('[data-camera-image]');
-        image.setAttribute('data-camera-image','');image.alt='板端媒体服务最近一次快照';image.hidden=false;display.replaceWith(image);
-        host.querySelector('[data-camera-empty]').hidden=true;
-        put('status','已连接 · 快照预览');
-        put('received',new Date(frame.receivedAt).toLocaleTimeString());put('resolution',`${frame.width} × ${frame.height}`);put('age','刚刚收到');
-        put('endpoint',frame.endpoint);
+  function signalling(address,port=8443){try{const u=new URL(address);if(!['http:','https:'].includes(u.protocol)||u.username||u.password||!Number.isInteger(port)||port<1||port>65535)return null;u.protocol=u.protocol==='https:'?'wss:':'ws:';u.port=String(port);u.pathname='/';u.search='';u.hash='';return u.href;}catch(_){return null;}}
+  function create({video,onState}){
+    let ws=null,pc=null,sessionId=null,starting=false,wanted=false,epoch=0,timer=null,ice=[],queue=Promise.resolve(),media=null,phase='idle';
+    const state=(next,message)=>{phase=next;onState?.({phase:next,message});};
+    const send=message=>{if(ws?.readyState===1)ws.send(JSON.stringify(message));};
+    function clearPeer(){if(pc){pc.ontrack=pc.onicecandidate=pc.onconnectionstatechange=pc.ondatachannel=null;pc.close();pc=null;}ice=[];media?.getTracks().forEach(t=>t.stop());media=null;video.pause();video.srcObject=null;video.style.transform='';}
+    function stop(){epoch++;wanted=false;starting=false;root.clearTimeout(timer);timer=null;if(sessionId)send({type:'endSession',sessionId});sessionId=null;if(ws){ws.onopen=ws.onerror=ws.onclose=ws.onmessage=null;ws.close();ws=null;}clearPeer();state('idle','未连接');}
+    function fail(message){stop();state('error',message);}
+    function playing(){if(!wanted||!video.videoWidth||video.readyState<2)return;root.clearTimeout(timer);timer=null;state('live','实时视频 · WebRTC');}
+    video.addEventListener('playing',playing);
+    function newPeer(){
+      pc=new root.RTCPeerConnection();
+      const peer=pc;
+      peer.ontrack=event=>{if(peer!==pc||event.track.kind!=='video')return;media=event.streams[0]||new root.MediaStream([event.track]);video.srcObject=media;video.play().catch(()=>{if(peer===pc&&wanted)state('paused','点击继续播放');});};
+      peer.onicecandidate=event=>{if(peer===pc&&event.candidate)send({type:'peer',sessionId,ice:{candidate:event.candidate.candidate,sdpMLineIndex:event.candidate.sdpMLineIndex}});};
+      peer.onconnectionstatechange=()=>{if(peer!==pc)return;if(peer.connectionState==='failed')fail('视频连接失败，请检查板端 ICE 连接');else if(peer.connectionState==='disconnected')state('interrupted','视频连接中断');else if(peer.connectionState==='connected'&&phase==='interrupted')playing();};
+      // The producer creates its datachannel. Read only media.video; never send robot RPCs.
+      peer.ondatachannel=event=>{event.channel.onmessage=event=>{try{const msg=JSON.parse(event.data);if(msg.method==='media.video'){const rotation=msg.params?.rotate??msg.params?.rotation??0;if([0,90,180,270].includes(rotation))video.style.transform=`rotate(${rotation}deg)${rotation%180?' scale(.5625)':''}`;}}catch(_){}};};
+    }
+    async function onSignalling(raw,ticket){
+      if(typeof raw!=='string'||raw.length>1024*1024)throw Error('Invalid signalling message');
+      const msg=JSON.parse(raw);
+      switch(msg.type){
+        case 'welcome':send({type:'list'});break;
+        case 'list':{
+          if(sessionId||starting||!wanted)break;
+          const producers=msg.producers||[];
+          if(!producers.length)throw Error('板端尚未发布视频');
+          if(producers.length!==1)throw Error('检测到多个视频源，请检查板端服务');
+          starting=true;send({type:'startSession',peerId:producers[0].id});break;
+        }
+        case 'sessionStarted':
+          if(!wanted)break;starting=false;sessionId=msg.sessionId;state('negotiating','正在协商视频…');newPeer();break;
+        case 'peer':{
+          if(!pc||msg.sessionId!==sessionId)break;const peer=pc;
+          if(msg.sdp){if(msg.sdp.type!=='offer')throw Error('Unexpected SDP');await peer.setRemoteDescription(msg.sdp);if(ticket!==epoch||peer!==pc)return;for(const item of ice.splice(0))await peer.addIceCandidate(item);const answer=await peer.createAnswer();await peer.setLocalDescription(answer);if(ticket===epoch&&peer===pc)send({type:'peer',sessionId,sdp:{type:'answer',sdp:answer.sdp}});}
+          else if(msg.ice){const candidate={candidate:msg.ice.candidate,sdpMLineIndex:msg.ice.sdpMLineIndex};if(peer.remoteDescription)await peer.addIceCandidate(candidate);else ice.push(candidate);}
+          break;
+        }
+        case 'endSession':if(msg.sessionId===sessionId)fail('视频会话已结束，请重新连接');break;
+        case 'sessionRejected':throw Error('板端拒绝了视频会话');
+        case 'error':throw Error('视频信令服务返回错误');
       }
-      controls();
     }
-    request.timeout=root.setTimeout(()=>{if(ticket===generation){image.src='';finish('读取超时');}},4000);
-    image.onload=()=>finish(null);image.onerror=()=>finish('读取失败，请核对媒体服务地址');image.src=url.href;controls();
-  }
-  function click(event) {
-    const button=event.target.closest('button');if(!button || !host?.contains(button) || button.disabled)return;
-    if (button.matches('[data-camera-connect]')) {
-      if(active){disconnect();return;}
-      address=host.querySelector('[data-camera-address]').value.trim();const parsed=parseAddress(address);
-      if(!parsed){put('status','请输入 http:// 或 https:// 媒体服务地址。');return;}
-      endpoint=parsed;active=true;paused=false;if(frame)frame.stale=true;put('status','正在连接…');capture();
-      timer=root.setInterval(()=>{if(frame)put('age',`${Math.floor((Date.now()-frame.receivedAt)/1000)} s 前收到${frame.stale?' · 陈旧':''}`);if(!paused)capture();},1000);
-    }else if(button.matches('[data-camera-pause]')){paused=!paused;if(paused){cancelRequest();put('status','预览已暂停');}else capture();controls();}
-    else if(button.matches('[data-camera-capture]'))capture();
-  }
-  function mount(options) {
-    unmount();host=options?.container;if(!host)return false;
-    if(root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance'){
-      const url=new URL(root.location.href);url.port=String(root.HATCHERY_BACKEND.cameraPort||8080);url.pathname='/';url.search='';url.hash='';address=url.href;
+    function start(address,port){
+      stop();const url=signalling(address,port);if(!url){state('error','相机地址无效');return false;}
+      if(!root.RTCPeerConnection||!root.WebSocket){state('error','当前浏览器不支持 WebRTC');return false;}
+      wanted=true;const ticket=epoch;state('connecting','正在连接相机…');queue=Promise.resolve();
+      try{ws=new root.WebSocket(url);}catch(_){fail('无法连接视频信令服务');return false;}
+      timer=root.setTimeout(()=>{if(wanted&&ticket===epoch)fail('等待视频超时，请检查信令和网络');},20000);
+      ws.onopen=()=>state('connecting','正在查找视频源…');
+      ws.onerror=()=>{if(ticket===epoch)fail('无法连接信令，请检查 8443 端口');};
+      ws.onclose=()=>{if(ticket===epoch)fail('视频信令连接已关闭');};
+      ws.onmessage=event=>{queue=queue.then(()=>{if(ticket===epoch&&wanted)return onSignalling(event.data,ticket);}).catch(error=>{if(ticket===epoch)fail(error.message||'视频连接失败');});};
+      return true;
     }
-    host.querySelector('[data-camera-address]').value=address;host.querySelector('[data-camera-address]').readOnly=root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance';host.addEventListener('click',click);
-    root.CameraParameters?.mount({container:host.querySelector('[data-camera-tuning]'),onState:data=>{
-      if(!host)return;
-      put('fps',data.target_fps+' FPS');put('capture-size',data.width+' × '+data.height);put('mode',data.mode);
-    }});
-    controls();return true;
+    function pause(paused){if(!wanted)return;if(paused){video.pause();state('paused','播放已暂停');}else video.play().then(playing).catch(()=>{if(wanted)state('paused','点击继续播放视频');});}
+    function destroy(){stop();video.removeEventListener('playing',playing);}
+    return Object.freeze({start,stop,pause,destroy,snapshot:()=>({phase,active:wanted,sessionId})});
   }
-  function unmount() {
-    root.CameraParameters?.unmount();cancel();host?.removeEventListener('click',click);host=null;active=false;paused=false;endpoint=null;frame=null;
+  return Object.freeze({create,signalling});
+});
+
+</script>
+<script>
+(function(root,factory){'use strict';const api=factory(root);if(typeof module==='object'&&module.exports)module.exports=api;else root.SensorCamera=api;})(typeof window!=='undefined'?window:globalThis,function(root){
+  'use strict';
+  let host=null,stream=null,address='',paused=false,active=false,download=null;
+  const put=(key,text)=>{const n=host?.querySelector('[data-camera-'+key+']');if(n)n.textContent=text;};
+  function parseAddress(value){try{const u=new URL(value);if(!['http:','https:'].includes(u.protocol)||u.username||u.password)return null;u.pathname='/frame';u.search='';u.hash='';return u.href;}catch(_){return null;}}
+  function controls(){if(!host)return;const info=stream?.snapshot();active=!!info?.active;host.querySelector('[data-camera-connect]').textContent=active?'断开':'连接';host.querySelector('[data-camera-pause]').disabled=!active;host.querySelector('[data-camera-pause]').textContent=paused?'继续':'暂停';host.querySelector('[data-camera-capture]').disabled=!['live','paused'].includes(info?.phase);}
+  function onState(info){if(!host)return;const live=info.phase==='live'||info.phase==='paused';put('status',info.message);put('source',live?info.phase==='paused'?'播放已暂停':'实时视频':'等待视频');host.querySelector('[data-camera-video]').hidden=!live;host.querySelector('[data-camera-empty]').hidden=live;controls();}
+  function snapshot(){const video=host.querySelector('[data-camera-video]');if(!video.videoWidth||video.readyState<2)return;const canvas=root.document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d').drawImage(video,0,0);canvas.toBlob(blob=>{if(!blob||!host)return;if(download)root.URL.revokeObjectURL(download);download=root.URL.createObjectURL(blob);const a=root.document.createElement('a');a.href=download;a.download='microduck-camera-'+Date.now()+'.png';a.click();},'image/png');}
+  function click(event){const button=event.target.closest('button');if(!button||!host?.contains(button)||button.disabled)return;
+    if(button.matches('[data-camera-connect]')){if(active){stream.stop();paused=false;controls();return;}address=host.querySelector('[data-camera-address]').value.trim();if(!parseAddress(address)){put('status','请输入有效的相机服务地址');return;}paused=false;stream.start(address,root.HATCHERY_BACKEND?.signallingPort||8443);controls();}
+    else if(button.matches('[data-camera-pause]')){paused=!paused;stream.pause(paused);controls();}
+    else if(button.matches('[data-camera-capture]'))snapshot();
   }
-  return Object.freeze({mount,unmount,parseAddress,snapshot:()=>({mounted:!!host,active,paused,hasFrame:!!frame})});
+  function mount(options){unmount();host=options?.container;if(!host)return false;
+    if(root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance'){const u=new URL(root.location.href);u.port=String(root.HATCHERY_BACKEND.cameraPort||8080);u.pathname='/';u.search='';u.hash='';address=u.href;}
+    const field=host.querySelector('[data-camera-address]');field.value=address;field.readOnly=root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance';
+    const video=host.querySelector('[data-camera-video]');stream=root.CameraStream.create({video,onState});host.addEventListener('click',click);
+    root.CameraParameters?.mount({container:host.querySelector('[data-camera-tuning]'),onState:data=>{if(host){put('fps',data.target_fps+' FPS');put('capture-size',data.width+' × '+data.height);put('mode',data.mode);}}});controls();return true;
+  }
+  function unmount(){root.CameraParameters?.unmount();stream?.destroy();stream=null;host?.removeEventListener('click',click);if(download)root.URL.revokeObjectURL(download);download=null;host=null;active=false;paused=false;}
+  return Object.freeze({mount,unmount,parseAddress,snapshot:()=>({mounted:!!host,active,paused,hasFrame:!!stream&&['live','paused'].includes(stream.snapshot().phase)})});
 });
 
 </script>
@@ -4252,7 +4267,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
         <section class="panel sensor-card sensor-camera" aria-labelledby="sensor-camera-title">
           <header class="sensor-card-header"><div><span class="sensor-number">01</span><h3 id="sensor-camera-title">摄像头</h3></div><span class="badge draft" data-camera-source>尚无画面</span></header>
           <div class="sensor-camera-layout" data-sensor-camera>
-            <div class="sensor-camera-stage"><img data-camera-image hidden alt="板端媒体服务最近一次快照"><div class="sensor-camera-empty" data-camera-empty><svg viewBox="0 0 240 130" aria-hidden="true"><path d="M32 46V24h34m108 0h34v22m0 38v22h-34m-108 0H32V84" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="120" cy="65" r="24" fill="none" stroke="currentColor"/><path d="M120 31v14m0 40v14M86 65h14m40 0h14" stroke="currentColor"/></svg><strong>相机未连接</strong><p>连接板端媒体服务查看画面。</p></div></div>
+            <div class="sensor-camera-stage"><video data-camera-video autoplay muted playsinline hidden aria-label="板端实时视频"></video><img data-camera-image hidden alt="板端媒体服务最近一次快照"><div class="sensor-camera-empty" data-camera-empty><svg viewBox="0 0 240 130" aria-hidden="true"><path d="M32 46V24h34m108 0h34v22m0 38v22h-34m-108 0H32V84" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="120" cy="65" r="24" fill="none" stroke="currentColor"/><path d="M120 31v14m0 40v14M86 65h14m40 0h14" stroke="currentColor"/></svg><strong>相机未连接</strong><p>连接板端媒体服务查看画面。</p></div></div>
             <div class="sensor-camera-controls"><label for="sensor-camera-address">媒体服务</label><div class="camera-address-row"><input id="sensor-camera-address" data-camera-address type="url" placeholder="http://&lt;Radxa地址&gt;:8080" autocomplete="off" spellcheck="false"><button type="button" class="button primary" data-camera-connect>连接</button></div><div class="sensor-camera-actions"><button type="button" class="button secondary" data-camera-pause disabled>暂停</button><button type="button" class="button secondary" data-camera-capture disabled>快照</button></div><p class="sensor-camera-status" data-camera-status role="status">相机未连接</p><div class="camera-capture-info" aria-label="采集信息，只读"><span data-camera-fps title="配置的采集帧率，非浏览器刷新率">— FPS</span><span data-camera-capture-size>— × —</span><span data-camera-mode>—</span></div><div data-camera-tuning>${root.CameraParameters?.render()||''}</div></div>
           </div>
         </section>
@@ -4514,7 +4529,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     if (row.state === 'failed') return {label:'启动失败',tone:'error',running:false,hint:row.process_pid?'systemd 失败；另检测到同名进程':'systemd 报告服务失败'};
     if (row.sub_state?.startsWith('stop') || row.sub_state==='final-sigterm') return {label:'停止中',tone:'pending',running:false,hint:'systemd 正在停止服务'};
     if (row.state === 'active') return {label:row.sub_state==='exited'?'已启动':'运行中',tone:'online',running:true,hint:'由 systemd 管理'};
-    if (row.process_pid) return {label:'运行中',tone:'online',running:true,hint:'已检测到独立进程'};
+    if (row.process_pid) return {label:'独立运行',tone:'online',running:true,hint:'服务单元未运行，程序进程仍在'};
     if (row.state === 'inactive') return {label:'已停止',tone:'quiet',running:false,hint:'systemd 服务未运行'};
     if (row.state === 'absent') return {label:'未安装服务',tone:'quiet',running:false,hint:'未找到 systemd 服务单元'};
     return {label:'未知',tone:'quiet',running:false,hint:'暂时无法取得启动状态'};
@@ -4571,6 +4586,89 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
 
 </script>
 <script>
+(function(root,factory){'use strict';const api=factory(root);if(typeof module==='object'&&module.exports)module.exports=api;else root.ConnectionsPanel=api;})(typeof window!=='undefined'?window:globalThis,function(root){
+  'use strict';
+  const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const endpoint='/api/v1/maintenance/connections',security={open:'开放',wep:'WEP',wpa_psk:'WPA/WPA2',wpa3_sae:'WPA3',enterprise:'企业网络'};
+  const plain=v=>v&&typeof v==='object'&&!Array.isArray(v),text=v=>typeof v==='string'&&v.length<=256;
+  function validate(v){
+    if(!plain(v)||v.protocol_version!=='hatchery-connections/1'||!text(v.session_id)||!['hardware','fixture','unavailable'].includes(v.source)||typeof v.available!=='boolean'||!Array.isArray(v.networks)||v.networks.length>256)return null;
+    if(v.networks.some(n=>!plain(n)||!text(n.ssid)||!Number.isInteger(n.signal)||n.signal<0||n.signal>100||!Object.hasOwn(security,n.security)||typeof n.saved!=='boolean'))return null;
+    const b=v.bluetooth;
+    if(b!=null&&(!plain(b)||typeof b.available!=='boolean'||![true,false,null].includes(b.powered)||!Array.isArray(b.devices)||b.devices.length>128||b.devices.some(d=>!plain(d)||!/^([0-9a-f]{2}:){5}[0-9a-f]{2}$/i.test(d.mac)||!text(d.name)||typeof d.paired!=='boolean'||typeof d.connected!=='boolean')))return null;
+    if(v.wifi!=null&&(!plain(v.wifi)||![true,false,null].includes(v.wifi.enabled)||!plain(v.wifi.state)||!['connected','connecting','disconnected','unavailable'].includes(v.wifi.state.state)||!(v.wifi.state.ssid===null||text(v.wifi.state.ssid))))return null;
+    if(v.operation!=null&&(!plain(v.operation)||!['pending','complete','error'].includes(v.operation.state)||!text(v.operation.request_id)))return null;
+    return v;
+  }
+  let host=null,state=null,fresh=false,busy=false,tab='wifi',selected=null,epoch=0,timer=null,request=null,write=null,pending=null,lastOperation=null;
+  const icon=name=>root.DeviceOverview?.icon(name)||'';
+  function render(){return `<section class="panel device-network-panel connections-panel"><div class="device-panel-heading"><div><span class="device-kicker">CONNECTIONS</span><h3>网络与蓝牙</h3></div><button type="button" class="device-text-button" data-connections-scan disabled>${icon('refresh')}刷新列表</button></div><div class="connections-tabs" role="tablist" aria-label="连接方式"><button type="button" role="tab" data-connections-tab="wifi" aria-selected="true">${icon('wifi')}Wi-Fi</button><button type="button" role="tab" data-connections-tab="bluetooth" aria-selected="false">${icon('bluetooth')}蓝牙</button></div><div class="connections-toolbar"><div><strong data-connections-title>Wi-Fi</strong><span data-connections-summary>读取连接状态</span></div><button type="button" role="switch" aria-checked="false" aria-label="Wi-Fi 开关" class="connections-switch" data-connections-power disabled><i></i></button></div><div class="connections-list" data-connections-list><p class="connections-empty">连接设备后可扫描附近网络</p></div><div class="connections-bottom"><span data-connections-state role="status" aria-live="polite">未连接</span></div><dialog class="connections-dialog" data-connections-dialog aria-labelledby="connections-dialog-title"><form data-connections-form><div class="device-dialog-heading"><h3 id="connections-dialog-title">连接 Wi-Fi</h3><button type="button" class="icon-button" data-connections-close aria-label="关闭">×</button></div><label>网络名称<input data-connections-ssid maxlength="32" required autocomplete="off"></label><label data-connections-password-label>密码<input type="password" data-connections-password maxlength="128" autocomplete="new-password"></label><div class="device-dialog-actions"><button type="button" class="button secondary" data-connections-close>取消</button><button type="submit" class="button primary">连接</button></div></form></dialog></section>`;}
+  const enabled=()=>fresh&&state?.source==='hardware'&&state.available&&(tab==='wifi'?state.wifi_available!==false:state.bluetooth_available!==false)&&!busy&&!pending;
+  function inject(key,markup){const n=host?.querySelector('[data-connections-'+key+']');if(n&&n._markup!==markup){n.innerHTML=markup;n._markup=markup;}}
+  function message(text){const n=host?.querySelector('[data-connections-state]');if(n)n.textContent=text;}
+  function paint(){
+    if(!host)return;
+    const wifi=tab==='wifi',info=state?.wifi?.state,bt=state?.bluetooth,powered=wifi?state?.wifi?.enabled:bt?.powered,can=enabled();
+    host.querySelectorAll('[data-connections-tab]').forEach(n=>n.setAttribute('aria-selected',String(n.dataset.connectionsTab===tab)));
+    host.querySelector('[data-connections-title]').textContent=wifi?'Wi-Fi':'蓝牙';
+    const summary=!fresh?'连接设备后查看':wifi?info?.state==='connected'?info.ssid:info?.state==='connecting'?'正在连接…':powered===false?'已关闭':info?.state==='unavailable'?'Wi-Fi 不可用':'未连接':!bt?.available?'蓝牙不可用':powered?'可连接附近设备':'已关闭';
+    host.querySelector('[data-connections-summary]').textContent=summary||'未取得状态';
+    const power=host.querySelector('[data-connections-power]');power.setAttribute('aria-checked',String(powered===true));power.setAttribute('aria-label',(wifi?'Wi-Fi':'蓝牙')+' 开关');power.disabled=!can||typeof powered!=='boolean';
+    host.querySelector('[data-connections-scan]').disabled=!can||powered===false;
+    if(wifi){
+      const networks=[...(state?.networks||[])];
+      if(info?.state==='connected'&&info.ssid&&!networks.some(n=>n.ssid===info.ssid))networks.unshift({ssid:info.ssid,signal:info.signal??0,security:null,saved:true});
+      networks.sort((a,b)=>(b.ssid===info?.ssid)-(a.ssid===info?.ssid)||b.signal-a.signal);
+      inject('list',networks.map((n,i)=>{const current=info?.state==='connected'&&n.ssid===info.ssid;return `<div class="connections-row ${current?'is-connected':''}"><span class="connections-row-icon">${icon('wifi')}</span><div class="connections-row-copy"><strong>${escape(n.ssid)}</strong><small>${current?'已连接':n.saved?'已保存':security[n.security]||'安全性未知'}${Number.isInteger(n.signal)?' · '+n.signal+'%':''}</small></div><div class="connections-row-actions">${current?`<button type="button" data-connections-action="wifi_disconnect" ${!can?'disabled':''}>断开</button>`:`<button type="button" data-connections-wifi="${escape(n.ssid)}" ${!can||['enterprise','wep'].includes(n.security)?'disabled':''}>连接</button>`}${n.saved?`<button type="button" class="connections-more" data-connections-forget="${escape(n.ssid)}" ${!can?'disabled':''}>忘记</button>`:''}</div></div>`;}).join('')||`<p class="connections-empty">${!fresh?'连接设备后查看':powered===false?'开启 Wi-Fi 后扫描网络':'点击刷新，查找附近网络'}</p>`);
+    }else inject('list',(bt?.devices||[]).map(d=>`<div class="connections-row ${d.connected?'is-connected':''}"><span class="connections-row-icon">${icon(d.icon==='input-gaming'?'gamepad':'bluetooth')}</span><div class="connections-row-copy"><strong>${escape(d.name||'未命名设备')}</strong><small>${d.connected?'已连接':d.paired?'已配对':'未配对'}</small></div><div class="connections-row-actions"><button type="button" data-connections-bt="${d.connected?'disconnect':d.paired?'connect':'pair'}" data-mac="${escape(d.mac)}" ${!can||powered!==true?'disabled':''}>${d.connected?'断开':d.paired?'连接':'配对'}</button>${d.paired?`<button type="button" class="connections-more" data-connections-bt="forget" data-mac="${escape(d.mac)}" ${!can?'disabled':''}>移除</button>`:''}</div></div>`).join('')||`<p class="connections-empty">${!fresh?'连接设备后查看':powered===false?'开启蓝牙后扫描':'点击刷新，查找附近蓝牙设备'}</p>`);
+  }
+  function outcome(operation){
+    if(!operation||operation.state==='pending')return;
+    if(pending===operation.request_id)pending=null;else if(pending){pending=null;message('操作记录已更新，请确认当前状态');}
+    const key=operation.request_id+operation.state;if(lastOperation===key)return;lastOperation=key;
+    const r=operation.result;
+    if(operation.state==='error')message('操作未完成，请刷新确认当前状态');
+    else if(r?.outcome==='failed'){const labels={bad_key:'密码错误或认证失败',not_found:'找不到网络',timeout:'连接超时',unsupported:'不支持此连接方式',no_adapter:'没有可用蓝牙适配器',ambiguous:'请指定一个设备',other:'操作失败'};message(labels[r.reason]||'连接未完成，请重试');}
+    else message(r?.outcome==='connected'?'Wi-Fi 已连接':r?.outcome==='paired'?'已配对':'操作完成，正在更新状态');
+  }
+  async function refresh(){
+    if(!host||request||!root.HATCHERY_BACKEND)return;
+    const ticket=epoch,controller=new root.AbortController();request=controller;const timeout=root.setTimeout(()=>controller.abort(),5500);
+    try{const reply=await root.fetch(endpoint,{credentials:'same-origin',cache:'no-store',signal:controller.signal});if(!reply.ok)throw Error();const next=validate(await reply.json());if(!next)throw Error();if(!host||epoch!==ticket)return;
+      if(state?.session_id&&next.session_id!==state.session_id){pending=null;message('服务已重启，请确认连接状态');}
+      state=next;fresh=next.available&&next.source==='hardware';busy=next.operation?.state==='pending';outcome(next.operation);if(busy)message('正在操作…');else if(!fresh)message('配置服务未连接');paint();
+    }catch(_){if(host&&ticket===epoch){fresh=false;message(pending?'连接中断，请确认操作结果':'配置服务未连接');paint();}}
+    finally{root.clearTimeout(timeout);if(request===controller)request=null;}
+  }
+  async function submit(command){
+    if(!enabled()||write)return false;
+    const ticket=epoch,controller=new root.AbortController(),id=root.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);write=controller;pending=id;busy=true;paint();message('正在操作…');
+    const timeout=root.setTimeout(()=>controller.abort(),6000);
+    try{const reply=await root.fetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-Hatchery-Command':'1'},body:JSON.stringify({session_id:state.session_id,request_id:id,command}),signal:controller.signal});if(!reply.ok)throw Error();await reply.json();if(host&&ticket===epoch){busy=false;await refresh();}}
+    catch(_){if(host&&ticket===epoch){fresh=false;message('请求中断，请刷新确认结果后重试');paint();}}
+    finally{root.clearTimeout(timeout);if(write===controller)write=null;}
+    return true;
+  }
+  function openWifi(ssid,hidden=false){const n=state.networks.find(n=>n.ssid===ssid);if(n?.saved||n?.security==='open'){submit({action:'wifi_connect',ssid,psk:null});return;}selected=n||{ssid,security:'wpa_psk'};const dialog=host.querySelector('[data-connections-dialog]'),name=dialog.querySelector('[data-connections-ssid]');name.value=ssid;name.readOnly=!hidden;dialog.querySelector('[data-connections-password]').value='';dialog.showModal();(hidden?name:dialog.querySelector('[data-connections-password]')).focus();}
+  function close(){const d=host?.querySelector('[data-connections-dialog]');if(d){d.querySelector('[data-connections-password]').value='';d.close();}selected=null;}
+  function click(event){const b=event.target.closest('button');if(!b||!host?.contains(b)||b.disabled)return;
+    if(b.matches('[data-connections-tab]')){tab=b.dataset.connectionsTab;paint();}
+    else if(b.matches('[data-connections-scan]'))submit({action:tab==='wifi'?'wifi_scan':'bluetooth_scan'});
+    else if(b.matches('[data-connections-power]')){const value=tab==='wifi'?state?.wifi?.enabled:state?.bluetooth?.powered;submit({action:tab==='wifi'?'wifi_radio':'bluetooth_radio',enabled:!value});}
+    else if(b.matches('[data-connections-wifi]'))openWifi(b.dataset.connectionsWifi);
+    else if(b.matches('[data-connections-forget]')){if(root.confirm('忘记此 Wi-Fi？下次连接需要重新输入密码。'))submit({action:'wifi_forget',ssid:b.dataset.connectionsForget});}
+    else if(b.matches('[data-connections-bt]')){if(b.dataset.connectionsBt==='forget'&&!root.confirm('移除此设备并清除配对？'))return;submit({action:'bluetooth_'+b.dataset.connectionsBt,mac:b.dataset.mac});}
+    else if(b.matches('[data-connections-action]'))submit({action:b.dataset.connectionsAction});
+    else if(b.matches('[data-connections-close]'))close();
+  }
+  function form(event){if(!event.target.matches('[data-connections-form]'))return;event.preventDefault();const d=host.querySelector('[data-connections-dialog]'),ssid=d.querySelector('[data-connections-ssid]').value,psk=d.querySelector('[data-connections-password]').value||null;close();submit({action:'wifi_connect',ssid,psk});}
+  function mount(container){unmount();host=container;if(!host)return;host.addEventListener('click',click);host.addEventListener('submit',form);host.querySelector('[data-connections-dialog]').addEventListener('cancel',close);if(root.HATCHERY_BACKEND){refresh();timer=root.setInterval(refresh,2500);}else{message('未连接');paint();}}
+  function unmount(){epoch++;root.clearInterval(timer);timer=null;request?.abort();write?.abort();request=null;write=null;close();host?.removeEventListener('click',click);host?.removeEventListener('submit',form);host=null;state=null;fresh=false;busy=false;pending=null;lastOperation=null;}
+  return Object.freeze({render,mount,unmount,validate,refresh});
+});
+
+</script>
+<script>
 (function (root, factory) {
   'use strict';
   const api=factory(root);
@@ -4620,8 +4718,8 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   function render(){return `<div class="device-workspace">
     <section class="panel device-home-card"><div class="device-profile"><div class="device-portrait" role="img" aria-label="Microduck 参考外观照片"><span>参考外观</span></div><div class="device-profile-copy"><span class="device-kicker">MY MICRODUCK</span><h2 data-device-page-name>我的 Microduck</h2><p data-device-model>连接后识别设备型号</p><div class="device-profile-meta"><span class="device-status-pill" data-device-hero-status>等待连接</span><span data-device-updated>尚无设备读数</span></div></div><div class="device-health" data-device-health data-tone="quiet"><span class="device-health-icon" data-device-health-icon>${icon('network')}</span><div><h3 data-device-health-title>让你的小鸭上线</h3><p data-device-health-detail>连接后查看它的运行与网络状态。</p></div></div></div><div class="device-quick-status"><div>${icon('clock')}<span>本次运行</span><strong data-device-uptime>等待设备</strong></div><div>${icon('network')}<span>网络链路</span><strong data-device-network-summary>待确认</strong></div><div>${icon('chip')}<span>设备服务</span><strong data-device-version>待确认</strong></div></div></section>
     <div class="device-dashboard-grid"><section class="panel device-vitals"><div class="device-panel-heading"><div><span class="device-kicker">VITALS</span><h3>运行状态</h3></div><span class="device-status-pill" data-device-reading-status>等待设备</span></div><div class="device-gauges">${gauge('cpu','CPU 占用','等待首次采样')}${gauge('memory','内存占用','等待内存读数')}${gauge('temperature','板载温度','最高温区读数')}</div><div class="device-trend"><div class="device-trend-heading"><div><h4 data-device-chart-title>CPU 占用趋势</h4><span data-device-chart-subtitle>从连接开始，保留实际采样。</span></div><div class="device-segments" role="group" aria-label="趋势时间范围"><button type="button" data-device-range="60" aria-pressed="true">1 分钟</button><button type="button" data-device-range="180" aria-pressed="false">3 分钟</button></div></div><div class="device-chart-area" data-device-chart tabindex="0" role="group" aria-label="系统趋势图，左右方向键查看采样"><div data-device-chart-content></div><div class="device-chart-tooltip" data-device-tooltip hidden></div></div><div class="device-trend-footer"><span data-device-chart-note>连接后开始记录</span><button type="button" class="device-text-button" data-device-pause aria-pressed="false">${icon('pause')}暂停曲线</button></div></div></section>
-    <section class="panel device-network-panel"><div class="device-panel-heading"><div><span class="device-kicker">CONNECTIONS</span><h3>连接你的设备</h3></div><span class="device-status-pill" data-device-link-status>待确认</span></div><div class="device-network-tabs" role="group" aria-label="查看连接类型">${Object.entries(kinds).map(([kind,label])=>`<button type="button" data-device-network="${kind}" aria-pressed="false">${icon(kind==='usb-network'?'usb':kind)}<span>${label}</span></button>`).join('')}</div><div data-device-network-content></div><div class="device-network-footer"><span>接口在线不代表公网已连通</span><button type="button" class="device-text-button" data-connect-open>连接说明 ${icon('arrow')}</button></div></section></div>
-    <div class="device-bottom-grid"><section class="panel device-functions"><div class="device-panel-heading"><div><span class="device-kicker">BOARD SERVICES</span><h3>程序服务</h3></div><span class="device-caption" data-device-service-summary>等待连接</span></div><div class="device-service-grid" data-device-services></div><details class="device-disclosure"><summary>查看服务详情</summary><div data-device-service-details></div></details></section><section class="panel device-about"><div class="device-panel-heading"><div><span class="device-kicker">THIS DEVICE</span><h3>关于这台设备</h3></div><button type="button" class="device-text-button" data-device-settings>编辑显示名称 ${icon('edit')}</button></div><div data-device-host-info></div><details class="device-disclosure"><summary>系统与技术详情</summary><div data-device-system-details></div></details></section></div>
+    ${root.ConnectionsPanel.render()}</div>
+    <div class="device-bottom-grid"><section class="panel device-functions"><div class="device-panel-heading"><div><span class="device-kicker">BOARD SERVICES</span><h3>程序服务</h3></div><span class="device-caption" data-device-service-summary>等待连接</span></div><div class="device-service-grid" data-device-services></div><details class="device-disclosure"><summary>查看服务详情</summary><div data-device-service-details></div></details></section><section class="panel device-about"><div class="device-panel-heading"><div><span class="device-kicker">THIS DEVICE</span><h3>关于这台设备</h3></div><button type="button" class="device-text-button" data-device-settings>编辑显示名称 ${icon('edit')}</button></div><div data-device-host-info></div><details class="device-disclosure"><summary>网络地址与 SSH</summary><div data-device-addresses></div></details><details class="device-disclosure"><summary>系统与技术详情</summary><div data-device-system-details></div></details></section></div>
     <p class="device-data-note">系统状态来自当前连接的后端主机；未取得的数据保留未知。名称与连接备注仅保存在当前浏览器。</p>
     <dialog class="device-settings-dialog" data-device-settings-dialog aria-labelledby="device-settings-title"><form data-device-label-form><div class="device-dialog-heading"><div><span class="device-kicker">MAKE IT YOURS</span><h3 id="device-settings-title">设备显示设置</h3></div><button type="button" class="icon-button" data-device-close aria-label="关闭显示设置">×</button></div><p>给这台设备起个熟悉的名字，方便识别。</p><label>显示名称<input data-device-alias maxlength="80" placeholder="例如：家庭小鸭"></label><label>当前连接方式备注<select data-device-path-choice><option value="unknown">未注明</option><option value="ssh">SSH 转发</option><option value="usb">USB 网络</option><option value="wifi">Wi-Fi</option><option value="local">电脑本地维护</option></select></label><label>SSH 用户名<input data-device-ssh-user maxlength="32" placeholder="duck" autocomplete="off" spellcheck="false"></label><p class="device-caption">仅调整本浏览器的显示和复制命令，不修改板端名称、账号或网络。</p><div class="device-dialog-actions"><button type="button" class="button secondary" data-device-close>取消</button><button class="button primary" type="submit">保存设置</button></div></form></dialog>
     <dialog class="device-copy-dialog" data-device-copy-dialog aria-labelledby="device-copy-title"><h3 id="device-copy-title">复制连接信息</h3><p>选中下方内容，使用系统的复制快捷键。</p><input readonly aria-label="要复制的连接信息" data-device-copy-value><button type="button" class="button secondary" data-device-copy-close>完成</button></dialog>
@@ -4663,16 +4761,8 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     inject('system-details',fields([['设备 ID',id?.id],['身份来源',id?.id_source==='configured'?'设备配置':id?.id_source==='machine-id-derived'?'系统身份派生':null],['内核',id?.kernel],['架构',id?.architecture],['Load · 1 min',value(data?.system.load_one,2)],['当前网页入口',meta.endpoint],['快照接收时间',snapshot.receivedAt?new Date(snapshot.receivedAt).toLocaleString()+(snapshot.fresh?'':' · 陈旧'):null]]));
   }
   function paintNetwork(){
-    const data=view.data, fresh=view.fresh, all=root.DeviceTelemetry.links(data);
-    if(!ui.network)ui.network=all.some(n=>n.kind==='wifi')?'wifi':all.some(n=>n.kind==='usb-network')?'usb-network':'wifi';
-    host.querySelectorAll('[data-device-network]').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.deviceNetwork===ui.network)));
-    put('link-status',fresh?'接口实读':data?'上次状态':'等待连接');
-    if(ui.network==='bluetooth'){
-      const controllers=data?.bluetooth;
-      inject('network-content',`<div class="device-link-illustration">${icon('bluetooth')}<div><h4>蓝牙</h4><p>${!data||controllers===null?'连接后查看蓝牙控制器':controllers.length?`检测到 ${controllers.length} 个控制器`:'暂未检测到控制器'}</p></div></div>${controllers?.map(n=>`<div class="device-link-card"><div><strong>${escape(n.name)}</strong><span class="device-status-pill" data-tone="quiet">${!fresh?'上次状态':n.blocked===true?'无线被阻断':n.blocked===false?'未被无线开关阻断':'状态待确认'}</span></div><p class="mono">${escape(n.address||'地址尚未提供')}</p></div>`).join('')||''}<p class="device-connection-note">控制器识别、配对与 BLE 通信是不同状态。当前尚未读取配对信息。</p>`);return;
-    }
-    const links=all.filter(n=>n.kind===ui.network), kind=kinds[ui.network];
-    inject('network-content',`<div class="device-link-illustration">${icon(ui.network==='usb-network'?'usb':ui.network)}<div><h4>${kind}</h4><p>${!data?'连接设备后查看网络状态':!fresh?'当前展示上次连接信息':links.some(n=>n.online&&n.address)?'已取得接口地址':links.length?'等待链路或地址就绪':'暂未检测到该类接口'}</p></div></div>${links.map(n=>`<div class="device-link-card"><div><strong>${escape(n.name)}</strong><span class="device-status-pill" data-tone="${fresh&&n.online?'online':'quiet'}">${!fresh?'上次状态':escape(n.label)}</span></div><div class="device-link-address"><span>IPv4</span><strong class="mono">${escape(n.address||'尚未分配')}</strong><button type="button" class="device-icon-button" data-device-copy-ip="${escape(n.address||'')}" aria-label="复制 ${escape(n.name)} 的 IPv4 地址" ${!n.address?'disabled':''}>${icon('copy')}</button></div><button type="button" class="device-ssh-button" data-device-copy-ssh="${escape(n.address||'')}" ${!n.address?'disabled':''}>${icon('copy')}复制 SSH 命令<span class="mono">${escape(metadata.sshUser)}</span></button>${(n.addresses||[]).filter(a=>!root.DeviceTelemetry.ipv4(a)).length?`<details class="device-address-details"><summary>其他地址</summary><p class="mono">${(n.addresses||[]).filter(a=>!root.DeviceTelemetry.ipv4(a)).map(escape).join('<br>')}</p></details>`:''}</div>`).join('')}${!links.length?`<div class="device-network-empty">${icon('network')}<p>${!data?'先连接设备，网络信息会出现在这里。':data.interfaces===null?'设备尚未提供网络接口信息。':`尚无 ${kind} 接口信息。`}</p></div>`:''}<p class="device-connection-note">${ui.network==='wifi'?'Wi-Fi 名称、信号强度与附近网络扫描尚未接入。':ui.network==='usb-network'?'USB-C 可同时供电与直连；能否联网取决于网络配置。':'这里列出其他实际网络接口，包括系统提供的虚拟接口。'}</p>`);
+    const links=root.DeviceTelemetry.links(view.data);
+    inject('addresses',links.map(n=>`<div class="device-link-card"><div><strong>${escape(n.name)}</strong><span class="device-status-pill">${escape(kinds[n.kind]||n.kind)} · ${view.fresh?escape(n.label):'上次状态'}</span></div><div class="device-link-address"><span>IPv4</span><strong class="mono">${escape(n.address||'未取得地址')}</strong><button type="button" class="device-icon-button" data-device-copy-ip="${escape(n.address||'')}" aria-label="复制 IPv4" ${!n.address?'disabled':''}>${icon('copy')}</button></div><button type="button" class="device-ssh-button" data-device-copy-ssh="${escape(n.address||'')}" ${!n.address?'disabled':''}>${icon('copy')}复制 SSH 命令</button><p class="device-caption mono">${(n.addresses||[]).map(escape).join(' · ')}</p></div>`).join('')||'<p class="device-caption">暂无网络地址</p>');
   }
   function paintServices(){
     const fresh=view.fresh, data=view.data, service=data?.service, rows=root.DeviceTelemetry.services(view);
@@ -4680,7 +4770,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     put('service-summary',fresh?(known?`${rows.filter(row=>row.running).length} / ${rows.length} 已启动`:'服务状态待获取'):data?'上次状态 · 等待更新':'等待连接');
     inject('services',rows.map(row=>`<div class="device-service-card" data-daemon="${row.name}" data-state="${row.row?.state||'unknown'}" ${!fresh?'data-stale="true"':''}><span class="device-service-symbol">${icon(row.icon)}</span><div><div class="device-service-title"><strong class="mono">${row.name}</strong><span class="device-service-state" data-tone="${row.tone}">${escape(row.label)}</span></div><p>${row.description}</p><small>${escape(row.hint)}</small></div></div>`).join(''));
     const unitNames={active:'active',restarting:'activating / restarting',failed:'failed',inactive:'inactive',absent:'not-found',unknown:'unknown'};
-    const details=rows.map(row=>`<div class="device-daemon-detail"><strong class="mono">${row.name}</strong>${fields([['服务单元',row.row?.unit],['systemd 状态',row.row?unitNames[row.row.state]:null],['启动阶段',row.row?.sub_state],['单元主进程 PID',row.row?.main_pid],['检测到的程序 PID',row.row?.process_pid]])}</div>`).join('');
+    const details=rows.map(row=>`<div class="device-daemon-detail"><strong class="mono">${row.name}</strong>${fields([['运行方式',row.row?.state==='active'?'systemd 管理':row.row?.process_pid?'独立进程':'未运行'],['服务单元',row.row?.unit],['systemd 状态',row.row?unitNames[row.row.state]:null],['启动阶段',row.row?.sub_state],['单元主进程 PID',row.row?.main_pid],['检测到的程序 PID',row.row?.process_pid]])}</div>`).join('');
     const maintenance=(data?.services||[]).filter(row=>['robotd-maintenance','mediad-maintenance'].includes(row.name));
     inject('service-details',`<p class="device-service-explanation">每约 2 秒只读更新。独立进程与 systemd 单元分别核对；未安装服务单元不代表磁盘中没有可执行程序。${fresh?'':' 当前没有新状态。'}</p>${details}<div class="device-daemon-detail"><strong>当前维护连接</strong>${fields([['状态接口',service?.name],['软件版本',service?.version],...maintenance.map(row=>[row.name,row.process_pid?`PID ${row.process_pid}${fresh?'':' · 上次'}`:'未取得进程信息'])])}</div>`);
   }
@@ -4753,10 +4843,12 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   function mount(options){
     unmount();if(!options.container?.querySelector('.device-workspace'))return;
     host=options.container;settings=options.onSettings;
+    root.ConnectionsPanel.mount(host.querySelector('.connections-panel'));
     if(root.ResizeObserver){resizeObserver=new root.ResizeObserver(()=>{if(host&&metadata&&view)paintChart();});resizeObserver.observe(host.querySelector('[data-device-chart]'));}
     for(const [name,handler] of Object.entries({click,keydown,pointermove:pointer,pointerout:pointer}))host.addEventListener(name,handler);
   }
   function unmount(){
+    root.ConnectionsPanel.unmount();
     for(const [name,handler] of Object.entries({click,keydown,pointermove:pointer,pointerout:pointer}))host?.removeEventListener(name,handler);
     host?.querySelectorAll('[data-device-settings-dialog],[data-device-copy-dialog]').forEach(d=>{if(d.open)d.close();});
     root.clearTimeout(toastTimer);resizeObserver?.disconnect();resizeObserver=null;ui.frozen=null;ui.hover=null;host=null;settings=null;metadata=null;

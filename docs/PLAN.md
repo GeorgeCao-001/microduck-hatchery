@@ -7,7 +7,7 @@
 | 阶段 | 输出 | 进入下一阶段的条件 |
 |---|---|---|
 | 0 · 本地结构 | daemons / libraries / protocol / tools 位置，hooks / scripts / spaces，独立样例工具与文档入口 | 已建立说明位置与 Python 样例入口；未自动迁入官方源码，后续只读 workspace 见阶段 1。 |
-| 1 · 来源与路径 | 固定来源完整 crate；修正 workspace、path dependency、脚本、systemd 和资源路径 | 摄像头 / 舵机所需官方 crate 已迁入，FT 边界复用，12 成员 workspace 与 Radxa 启动入口已建立；其他 daemon / CI / OTA 尚未迁入，板端链接与硬件验收待用户执行。 |
+| 1 · 来源与路径 | 固定来源完整 crate；修正 workspace、path dependency、脚本、systemd 和资源路径 | 摄像头 / 舵机所需官方 crate 已迁入，FT 边界复用，13 成员 workspace 与 Radxa 启动入口已建立；其他 daemon / CI / OTA 尚未迁入，板端链接与硬件验收待用户执行。 |
 | 2 · 协议与只读 | 核对 shared protocol / RPC、板端 gateway 与 robotd；15 关节、单位、时钟、来源、会话、有效期 | 实物型号、固件、节点与总线所有者明确；只读不绕开 robotd 直接轮询；样例和真实来源可区分。 |
 | 3 · 有限台架控制 | duck-control / safety 裁定校准、限位、控制权、模式、期限与确认；先单关节再逐关节批量 | 所有入口统一门控；校准与 robotd 互斥；停止、失联和重连行为经核对，重连不补发旧目标。 |
 | 4 · 模型与标准导出 | 保留所选训练源码结构，固定模型、仿真、RL、评估及标准策略产物 | 观察/动作映射、HOME、归一化、缩放、IMU 坐标、频率和运行时兼容逐项有证据。 |
@@ -29,7 +29,7 @@
 
 **总控界面（整机总览与全局操作）尚未实现。** [总控方案](../web/docs/LOCAL_REVIEW_PROPOSAL.md#8-总控界面方案待审查) 仍待审查，独立样例页覆盖整机状态、控制资格、15 关节/校准概览、健康告警、全局操作和整机事件。顶部样例状态栏及设备占位提示不算总控完成；首轮真实操作禁用，缺测保留未知，不等待或冒充正式设备链路。
 
-传感器页已提供 IMU / ToF 的明确样例及手动相机快照观察。后续按实际 LSM6DSV16X、VL53L5X 和 Radxa IMX219 接通权威只读数据、有效性与设备时钟，再由用户上板验收；页面和 BOM 不代表硬件已接通。范围仅为这三项，详见 [传感器说明](../web/docs/LOCAL_REVIEW_PROPOSAL.md#13-传感器观察页已实现前端)。
+传感器页已提供 IMU / ToF 的明确样例及 WebRTC 相机观察。后续按实际 LSM6DSV16X、VL53L5X 和 Radxa IMX219 接通权威只读数据、有效性与设备时钟，再由用户上板验收；页面和 BOM 不代表硬件已接通。范围仅为这三项，详见 [传感器说明](../web/docs/LOCAL_REVIEW_PROPOSAL.md#13-传感器观察页已实现前端)。
 
 [七章教程](../web/docs/LOCAL_REVIEW_PROPOSAL.md) 继续先审查，再实现页面。[联调样例](../web/docs/JOINT_COORDINATION.md) 不连接设备或发送目标。15 个关节含嘴部按左腿、右腿、头颈与嘴部分组三组各五条紧凑行，保留滑块、数字输入与独立实测标记，联调无内部列表滚动；单舵机调试继续保留独立滚动列表与详情。草稿与反馈分离，加载姿态只改已选草稿。
 
@@ -69,3 +69,5 @@ USB-C gadget 网络、BLE 本地桥、媒体、手柄、ToF、OTA 等已有对�
 设备接入前核实 Radxa 镜像、FT 型号与固件、全部 15 个 ID、校准方向/零位/限位、HOME、FT 运行时与 IMU 配套版本、串口所有者及恢复路径。摄像头、I2C、UART、GPIO 等节点不能沿用官方假设。
 
 当前实际完成情况见 [LOCAL_STATUS.md](../web/docs/LOCAL_STATUS.md)，目录边界见 [ARCHITECTURE.md](ARCHITECTURE.md)。
+
+2026-10-17 增补：官方 configd 已迁入并接通设备页网络 / 蓝牙操作接口；传感器页接入官方 WebRTC 视频与 RKAIQ 白平衡 / 对比度 / 饱和度。源码及本地检查完成不代表板上连接 / 画面验收；持久服务部署、正式 robot.* 前端订阅仍待完成。见 [设备连接](DEVICE_CONNECTIONS.md) 和 [相机控制](CAMERA_CONTROLS.md)。

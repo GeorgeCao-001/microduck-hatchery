@@ -209,3 +209,10 @@
 - 相机保持原预览尺寸，增加自动 / 手动曝光、曝光时间、模拟增益与亮度；其余实际支持项位于折叠高级设置。采集帧率、分辨率与模式只读，界面保留简短状态。
 - 参数通过同源认证 gateway 转发本机 mediad，复用 V4L2 工具和原曝光算法；自动 / 手动串行仲裁，原生写入须回读，重复请求拒绝，断线不重发。亮度使用原生控制或自动曝光计量目标，缺少能力时禁用；无通用 RKAIQ 私有接口，没有新增依赖或设备控制权迁移。两份单文件入口同步。
 - 115 项 Node、18 项本地 Edge、9 项 loopback gateway 契约、19 项原源文件纯逻辑测试及 1 项模拟 V4L2 事务核对通过；Windows 维护构建与 Linux ARM64 源码检查通过。纯逻辑 harness 与 ARM64 类型检查不替代原生链接、完整 crate 或 Radxa 相机验收；未部署、操作实机或提交。
+
+## 2026-10-17 · 官方 configd、网络选择与相机直播
+
+- 迁入官方 configd 完整模块及 Apache-2.0 许可，固定来源提交与逐文件哈希。保留 NetworkManager / BlueZ 后端和 Unix peer 凭据检查，仅添加 Web 所需开关、扫描、断开与显式设备操作；复用已保存 Wi-Fi 配置。设备页可选择 Wi-Fi / 蓝牙并提交真实操作，地址 / SSH 收入设备详情，systemd inactive 与独立运行分别显示。
+- 传感器页复用官方 mediad WebRTC 信令、SDP / ICE 与视频轨道，不再轮询 PNG；保留原预览尺寸、暂停、快照与离页清理。基础相机区保持紧凑，高级区加入实际支持的白平衡 / 红蓝增益 / 对比度 / 饱和度。Rockchip SDK 的报文、CPROC 与 AWB 接口来源见 docs/RKAIQ_IMPORT.json，沿用板上 RKAIQ 服务；能力查询和写入回读失败时不声称成功。
+- 最新本地检查：121 项 Node、18 项 Edge 模拟交互、11 项实际 Windows gateway 的 loopback HTTP 合约、3 项协议 Rust 测试及 8 项直接引用源文件的最小 Rust harness 测试通过。Windows 两个维护 binary 构建通过；mediad / configd Linux ARM64 类型检查通过。本机 DOCS_RS 跳过 GStreamer 原生探测，不代表 ARM64 原生链接或完整 crate 测试通过；浏览器视频来自明确模拟的 MediaStream，不代表板端画面验收。
+- 两份单文件网页同步。构建与前台启动步骤见 docs/DEVICE_CONNECTIONS.md、docs/CAMERA_CONTROLS.md。特权 systemd 适配被自动审批拒绝，保留未改动的官方参考单元，持久部署尚未完成；未在板上安装、启用服务、切换网络、配对、写 ISP 或操作舵机。板端连接 / 画面 / 权限与参数效果由用户验收；未暂存、提交或推送。

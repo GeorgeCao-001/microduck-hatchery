@@ -7,6 +7,7 @@ resolver = "3"
 members = [
   "daemons/robotd",
   "daemons/mediad",
+  "daemons/configd",
   "../protocol/duck-ipc-proto",
   "../tools/test-support",
   "libraries/duck-control",

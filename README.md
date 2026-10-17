@@ -10,12 +10,12 @@ Microduck 整机复刻项目，覆盖机械与电气、运控、仿真与 RL、�
 
 | 部分 | 已有内容 | 尚未完成 |
 |---|---|---|
-| 设备软件与协议 | 12 成员 workspace；官方 robotd / mediad、控制 / 参数 / 支撑库与 IPC；独立维护入口及 FT 只读适配 | HD 固件 / 单位确认、实际 IMU、装机运控、板端链接 / 部署与实测；其他 daemon 尚未迁入 |
-| Hatchery Web | 原生原型、只读 3D 与 15 关节长滑块、紧凑反馈表 / CSV、独立曲线；HD 参考角、参数 / 标定草稿；按 ID 的台架工作台含未归类舵机；当前设备系统 / 网络状态及同步顶部栏；IMU / ToF 样例与手动相机快照观察页 | 总控、真实传感器接入、装机校准 / 模型映射、完整 FD 与硬件批量调试、正式记录、生产构建 |
+| 设备软件与协议 | 13 成员 workspace；官方 robotd / mediad / configd、控制 / 参数 / 支撑库与 IPC；独立维护入口及 FT 只读适配 | HD 固件 / 单位确认、实际 IMU、装机运控、板端链接 / 部署与实测；其余 daemon 尚未迁入 |
+| Hatchery Web | 原生原型、只读 3D 与 15 关节长滑块、紧凑反馈表 / CSV、独立曲线；HD 参考角、参数 / 标定草稿；按 ID 的台架工作台含未归类舵机；当前设备系统状态、Wi-Fi / 蓝牙连接选择及同步顶部栏；IMU / ToF 样例与 WebRTC 相机画面 | 总控、真实传感器接入、装机校准 / 模型映射、完整 FD 与硬件批量调试、正式记录、生产构建 |
 | 教程 | 当前原型仍为六章结构，七章全栈方案已整理为审查稿 | 七章页面及完整教程内容，须先共同审查 |
 | 本地工具 | Python 静态预览、独立的只读 HTTP/WS 样例服务与检查脚本 | 诊断页 `app.js`、schema 对齐、完整的新环境依赖清单 |
 | 硬件 | BOM 采购与选型记录、厂商规格书、照片及 CAD | 实际装配与接口配置核实、校准、上电和实机验收 |
-| 摄像头与部署 | 官方 V4L2 / GStreamer / WebRTC 源码、Hatchery 快照预览、Radxa 显式配置和 systemd 单元 | 相机 overlay / 节点 / 画面与硬件加速验收；正式 Web 状态订阅和视频整合 |
+| 摄像头与部署 | 官方 V4L2 / GStreamer / WebRTC 源码、传感器页直播与 RKAIQ 参数、Radxa 显式配置和 systemd 参考单元 | 相机 overlay / 节点 / 画面与硬件加速验收；正式 Web 状态订阅、直播 / ISP 实机验收与 configd 持久部署 |
 | 训练 | `training/` 职责说明与阶段计划 | 仿真、RL、标准导出与 FT 策略闭环 |
 | 参考资料 | 官方 docs 的固定提交快照、来源与许可说明 | 官方文档仅作参考，不代表本项目已经实现或验证 |
 
@@ -130,7 +130,7 @@ python scripts/hatchery-maintenance.py --port COM5 --ids 1 --baud 1000000
 - 迁移前先复查已有 FT 代码，优先利用 `bus.rs` / `io.rs` 边界适配；寄存器与串口细节不进入 policy、observation 或 Web。设备节点按 Radxa 实物与镜像核实。
 - 总线只由当前活动后端占用，读操作同样需要仲裁。校准后端与 robotd 不能同时访问总线；`release` 不是急停，回放不发送历史目标。
 - Web 沿用纸白、深绿黑、芥末黄、真实照片和技术文档风格。联调样例保留单关节入口、草稿与反馈分离，加载姿态只改已选草稿；缺校准时镜像禁用，实机动作禁用。
-- 仿真与 RL 属于整机和教程主线。Web 已按最新要求加入只读 3D 参考姿态，不做浏览器物理仿真或策略导入、转换、推理。模型和角度当前均属参考/演示，未验证实际 Radxa / FT 装配；[模型来源与许可](web/licenses/microduck-model-NOTICE.md)。WiFi、USB-C gadget 网络和 BLE 桥仍是目标能力，BLE 不默认承担高频运动控制。
+- 仿真与 RL 属于整机和教程主线。Web 已按最新要求加入只读 3D 参考姿态，不做浏览器物理仿真或策略导入、转换、推理。模型和角度当前均属参考/演示，未验证实际 Radxa / FT 装配；[模型来源与许可](web/licenses/microduck-model-NOTICE.md)。Wi-Fi / 蓝牙配置已复用官方 configd，待板上验收；USB-C gadget 系统配置和 BLE 桥仍待完善，BLE 不默认承担高频运动控制。
 
 ## 阅读入口
 
@@ -141,6 +141,8 @@ python scripts/hatchery-maintenance.py --port COM5 --ids 1 --baud 1000000
 | Web 运行、状态与共同设计 | [Web README](web/README.md)、[Web 文档索引](web/docs/README.md)、[联调说明](web/docs/JOINT_COORDINATION.md)、[总控、七章与联调审查稿](web/docs/LOCAL_REVIEW_PROPOSAL.md) |
 | HD 舵机调试扩展 | [FD1985 接入方案](web/docs/FD1985_INTEGRATION_PROPOSAL.md)、[只读维护后端](docs/MAINTENANCE_BACKEND.md)：B 已完成，C 软件基础可运行，硬件验收待完成 |
 | 正式模块与本地样例 | [src](src/README.md)、[protocol](protocol/README.md)、[hatchery-shell](tools/hatchery-shell/README.md) |
+| 设备网络与蓝牙 | [官方 configd 接入、构建与前台启动](docs/DEVICE_CONNECTIONS.md) |
+| 相机直播与参数 | [WebRTC、RKAIQ 与运行步骤](docs/CAMERA_CONTROLS.md) |
 | Radxa 摄像头与舵机 | [构建、配置、启动与验收](docs/RADXA_RUNTIME.md)、[源码导入清单](docs/UPSTREAM_IMPORT.json) |
 | 来源、冻结与参考范围 | [SOURCES](docs/SOURCES.md)、[设备协议源码审核](web/docs/PROTOCOL_SOURCE_AUDIT.md)、[官方文档快照](docs/official-microduck/README.md) |
 | 开发约束与记录 | [AGENTS](AGENTS.md)、[项目日志](logs/PROJECT_LOG.md)、[日志规则](logs/README.md) |

@@ -18,7 +18,7 @@ python3 scripts/hatchery-maintenance.py --release --fixture
 ssh -N -L 8088:127.0.0.1:8088 duck@192.168.8.2
 ```
 
-浏览器打开 `http://127.0.0.1:8088/#console/device`；核对主机名、aarch64、系统读数和板端网络接口。顶部应同时显示“后端已连接”与“fixture · 非硬件”。USB-C 当前只提供到板子的网络链路；设备页可备注“SSH 转发”，网页入口 localhost 不代表服务运行在 Windows。Wi-Fi / 蓝牙仅显示可读系统状态，不配置网络或配对。设备状态缺测或旧后端 404 时按页面提示处理，不据此补入样例。
+浏览器打开 `http://127.0.0.1:8088/#console/device`；核对主机名、aarch64、系统读数和板端网络接口。顶部应同时显示“后端已连接”与“fixture · 非硬件”。USB-C 当前只提供到板子的网络链路；设备页可备注“SSH 转发”，网页入口 localhost 不代表服务运行在 Windows。Wi-Fi / 蓝牙连接操作复用官方 configd，启动与范围见 [设备连接](DEVICE_CONNECTIONS.md)。设备状态缺测或旧后端 404 时按页面提示处理，不据此补入样例。
 
 不设置显示名称也可运行，默认使用板端主机名；上述 `export` 仅影响当前 shell 及其启动的进程。未连接外设时保持 `--fixture`，不添加串口、动作或摄像头选项。
 
@@ -32,7 +32,7 @@ ssh -N -L 8088:127.0.0.1:8088 duck@192.168.8.2
 
 上述 Rust 固件部分为 Apache-2.0，原许可保留在各 crate 的 `LICENSE-UPSTREAM`。kissqy 的 console、训练中控和其他个人非商业部分没有引入，也没有导入其 FT6 IMU 固件、策略权重或发布包。原文件哈希、迁移路径与修改标记见 [UPSTREAM_IMPORT.json](UPSTREAM_IMPORT.json)。来源作者的测试与本项目测试分开记录。
 
-迁入模块以 crate 为单位保留内部布局。`pet-detect`、`sounds`、`duck-detect` 是官方 daemon 当前的编译依赖，音频、检测和策略运行保持关闭，不要求安装 ONNX/NPU 运行库。`test-support` 仅保留官方测试辅助代码；依赖 OTA updater 的集成测试不在本次范围。updater、configd、BLE、手柄、ToF 和 RL 尚未迁入。
+迁入模块以 crate 为单位保留内部布局。`pet-detect`、`sounds`、`duck-detect` 是官方 daemon 当前的编译依赖，音频、检测和策略运行保持关闭，不要求安装 ONNX/NPU 运行库。`test-support` 仅保留官方测试辅助代码；依赖 OTA updater 的集成测试不在本次范围。configd 已按新增授权迁入；updater、BLE、手柄、ToF 和 RL 尚未迁入。
 
 ## 尚未迁入与待完成项
 
@@ -40,7 +40,6 @@ ssh -N -L 8088:127.0.0.1:8088 duck@192.168.8.2
 
 | 尚未迁入部分 | 用途与当前状态 |
 |---|---|
-| `src/daemons/configd` | WiFi 与系统配置；当前只有说明 |
 | `src/daemons/updater` | OTA 更新、回滚与恢复；当前只有说明 |
 | `src/daemons/btd`、`protocol/duck-ble` | BLE 服务和协议；当前只有说明 |
 | `src/daemons/padd`、`src/libraries/pad-imu` | 手柄输入与手柄 IMU；当前只有说明，不是本机 LSM6DSV16X 适配 |
@@ -60,7 +59,7 @@ ssh -N -L 8088:127.0.0.1:8088 duck@192.168.8.2
 |---|---|
 | FT 整机运控 | 确认 HD 固件 / 寄存器 / 单位，完成增益、装机零位 / 方向 / 限位、写入与安全闭环；当前只读 |
 | 实际 IMU | 接入 LSM6DSV16X，核对接口、坐标与安装方向；不能套用官方 IMU200 或第三方 FT6 |
-| Hatchery Web | 接通正式 robot.* 状态订阅与 WebRTC 视频；现有维护入口和独立相机快照保留，原联调 / 曲线 / 3D 仍为样例 |
+| Hatchery Web | 正式 robot.* 状态订阅待接通；传感器页 WebRTC 视频已接入，流式画面待上板验收；独立相机快照诊断页保留，原联调 / 曲线 / 3D 仍为样例 |
 | Radxa 运行 | 原生链接、部署、相机画面、HD 同步读取、断线和串口互斥尚未实机验收；硬件测试由用户执行 |
 
 后续软件优先补 FT 实际参数、装机控制和 IMU 接入，再完成正式 Web 通信；其余服务按需要逐步迁入。阶段安排见 [PLAN.md](PLAN.md)。
@@ -135,7 +134,7 @@ python3 scripts/run-radxa.py robot
 端口默认监听板端 loopback，可在 Windows/macOS 通过 SSH 转发访问：
 
 ```sh
-ssh -L 8088:127.0.0.1:8088 -L 8080:127.0.0.1:8080 user@radxa-address
+ssh -L 8088:127.0.0.1:8088 -L 8080:127.0.0.1:8080 -L 8443:127.0.0.1:8443 user@radxa-address
 ```
 
 - `http://localhost:8088/#console/servos/parameters`：现有 Hatchery 舵机工作台。
@@ -143,7 +142,7 @@ ssh -L 8088:127.0.0.1:8088 -L 8080:127.0.0.1:8080 user@radxa-address
 - `http://localhost:8080/frame`：官方媒体链路的 PNG 快照接口。
 - `/reference`：保留的官方媒体控制台参考入口；Hatchery 的联调 UI 没有被替换。WebRTC 还需要 signalling 和 ICE 网络可达，HTTP 转发本身不证明视频 UDP 路径可用。
 
-当前 Hatchery Web 的正式 `robot.*` 状态订阅和 WebRTC 视频整合仍是后续任务；本轮维护工作台与相机预览可独立运行。用户只确认台架裸机和参考表后，才在配置中设置 `HATCHERY_BENCH_CONTROL=1`；它不解锁整机策略或批量硬件动作。
+当前 Hatchery Web 的正式 `robot.*` 状态订阅仍待接入；传感器页已集成 WebRTC 接收，实机视频尚待验收。维护工作台与相机预览可独立运行。用户只确认台架裸机和参考表后，才在配置中设置 `HATCHERY_BENCH_CONTROL=1`；它不解锁整机策略或批量硬件动作。
 
 ## 可选 systemd 安装
 
@@ -169,3 +168,5 @@ sudo systemctl start hatchery-maintenance mediad
 本地结果：Windows 两个维护 binary 构建通过；robotd / mediad 的 Linux ARM64 cargo check 通过。媒体检查使用 DOCS_RS 跳过 GStreamer / GLib 原生库探测，AWS-LC 的 ARM64 C 部分由本地 Zig 工具编译；这是源码类型检查，不是板端链接或运行结果。板端必须使用上述原生构建，不带 DOCS_RS。工具链和缓存仅在忽略的 .local/，不作为产品依赖或上板文件。
 
 正式协议保留官方时钟语义：robot.state.t 是进程经过秒数，t_ns 是板端 CLOCK_MONOTONIC 纳秒；维护协议 *_unix_ms 才是 Unix 毫秒，相机页面显示浏览器接收时间。三者不能互相冒充采样时间。无真实 IMU 时 imu 为空 / health.ready=false，默认 odom、gravity、gain 等官方兼容字段不能当作实际测量，正式前端须结合能力与健康状态解释。
+
+配置服务现已完整迁入，官方 systemd 单元仍为参考，未安装启用。Wi-Fi / 蓝牙前台启动见 [设备连接](DEVICE_CONNECTIONS.md)；RKAIQ 控制、视频端口与权限见 [相机实时参数](CAMERA_CONTROLS.md)。

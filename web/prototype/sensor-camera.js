@@ -1,90 +1,22 @@
-(function (root,factory) {
+(function(root,factory){'use strict';const api=factory(root);if(typeof module==='object'&&module.exports)module.exports=api;else root.SensorCamera=api;})(typeof window!=='undefined'?window:globalThis,function(root){
   'use strict';
-  const api=factory(root);
-  if (typeof module==='object' && module.exports) module.exports=api;
-  else root.SensorCamera=api;
-})(typeof window!=='undefined'?window:globalThis,function (root) {
-  'use strict';
-  // Preview reads mediad /frame; parameters use the authenticated same-origin gateway.
-  // Opening this page never connects to a camera or changes camera configuration.
-  let host=null,endpoint=null,timer=null,pending=null,generation=0,active=false,paused=false;
-  let frame=null,address='';
-  const put=(key,value)=>{const element=host?.querySelector('[data-camera-'+key+']');if(element)element.textContent=value;};
-  function parseAddress(text) {
-    try {const url=new URL(text);if(!['http:','https:'].includes(url.protocol) || url.username || url.password)return null;url.pathname='/frame';url.search='';url.hash='';return url.href;}catch(_){return null;}
+  let host=null,stream=null,address='',paused=false,active=false,download=null;
+  const put=(key,text)=>{const n=host?.querySelector('[data-camera-'+key+']');if(n)n.textContent=text;};
+  function parseAddress(value){try{const u=new URL(value);if(!['http:','https:'].includes(u.protocol)||u.username||u.password)return null;u.pathname='/frame';u.search='';u.hash='';return u.href;}catch(_){return null;}}
+  function controls(){if(!host)return;const info=stream?.snapshot();active=!!info?.active;host.querySelector('[data-camera-connect]').textContent=active?'断开':'连接';host.querySelector('[data-camera-pause]').disabled=!active;host.querySelector('[data-camera-pause]').textContent=paused?'继续':'暂停';host.querySelector('[data-camera-capture]').disabled=!['live','paused'].includes(info?.phase);}
+  function onState(info){if(!host)return;const live=info.phase==='live'||info.phase==='paused';put('status',info.message);put('source',live?info.phase==='paused'?'播放已暂停':'实时视频':'等待视频');host.querySelector('[data-camera-video]').hidden=!live;host.querySelector('[data-camera-empty]').hidden=live;controls();}
+  function snapshot(){const video=host.querySelector('[data-camera-video]');if(!video.videoWidth||video.readyState<2)return;const canvas=root.document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d').drawImage(video,0,0);canvas.toBlob(blob=>{if(!blob||!host)return;if(download)root.URL.revokeObjectURL(download);download=root.URL.createObjectURL(blob);const a=root.document.createElement('a');a.href=download;a.download='microduck-camera-'+Date.now()+'.png';a.click();},'image/png');}
+  function click(event){const button=event.target.closest('button');if(!button||!host?.contains(button)||button.disabled)return;
+    if(button.matches('[data-camera-connect]')){if(active){stream.stop();paused=false;controls();return;}address=host.querySelector('[data-camera-address]').value.trim();if(!parseAddress(address)){put('status','请输入有效的相机服务地址');return;}paused=false;stream.start(address,root.HATCHERY_BACKEND?.signallingPort||8443);controls();}
+    else if(button.matches('[data-camera-pause]')){paused=!paused;stream.pause(paused);controls();}
+    else if(button.matches('[data-camera-capture]'))snapshot();
   }
-  function controls() {
-    if (!host) return;
-    host.querySelector('[data-camera-connect]').textContent=active?'断开':'连接';
-    host.querySelector('[data-camera-address]').disabled=active;
-    host.querySelector('[data-camera-pause]').disabled=!active;
-    host.querySelector('[data-camera-pause]').textContent=paused?'继续':'暂停';
-    host.querySelector('[data-camera-capture]').disabled=!active || !!pending;
-    const badge=host.querySelector('[data-camera-source]');
-    badge.textContent=frame?active?(paused?'画面已暂停':frame.stale?'陈旧快照':'媒体快照'):'历史快照':'尚无画面';
-    badge.className='badge '+(frame?'readonly':'draft');
+  function mount(options){unmount();host=options?.container;if(!host)return false;
+    if(root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance'){const u=new URL(root.location.href);u.port=String(root.HATCHERY_BACKEND.cameraPort||8080);u.pathname='/';u.search='';u.hash='';address=u.href;}
+    const field=host.querySelector('[data-camera-address]');field.value=address;field.readOnly=root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance';
+    const video=host.querySelector('[data-camera-video]');stream=root.CameraStream.create({video,onState});host.addEventListener('click',click);
+    root.CameraParameters?.mount({container:host.querySelector('[data-camera-tuning]'),onState:data=>{if(host){put('fps',data.target_fps+' FPS');put('capture-size',data.width+' × '+data.height);put('mode',data.mode);}}});controls();return true;
   }
-  function cancelRequest() {
-    generation++;
-    if (pending) {root.clearTimeout(pending.timeout);pending.image.onload=null;pending.image.onerror=null;pending.image.src='';pending=null;}
-  }
-  function cancel() {
-    if (timer!==null) root.clearInterval(timer); timer=null;
-    cancelRequest();
-  }
-  function disconnect() {
-    cancel();active=false;paused=false;endpoint=null;
-    put('age',frame?'历史快照':'—');
-    put('status',frame?'已断开 · 保留最后快照及其接收时间。':'尚未读取相机帧。');controls();
-  }
-  function capture() {
-    if (!host || !active || pending || root.document?.hidden) return;
-    const ticket=++generation,image=new root.Image(),url=new URL(endpoint);
-    url.searchParams.set('_hatchery_snapshot',String(Date.now()));
-    const request={image,timeout:null};pending=request;
-    function finish(error) {
-      if (!host || ticket!==generation || pending!==request) return;
-      root.clearTimeout(request.timeout);image.onload=null;image.onerror=null;pending=null;
-      if (error) {if(frame)frame.stale=true;put('status',error+'；'+(frame?'保留上次快照，画面已陈旧。':'暂无画面。'));put('age',frame?'陈旧快照':'—');}
-      else {
-        frame={receivedAt:Date.now(),width:image.naturalWidth,height:image.naturalHeight,endpoint};
-        const display=host.querySelector('[data-camera-image]');
-        image.setAttribute('data-camera-image','');image.alt='板端媒体服务最近一次快照';image.hidden=false;display.replaceWith(image);
-        host.querySelector('[data-camera-empty]').hidden=true;
-        put('status','已连接 · 快照预览');
-        put('received',new Date(frame.receivedAt).toLocaleTimeString());put('resolution',`${frame.width} × ${frame.height}`);put('age','刚刚收到');
-        put('endpoint',frame.endpoint);
-      }
-      controls();
-    }
-    request.timeout=root.setTimeout(()=>{if(ticket===generation){image.src='';finish('读取超时');}},4000);
-    image.onload=()=>finish(null);image.onerror=()=>finish('读取失败，请核对媒体服务地址');image.src=url.href;controls();
-  }
-  function click(event) {
-    const button=event.target.closest('button');if(!button || !host?.contains(button) || button.disabled)return;
-    if (button.matches('[data-camera-connect]')) {
-      if(active){disconnect();return;}
-      address=host.querySelector('[data-camera-address]').value.trim();const parsed=parseAddress(address);
-      if(!parsed){put('status','请输入 http:// 或 https:// 媒体服务地址。');return;}
-      endpoint=parsed;active=true;paused=false;if(frame)frame.stale=true;put('status','正在连接…');capture();
-      timer=root.setInterval(()=>{if(frame)put('age',`${Math.floor((Date.now()-frame.receivedAt)/1000)} s 前收到${frame.stale?' · 陈旧':''}`);if(!paused)capture();},1000);
-    }else if(button.matches('[data-camera-pause]')){paused=!paused;if(paused){cancelRequest();put('status','预览已暂停');}else capture();controls();}
-    else if(button.matches('[data-camera-capture]'))capture();
-  }
-  function mount(options) {
-    unmount();host=options?.container;if(!host)return false;
-    if(root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance'){
-      const url=new URL(root.location.href);url.port=String(root.HATCHERY_BACKEND.cameraPort||8080);url.pathname='/';url.search='';url.hash='';address=url.href;
-    }
-    host.querySelector('[data-camera-address]').value=address;host.querySelector('[data-camera-address]').readOnly=root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance';host.addEventListener('click',click);
-    root.CameraParameters?.mount({container:host.querySelector('[data-camera-tuning]'),onState:data=>{
-      if(!host)return;
-      put('fps',data.target_fps+' FPS');put('capture-size',data.width+' × '+data.height);put('mode',data.mode);
-    }});
-    controls();return true;
-  }
-  function unmount() {
-    root.CameraParameters?.unmount();cancel();host?.removeEventListener('click',click);host=null;active=false;paused=false;endpoint=null;frame=null;
-  }
-  return Object.freeze({mount,unmount,parseAddress,snapshot:()=>({mounted:!!host,active,paused,hasFrame:!!frame})});
+  function unmount(){root.CameraParameters?.unmount();stream?.destroy();stream=null;host?.removeEventListener('click',click);if(download)root.URL.revokeObjectURL(download);download=null;host=null;active=false;paused=false;}
+  return Object.freeze({mount,unmount,parseAddress,snapshot:()=>({mounted:!!host,active,paused,hasFrame:!!stream&&['live','paused'].includes(stream.snapshot().phase)})});
 });

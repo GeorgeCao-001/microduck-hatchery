@@ -6672,3 +6672,6 @@ mod tests {
 
 /// Hatchery desktop/board maintenance RPC; separate from official robot.* types.
 pub mod maintenance;
+
+// Hatchery Web connection management; official net.* remains unchanged.
+pub mod connections;

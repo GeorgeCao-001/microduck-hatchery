@@ -119,7 +119,7 @@
       "upstream_path": "mediad/src/lib.rs",
       "path": "src/daemons/mediad/src/lib.rs",
       "upstream_sha256": "2824e055df0a79a03b2e2d533ca584c53bfd69cb40ce90415a868569c00993a9",
-      "installed_sha256": "6fd9fc11a657671aa0bf549292c19341e13f956548856aac368c5c0b9dcaba65",
+      "installed_sha256": "a2f7b8f909113cfd72487631271de910ad0fef30537d8430371f4e9f2c3b3c9e",
       "modified": true
     },
     {
@@ -252,7 +252,7 @@
       "upstream_path": "duck-ipc-proto/src/lib.rs",
       "path": "protocol/duck-ipc-proto/src/lib.rs",
       "upstream_sha256": "53483806ed6b76eeccdf7930e879ed90fbaa4e8c3b290c4995d4668ab1df74df",
-      "installed_sha256": "6f04c98aab007ab3d419cb020d0f0761d7e3a2ed6ee7cc362ec3c3294b48a390",
+      "installed_sha256": "fe64171b3c64847d62c96a06b1eac015ef1d6094b45089c9ce6a572be1ab55aa",
       "modified": true
     },
     {
@@ -867,15 +867,113 @@
       "upstream_path": "Cargo.toml",
       "path": "src/Cargo.toml",
       "upstream_sha256": "ac9bc188aeb61bcde560b5818447023f1e3b6af74ce8bff7977565e6f324f111",
-      "installed_sha256": "6ab8848b1927fbab662d6708b526e0f1bf94b6ae2f0868062460d0c2942c5db6",
+      "installed_sha256": "6601b28927234a6f6c66829049184df5a5ce1484ef89219b676fff962f341818",
       "modified": true
     },
     {
       "upstream_path": "Cargo.lock",
       "path": "src/Cargo.lock",
       "upstream_sha256": "fa1668b2e909f80bb4fc6db66a634742f6b42cfe79df6b51c6d5d90db36a08cf",
-      "installed_sha256": "6d41224f0bd538a3f141b218ab7c843e27ea491aaf0df11d339764d6e142ff31",
+      "installed_sha256": "469c4a2b7632458c2b65921759eaffb95325e64bed540e3a192a50e463044ab8",
       "modified": true
+    },
+    {
+      "upstream_path": "configd/Cargo.toml",
+      "path": "src/daemons/configd/Cargo.toml",
+      "upstream_sha256": "87e43583348fecaf23ba27f99b2154dfe19800cc3ddf7ccae875c35a5766b226",
+      "installed_sha256": "d815f99b3c6c7e008ebc6d77896cd261e7970d4100b0afbea8b6644ad690921e",
+      "modified": true
+    },
+    {
+      "upstream_path": "configd/src/bluez.rs",
+      "path": "src/daemons/configd/src/bluez.rs",
+      "upstream_sha256": "29b79a456cbec13fd57360b90350424fd05af024965781c28426b7ea3801b6fc",
+      "installed_sha256": "ec2d5b8370aaf11a6597e80cec8c2974dde1a56daadf29455fa162f9beb09006",
+      "modified": true
+    },
+    {
+      "upstream_path": "configd/src/identity.rs",
+      "path": "src/daemons/configd/src/identity.rs",
+      "upstream_sha256": "7357e76df9ef3202c9dc985a86bac0a059fd3828172938c85c21d14bd03c4b0c",
+      "installed_sha256": "7357e76df9ef3202c9dc985a86bac0a059fd3828172938c85c21d14bd03c4b0c",
+      "modified": false
+    },
+    {
+      "upstream_path": "configd/src/lib.rs",
+      "path": "src/daemons/configd/src/lib.rs",
+      "upstream_sha256": "6ce1342ed3ab38054032e13e22875fd942210e0613e3ff7c233dc70fabc829c6",
+      "installed_sha256": "6ce1342ed3ab38054032e13e22875fd942210e0613e3ff7c233dc70fabc829c6",
+      "modified": false
+    },
+    {
+      "upstream_path": "configd/src/logs.rs",
+      "path": "src/daemons/configd/src/logs.rs",
+      "upstream_sha256": "8082aa546ce023c95a0bc3b0b8871ccc4fe8a87cd1d3b55e9c4278ab6cf24284",
+      "installed_sha256": "8082aa546ce023c95a0bc3b0b8871ccc4fe8a87cd1d3b55e9c4278ab6cf24284",
+      "modified": false
+    },
+    {
+      "upstream_path": "configd/src/main.rs",
+      "path": "src/daemons/configd/src/main.rs",
+      "upstream_sha256": "1f40a279b3f35a9f7c8c582b8160339565b9a9684457ce6e1859561a3922352d",
+      "installed_sha256": "673f1540b4f56a34f122e410c7480eab2c802977353d8996549905862969ca7e",
+      "modified": true
+    },
+    {
+      "upstream_path": "configd/src/net.rs",
+      "path": "src/daemons/configd/src/net.rs",
+      "upstream_sha256": "405e4206952155cc3a154d918e6205f89b1dd6e717c0898080ddd23eda42f709",
+      "installed_sha256": "7012c47d091787dec292c5ca011c597d73177049dfe0af30af7b5bbffa1aa94b",
+      "modified": true
+    },
+    {
+      "upstream_path": "configd/src/nm.rs",
+      "path": "src/daemons/configd/src/nm.rs",
+      "upstream_sha256": "42639f6762ca6ae7c39b7d95104dfe0a4d4b6c68b59ec8b7166cbcb7817cc69d",
+      "installed_sha256": "f970d60f44a905023ca3d498b170feb3d3d2c16ba6d49148977e5dc0286b5d31",
+      "modified": true
+    },
+    {
+      "upstream_path": "configd/src/pad.rs",
+      "path": "src/daemons/configd/src/pad.rs",
+      "upstream_sha256": "7489b75f443a41f124880b1235e26a0bcba5b170e9031677d967c5ae26f4bbd4",
+      "installed_sha256": "8d7e10fb1f4f559423fbe0b8cc246840a8188d5af540716fefe9ef3301fb5346",
+      "modified": true
+    },
+    {
+      "upstream_path": "configd/src/power.rs",
+      "path": "src/daemons/configd/src/power.rs",
+      "upstream_sha256": "eec7fd812765c248e261c62fe1a4621cd0ba77f33f5406b02c0140c6141762ab",
+      "installed_sha256": "eec7fd812765c248e261c62fe1a4621cd0ba77f33f5406b02c0140c6141762ab",
+      "modified": false
+    },
+    {
+      "upstream_path": "configd/src/store.rs",
+      "path": "src/daemons/configd/src/store.rs",
+      "upstream_sha256": "a138b5cce1ef41dfa64c844fe972011abc6a6ae66bdce4c7e21e4eb6480fc4d4",
+      "installed_sha256": "a138b5cce1ef41dfa64c844fe972011abc6a6ae66bdce4c7e21e4eb6480fc4d4",
+      "modified": false
+    },
+    {
+      "upstream_path": "configd/src/units.rs",
+      "path": "src/daemons/configd/src/units.rs",
+      "upstream_sha256": "d348d18a4ee10929c700da9104f4abd5500537ab21d3927186ca68f17d76afc6",
+      "installed_sha256": "d348d18a4ee10929c700da9104f4abd5500537ab21d3927186ca68f17d76afc6",
+      "modified": false
+    },
+    {
+      "upstream_path": "configd/systemd/configd.service",
+      "path": "src/daemons/configd/systemd/configd.service",
+      "upstream_sha256": "62cea36995f6dfd7695c95541f60d1d269c0b1c4a99e97eb95ffbf67a929cce9",
+      "installed_sha256": "62cea36995f6dfd7695c95541f60d1d269c0b1c4a99e97eb95ffbf67a929cce9",
+      "modified": false
+    },
+    {
+      "upstream_path": "configd/systemd/sysusers.d/README",
+      "path": "src/daemons/configd/systemd/sysusers.d/README",
+      "upstream_sha256": "64c2e5700a0681e26a320cb3564aea371e018c244203e959529ed98f0cd97ec3",
+      "installed_sha256": "64c2e5700a0681e26a320cb3564aea371e018c244203e959529ed98f0cd97ec3",
+      "modified": false
     }
   ],
   "omitted_upstream_tests": [
@@ -889,5 +987,5 @@
     }
   ],
   "hatchery_notice": "src/NOTICE-UPSTREAM.md",
-  "scope": "camera/servo daemon slice; optional features retain the lightweight maintenance entrypoints; hardware validation deferred to the user"
+  "scope": "camera/servo slice plus officially reused configd for Wi-Fi/Bluetooth; board runtime and hardware validation deferred to the user"
 }

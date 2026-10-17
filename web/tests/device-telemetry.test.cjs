@@ -58,7 +58,7 @@ test('daemon states distinguish failure, restarting, stopped, absent and foregro
   assert.equal(telemetry.daemonState(row('absent')).label,'未安装服务');
   assert.equal(telemetry.daemonState(row('unknown')).label,'未知');
   const foreground=telemetry.daemonState(row('absent',null,123));
-  assert.equal(foreground.label,'运行中');assert.match(foreground.hint,/独立进程/);
+  assert.equal(foreground.label,'独立运行');assert.match(foreground.hint,/进程仍在/);
   assert.equal(telemetry.daemonState(row('unknown','stop-sigterm',123)).label,'停止中');
 });
 

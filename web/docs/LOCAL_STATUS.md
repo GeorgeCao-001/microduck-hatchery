@@ -297,3 +297,10 @@ Radxa Zero 3W 是整机主要运行平台，电脑 FD1985 / FE-URT2 和 Hatchery
 - 现有 gateway / RPC / robotd / bus 增加单颗 READ、限幅目标与输出开关。默认只读；台架控制需显式启动选项、FD HLS 参考 profile 与裸机确认。串行有界队列、期限、去重、实时模式 / 分辨率 / 位置预检及应答后回读；无 EEPROM、固件或新增依赖。
 - Windows 后端构建、受影响 JS 语法检查通过；单文件版本同步。自动审批按当前需明确要求测试的约束拒绝测试命令，本轮未运行自动测试或浏览器检查，未访问实际串口或执行写入。
 - 这是裸机软件基础，不是完整 FD 功能、批量硬件控制、装机标定或 Radxa 部署验收。启动和限制见 [维护后端](../../docs/MAINTENANCE_BACKEND.md#轻量台架工作台2026-10-11)。未暂存、提交或推送。
+
+## 2026-10-17 · 官方 configd、网络选择与相机直播
+
+- 迁入官方 configd 完整模块及 Apache-2.0 许可，固定来源提交与逐文件哈希。保留 NetworkManager / BlueZ 后端和 Unix peer 凭据检查，仅添加 Web 所需开关、扫描、断开与显式设备操作；复用已保存 Wi-Fi 配置。设备页可选择 Wi-Fi / 蓝牙并提交真实操作，地址 / SSH 收入设备详情，systemd inactive 与独立运行分别显示。
+- 传感器页复用官方 mediad WebRTC 信令、SDP / ICE 与视频轨道，不再轮询 PNG；保留原预览尺寸、暂停、快照与离页清理。基础相机区保持紧凑，高级区加入实际支持的白平衡 / 红蓝增益 / 对比度 / 饱和度。Rockchip SDK 的报文、CPROC 与 AWB 接口来源见 docs/RKAIQ_IMPORT.json，沿用板上 RKAIQ 服务；能力查询和写入回读失败时不声称成功。
+- 最新本地检查：121 项 Node、18 项 Edge 模拟交互、11 项实际 Windows gateway 的 loopback HTTP 合约、3 项协议 Rust 测试及 8 项直接引用源文件的最小 Rust harness 测试通过。Windows 两个维护 binary 构建通过；mediad / configd Linux ARM64 类型检查通过。本机 DOCS_RS 跳过 GStreamer 原生探测，不代表 ARM64 原生链接或完整 crate 测试通过；浏览器视频来自明确模拟的 MediaStream，不代表板端画面验收。
+- 两份单文件网页同步。构建与前台启动步骤见 docs/DEVICE_CONNECTIONS.md、docs/CAMERA_CONTROLS.md。特权 systemd 适配被自动审批拒绝，保留未改动的官方参考单元，持久部署尚未完成；未在板上安装、启用服务、切换网络、配对、写 ISP 或操作舵机。板端连接 / 画面 / 权限与参数效果由用户验收；未暂存、提交或推送。

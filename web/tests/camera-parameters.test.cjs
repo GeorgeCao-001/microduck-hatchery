@@ -42,3 +42,9 @@ test('basic camera controls remain compact and advanced parameters start folded'
   assert.match(html,/<details class="camera-advanced">/);assert.doesNotMatch(html,/<details[^>]*\bopen/);
   assert.doesNotMatch(html,/data-camera-param-(number|range)="(fps|width|height|mode)"/);
 });
+
+test('automatic white balance disables manual gain editing until switched off',()=>{
+  const input=state();input.controls.push({key:'auto_white_balance',min:0,max:1,step:1,value:1,writable:true,unit:'',source:'isp',choices:[]});
+  assert.equal(camera.canEdit(input,'white_balance_temperature'),false);
+  input.controls.at(-1).value=0;assert.equal(camera.canEdit(input,'white_balance_temperature'),true);
+});

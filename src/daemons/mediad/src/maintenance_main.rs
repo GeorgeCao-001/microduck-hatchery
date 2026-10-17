@@ -1,5 +1,6 @@
 //! Loopback gateway subset. Commands are forwarded; no bus access here.
 mod camera_gateway;
+mod config_gateway;
 use duck_ipc_proto::maintenance::MAX_FRAME;
 use serde_json::{Value, json};
 use std::{
@@ -18,7 +19,12 @@ fn header(request: &Request, name: &'static str) -> Option<String> {
         .find(|h| h.field.equiv(name))
         .map(|h| h.value.as_str().to_owned())
 }
-fn rpc(address: SocketAddr, token: &str, method: &str, params: Option<Value>) -> Result<Value, String> {
+fn rpc(
+    address: SocketAddr,
+    token: &str,
+    method: &str,
+    params: Option<Value>,
+) -> Result<Value, String> {
     let mut stream =
         TcpStream::connect_timeout(&address, Duration::from_secs(1)).map_err(|e| e.to_string())?;
     stream
@@ -27,8 +33,10 @@ fn rpc(address: SocketAddr, token: &str, method: &str, params: Option<Value>) ->
     stream
         .set_write_timeout(Some(Duration::from_secs(2)))
         .map_err(|e| e.to_string())?;
-    let mut request =
-        serde_json::to_vec(&json!({"jsonrpc":"2.0","id":1,"token":token,"method":method,"params":params})).unwrap();
+    let mut request = serde_json::to_vec(
+        &json!({"jsonrpc":"2.0","id":1,"token":token,"method":method,"params":params}),
+    )
+    .unwrap();
     request.push(b'\n');
     stream.write_all(&request).map_err(|e| e.to_string())?;
     let mut frame = Vec::new();
@@ -143,6 +151,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let allowed_hosts = [http.to_string(), format!("localhost:{}", http.port())];
     let server = Server::http(http).map_err(|e| std::io::Error::other(e.to_string()))?;
     println!("mediad maintenance gateway: http://{http}/#console/servos/parameters");
+    let connections = config_gateway::Connections::new();
     for mut request in server.incoming_requests() {
         let host = header(&request, "Host").unwrap_or_default();
         if !allowed_hosts.contains(&host)
@@ -159,7 +168,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         let url = request.url().split('?').next().unwrap_or("").to_owned();
         let camera = url == "/api/v1/maintenance/camera";
-        let command = (url == "/api/v1/maintenance/command" || camera) && request.method() == &Method::Post;
+        let network = url == "/api/v1/maintenance/connections";
+        let command = (url == "/api/v1/maintenance/command" || camera || network)
+            && request.method() == &Method::Post;
         if request.method() != &Method::Get && !command {
             send(
                 request,
@@ -186,28 +197,67 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             let params = if command {
-                if header(&request,"Origin") != Some(format!("http://{host}"))
-                    || header(&request,"X-Hatchery-Command").as_deref() != Some("1")
-                    || !header(&request,"Content-Type").is_some_and(|v| v.starts_with("application/json"))
-                    || request.body_length().is_none_or(|n| n > 8192) {
-                    send(request,403,b"Command origin, content type or size rejected".to_vec(),"text/plain",None);
+                if header(&request, "Origin") != Some(format!("http://{host}"))
+                    || header(&request, "X-Hatchery-Command").as_deref() != Some("1")
+                    || !header(&request, "Content-Type")
+                        .is_some_and(|v| v.starts_with("application/json"))
+                    || request.body_length().is_none_or(|n| n > 8192)
+                {
+                    send(
+                        request,
+                        403,
+                        b"Command origin, content type or size rejected".to_vec(),
+                        "text/plain",
+                        None,
+                    );
                     continue;
                 }
                 let mut body = Vec::new();
-                if request.as_reader().take(8193).read_to_end(&mut body).is_err() || body.len() > 8192 {
-                    send(request,400,b"Invalid command body".to_vec(),"text/plain",None); continue;
+                if request
+                    .as_reader()
+                    .take(8193)
+                    .read_to_end(&mut body)
+                    .is_err()
+                    || body.len() > 8192
+                {
+                    send(
+                        request,
+                        400,
+                        b"Invalid command body".to_vec(),
+                        "text/plain",
+                        None,
+                    );
+                    continue;
                 }
                 match serde_json::from_slice::<Value>(&body) {
                     Ok(value) => Some(value),
-                    Err(_) => { send(request,400,b"Invalid command JSON".to_vec(),"text/plain",None); continue; }
+                    Err(_) => {
+                        send(
+                            request,
+                            400,
+                            b"Invalid command JSON".to_vec(),
+                            "text/plain",
+                            None,
+                        );
+                        continue;
+                    }
                 }
-            } else { None };
+            } else {
+                None
+            };
             let method = match url.as_str() {
                 "/api/v1/maintenance/state" => "maintenance.state",
                 "/api/v1/maintenance/ports" => "maintenance.ports",
                 "/api/v1/maintenance/device" => "maintenance.device",
                 "/api/v1/maintenance/command" if command => "maintenance.command",
-                "/api/v1/maintenance/camera" => if command { duck_ipc_proto::maintenance::CAMERA_SET } else { duck_ipc_proto::maintenance::CAMERA_GET },
+                "/api/v1/maintenance/connections" => "hatchery.connections",
+                "/api/v1/maintenance/camera" => {
+                    if command {
+                        duck_ipc_proto::maintenance::CAMERA_SET
+                    } else {
+                        duck_ipc_proto::maintenance::CAMERA_GET
+                    }
+                }
                 _ => {
                     send(
                         request,
@@ -219,12 +269,38 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     continue;
                 }
             };
-            let reply = if camera { camera_gateway::call(method, params) } else { rpc(rpc_address, &rpc_token, method, params) };
+            let mut reply_error_status = 503;
+            let reply = if network {
+                if command {
+                    match params.and_then(|v| {
+                        serde_json::from_value::<duck_ipc_proto::connections::Change>(v).ok()
+                    }) {
+                        Some(change)
+                            if change.command.validate().is_ok()
+                                && !change.request_id.is_empty()
+                                && change.request_id.len() <= 80 =>
+                        {
+                            reply_error_status = 409;
+                            connections.submit(change)
+                        }
+                        _ => {
+                            reply_error_status = 400;
+                            Err("Invalid connection command".into())
+                        }
+                    }
+                } else {
+                    Ok(connections.state())
+                }
+            } else if camera {
+                camera_gateway::call(method, params)
+            } else {
+                rpc(rpc_address, &rpc_token, method, params)
+            };
             let (status, result) = match reply {
                 Ok(v) => (200, v),
                 Err(e) => (
-                    503,
-                    json!({"error":if camera {"camera_unavailable"} else {"robotd_unavailable"},"message":e,"read_only":true}),
+                    reply_error_status,
+                    json!({"error":if network {"connection_rejected"} else if camera {"camera_unavailable"} else {"robotd_unavailable"},"message":e,"read_only":true}),
                 ),
             };
             send(
@@ -241,9 +317,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let mut cookie = None;
                 if path == root.join("index.html") {
                     let html = String::from_utf8(data)?;
-                    let camera_port=env::var("HATCHERY_CAMERA_HTTP_PORT").ok().and_then(|p|p.parse::<u16>().ok()).filter(|p|*p>0).unwrap_or(8080);
-                    let bootstrap=format!("<head><script>window.HATCHERY_BACKEND={{apiBase:'/api/v1/maintenance',readOnly:true,cameraPort:{camera_port}}};</script>");
-                    data=html.replacen("<head>",&bootstrap,1).into_bytes();
+                    let camera_port = env::var("HATCHERY_CAMERA_HTTP_PORT")
+                        .ok()
+                        .and_then(|p| p.parse::<u16>().ok())
+                        .filter(|p| *p > 0)
+                        .unwrap_or(8080);
+                    let signalling_port = env::var("HATCHERY_SIGNALLING_PORT")
+                        .ok()
+                        .and_then(|p| p.parse::<u16>().ok())
+                        .filter(|p| *p > 0)
+                        .unwrap_or(8443);
+                    let bootstrap = format!(
+                        "<head><script>window.HATCHERY_BACKEND={{apiBase:'/api/v1/maintenance',readOnly:true,cameraPort:{camera_port},signallingPort:{signalling_port}}};</script>"
+                    );
+                    data = html.replacen("<head>", &bootstrap, 1).into_bytes();
                     cookie = Some(format!(
                         "hatchery_session={http_token}; HttpOnly; SameSite=Strict; Path=/"
                     ));

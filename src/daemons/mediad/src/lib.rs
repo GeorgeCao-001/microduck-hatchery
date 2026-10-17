@@ -24,6 +24,7 @@
 /// directions, and which sensor mode they belong to.
 pub mod camera;
 pub mod camera_controls;
+mod rkaiq;
 pub mod config;
 /// The account credential `updaterd` writes, read by the two things here that need it.
 pub mod producer;

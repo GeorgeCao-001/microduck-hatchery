@@ -15,7 +15,7 @@ for module in gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0 gstreamer-webr
 done
 cd "$ROOT/src"
 cargo build --locked --release -j "${HATCHERY_BUILD_JOBS:-1}" \
-    -p robotd -p mediad --features robotd/board-runtime,mediad/board-runtime \
-    --bin robotd --bin mediad --bin robotd-maintenance --bin mediad-maintenance
-printf '%s\n' 'Built src/target/release/{robotd,mediad,robotd-maintenance,mediad-maintenance}.' \
+    -p robotd -p mediad -p configd --features robotd/board-runtime,mediad/board-runtime,configd/board-runtime \
+    --bin robotd --bin mediad --bin configd --bin robotd-maintenance --bin mediad-maintenance
+printf '%s\n' 'Built src/target/release/{robotd,mediad,configd,robotd-maintenance,mediad-maintenance}.' \
     'Next: configure deploy/radxa/hatchery.env.example. This command did not start hardware.'
