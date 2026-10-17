@@ -147,6 +147,7 @@ pub fn snapshot(state: &State) -> DeviceSnapshot {
     DeviceSnapshot {
         protocol_version: DEVICE_VERSION.into(), source: "host-system".into(), generated_unix_ms: crate::unix_ms(),
         identity: identity(), system: system(), interfaces: interfaces(), bluetooth: bluetooth(),
+        services: Some(crate::services::snapshot()),
         service: DeviceService { name: "robotd-maintenance".into(), version: env!("CARGO_PKG_VERSION").into(),
             servo_source: state.source.clone(), servo_connection: state.connection.clone(), servo_fake: state.fake,
             serial_port: state.port.clone(), baud: state.baud, control_enabled: state.control_enabled, bus_owner: state.bus_owner.clone() },

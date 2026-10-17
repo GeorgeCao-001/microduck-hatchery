@@ -59,7 +59,7 @@ flowchart TD
     C --> B[motor bus]
 ```
 
-web/ 只负责页面、目标草稿、展示缓存和只读回放。板端 gateway 位于 mediad；官方 webclient 已保留在 crate 内，显式 `/reference` 提供参考入口，不替代 Hatchery UI。媒体根页面是本项目的浅色只读相机预览。协议库不依赖前端、硬件寄存器或 RL。
+web/ 只负责页面、目标草稿、展示缓存和只读回放。板端 gateway 位于 mediad；官方 webclient 已保留在 crate 内，显式 `/reference` 提供参考入口，不替代 Hatchery UI。媒体根页面是本项目的浅色只读相机预览。协议库不依赖前端、硬件寄存器或 RL。 相机参数由同源维护 gateway 转发本机媒体 RPC，mediad 独占 V4L2 写入并仲裁自动 / 手动曝光；前端不直接调用驱动，采集帧率、分辨率与模式仍只读。见 [相机实时参数](CAMERA_CONTROLS.md)。
 
 `robotd` 与 `duck-control` 保留官方的上层职责：生命周期、模式、状态、执行、控制循环和安全裁决。前端或 gateway 不能成为第二个权威控制器，不能直接写总线。命令接收、应用/读回和物理到位分别定义，逐关节结果由设备端产生。
 

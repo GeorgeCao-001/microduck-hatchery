@@ -46,3 +46,23 @@ test('one current endpoint uses GET only; static pages, stale data and late repl
   requests[1].resolve({ok:true,text:async()=>JSON.stringify(hostStatus())});await pending;
   assert.equal(api.snapshot().data,null);assert.equal(intervals.size,0);
 });
+
+test('optional daemon reports preserve old backends and reject malformed running claims',()=>{
+  assert.ok(session.validate(hostStatus()));
+  const daemon={name:'mediad',unit:'mediad.service',state:'active',sub_state:'running',main_pid:200,process_pid:201};
+  const input=hostStatus();input.services=[daemon];
+  const checked=session.validate(input);assert.equal(checked.services[0].process_pid,201);
+  checked.services[0].state='failed';assert.equal(input.services[0].state,'active');
+  for(const edit of [
+    v=>v.services=[daemon,daemon],
+    v=>v.services[0].name='arbitrary',
+    v=>v.services[0].unit='robotd.service',
+    v=>v.services[0].state='healthy',
+    v=>v.services[0].process_pid=-1,
+    v=>v.services[0].main_pid=1.5,
+    v=>v.services[0].sub_state=42,
+    v=>v.services=Array(9).fill(daemon)
+  ]){
+    const bad=hostStatus();bad.services=[{...daemon}];edit(bad);assert.equal(session.validate(bad),null);
+  }
+});

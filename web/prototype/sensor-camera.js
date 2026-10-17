@@ -5,7 +5,7 @@
   else root.SensorCamera=api;
 })(typeof window!=='undefined'?window:globalThis,function (root) {
   'use strict';
-  // Reads mediad's existing /frame PNG. Cross-origin <img> does not require CORS.
+  // Preview reads mediad /frame; parameters use the authenticated same-origin gateway.
   // Opening this page never connects to a camera or changes camera configuration.
   let host=null,endpoint=null,timer=null,pending=null,generation=0,active=false,paused=false;
   let frame=null,address='';
@@ -15,10 +15,10 @@
   }
   function controls() {
     if (!host) return;
-    host.querySelector('[data-camera-connect]').textContent=active?'断开预览':'连接预览';
+    host.querySelector('[data-camera-connect]').textContent=active?'断开':'连接';
     host.querySelector('[data-camera-address]').disabled=active;
     host.querySelector('[data-camera-pause]').disabled=!active;
-    host.querySelector('[data-camera-pause]').textContent=paused?'继续读取':'暂停读取';
+    host.querySelector('[data-camera-pause]').textContent=paused?'继续':'暂停';
     host.querySelector('[data-camera-capture]').disabled=!active || !!pending;
     const badge=host.querySelector('[data-camera-source]');
     badge.textContent=frame?active?(paused?'画面已暂停':frame.stale?'陈旧快照':'媒体快照'):'历史快照':'尚无画面';
@@ -51,7 +51,7 @@
         const display=host.querySelector('[data-camera-image]');
         image.setAttribute('data-camera-image','');image.alt='板端媒体服务最近一次快照';image.hidden=false;display.replaceWith(image);
         host.querySelector('[data-camera-empty]').hidden=true;
-        put('status','已收到媒体服务快照 · 只读显示。');
+        put('status','已连接 · 快照预览');
         put('received',new Date(frame.receivedAt).toLocaleTimeString());put('resolution',`${frame.width} × ${frame.height}`);put('age','刚刚收到');
         put('endpoint',frame.endpoint);
       }
@@ -66,17 +66,25 @@
       if(active){disconnect();return;}
       address=host.querySelector('[data-camera-address]').value.trim();const parsed=parseAddress(address);
       if(!parsed){put('status','请输入 http:// 或 https:// 媒体服务地址。');return;}
-      endpoint=parsed;active=true;paused=false;if(frame)frame.stale=true;put('status','正在请求媒体服务快照…');capture();
+      endpoint=parsed;active=true;paused=false;if(frame)frame.stale=true;put('status','正在连接…');capture();
       timer=root.setInterval(()=>{if(frame)put('age',`${Math.floor((Date.now()-frame.receivedAt)/1000)} s 前收到${frame.stale?' · 陈旧':''}`);if(!paused)capture();},1000);
-    }else if(button.matches('[data-camera-pause]')){paused=!paused;if(paused){cancelRequest();put('status','显示已暂停 · 不停止板端采集。');}else capture();controls();}
+    }else if(button.matches('[data-camera-pause]')){paused=!paused;if(paused){cancelRequest();put('status','预览已暂停');}else capture();controls();}
     else if(button.matches('[data-camera-capture]'))capture();
   }
   function mount(options) {
     unmount();host=options?.container;if(!host)return false;
-    host.querySelector('[data-camera-address]').value=address;host.addEventListener('click',click);controls();return true;
+    if(root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance'){
+      const url=new URL(root.location.href);url.port=String(root.HATCHERY_BACKEND.cameraPort||8080);url.pathname='/';url.search='';url.hash='';address=url.href;
+    }
+    host.querySelector('[data-camera-address]').value=address;host.querySelector('[data-camera-address]').readOnly=root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance';host.addEventListener('click',click);
+    root.CameraParameters?.mount({container:host.querySelector('[data-camera-tuning]'),onState:data=>{
+      if(!host)return;
+      put('fps',data.target_fps+' FPS');put('capture-size',data.width+' × '+data.height);put('mode',data.mode);
+    }});
+    controls();return true;
   }
   function unmount() {
-    cancel();host?.removeEventListener('click',click);host=null;active=false;paused=false;endpoint=null;frame=null;
+    root.CameraParameters?.unmount();cancel();host?.removeEventListener('click',click);host=null;active=false;paused=false;endpoint=null;frame=null;
   }
   return Object.freeze({mount,unmount,parseAddress,snapshot:()=>({mounted:!!host,active,paused,hasFrame:!!frame})});
 });

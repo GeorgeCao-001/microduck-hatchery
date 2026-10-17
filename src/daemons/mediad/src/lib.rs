@@ -23,6 +23,7 @@
 /// What the camera's geometry is — the intrinsics a consumer needs to turn pixels into
 /// directions, and which sensor mode they belong to.
 pub mod camera;
+pub mod camera_controls;
 pub mod config;
 /// The account credential `updaterd` writes, read by the two things here that need it.
 pub mod producer;

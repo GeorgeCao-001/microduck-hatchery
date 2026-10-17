@@ -39,7 +39,7 @@
       ${link('#console/sensors', '传感器', view === 'sensors')}
       ${link('#console/logs', '日志', view === 'logs')}
       <hr class="divider">${link('#records', '实验记录', false)}${link('#learn', '教程', false)}
-      <p>${view === 'parameters' ? '扫描和选择实际舵机 ID；关联关节、调节、参数与标定在同一页。' : view === 'sensors' ? '观察 IMU、ToF 与相机画面；各项独立标明数据来源。' : '真实舵机调试位于参数与标定；其他页面仍使用浏览器样例。'}</p>
+      <p>${view === 'device' ? '查看当前设备的连接与运行情况。' : view === 'parameters' ? '扫描和选择实际舵机 ID；关联关节、调节、参数与标定在同一页。' : view === 'sensors' ? '观察 IMU、ToF 与相机画面；各项独立标明数据来源。' : '真实舵机调试位于参数与标定；其他页面仍使用浏览器样例。'}</p>
     </nav>`;
   }
 
@@ -58,9 +58,8 @@
       const f = store.getFeedback(item.id, state);
       return `<tr class="${item.id === joint.id ? 'selected' : ''}"><td><button class="joint-select" data-joint="${item.id}" aria-pressed="${item.id === joint.id}"><strong>${escape(item.name)}</strong><span>#${root.ServoParameters?.boundId(item.id) ?? item.id} · ${escape(item.raw)}</span></button></td><td class="mono">${f.available ? numberText(f.value) : '—'}</td><td class="mono">${f.available ? numberText(f.temp) : '—'}</td><td class="joint-status">${f.available ? (f.stale ? '陈旧' : '样例') : '缺测'}</td></tr>`;
     }).join('')).join('');
-    return `<div class="console-wrap"><section class="console-heading"><div><span class="eyebrow">DEVICE WORKSPACE</span><h1>调试台</h1><p>先核对设备与反馈，再进行台架操作。</p></div><div>${isMaintenance || isDevice ? '' : `<label for="state-select" class="small muted">预览状态</label><select id="state-select" class="design-state-select">${Object.keys(stateNames).map(value => `<option value="${value}" ${value === state ? 'selected' : ''}>${stateNames[value]}</option>`).join('')}</select>`}<button class="button secondary" data-connect-open ${isMaintenance ? 'data-connect-default="maintenance"' : ''}>连接说明</button></div></section>
-      ${root.DeviceWorkspace.headerMarkup()}
-      <div class="status-banner" data-device-banner>正在核对设备身份与后端状态…</div>
+    return `<div class="console-wrap"><section class="console-heading"><div><span class="eyebrow">${isDevice ? 'MY MICRODUCK' : 'DEVICE WORKSPACE'}</span><h1>${isDevice ? '我的设备' : '调试台'}</h1><p>${isDevice ? '认识你的小鸭，随时了解它的状态。' : '先核对设备与反馈，再进行台架操作。'}</p></div><div>${isMaintenance || isDevice ? '' : `<label for="state-select" class="small muted">预览状态</label><select id="state-select" class="design-state-select">${Object.keys(stateNames).map(value => `<option value="${value}" ${value === state ? 'selected' : ''}>${stateNames[value]}</option>`).join('')}</select>`}${isDevice ? `<button type="button" class="button secondary" data-device-refresh>${root.DeviceOverview.icon('refresh')}刷新</button><button type="button" class="button secondary" data-device-settings>${root.DeviceOverview.icon('edit')}显示设置</button>` : ''}<button class="button secondary" data-connect-open ${isMaintenance ? 'data-connect-default="maintenance"' : ''}>连接说明</button></div></section>
+      ${isDevice ? '' : root.DeviceWorkspace.headerMarkup() + '<div class="status-banner" data-device-banner>正在核对设备身份与后端状态…</div>'}
       <div class="console-grid"><aside class="console-sidebar"></aside>
         <section class="panel joint-panel"><div class="panel-title"><h2>单舵机调试</h2><span class="small muted">配置 15 个关节</span></div><div class="joint-list-scroll" tabindex="0" role="region" aria-label="关节列表，可滚动"><table class="joint-table"><thead><tr><th>名称 / ID</th><th>位置 ticks</th><th>温度 °C</th><th>状态</th></tr></thead><tbody>${rows}</tbody></table></div><p class="joint-note">完整列出 15 个关节；ID 读取参数与标定的关联草稿；实机校准仍待核对。</p></section>
         <div class="console-detail"><section class="panel"><div class="detail-title"><div><h2>${escape(joint.name)}</h2><p class="mono">#${root.ServoParameters?.boundId(joint.id) ?? joint.id} / ${escape(joint.raw)}</p></div>${badge(feedback.available ? '样例回读' : '回读待获取', feedback.available ? 'example' : 'draft')}</div><div class="metrics"><div class="metric"><span>样例位置回读</span><strong>${feedback.available ? numberText(feedback.value) : '—'}<small>ticks</small></strong></div><div class="metric"><span>样例目标回读</span><strong>${feedback.available ? numberText(feedback.goal) : '—'}<small>ticks</small></strong></div><div class="metric"><span>舵机电压</span><strong>${feedback.available ? numberText(feedback.volt) : '—'}<small>V</small></strong></div></div><div class="detail-chart"><div class="chart-controls"><span>曲线位于独立页面</span></div></div><div class="command-box"></div></section>
@@ -83,7 +82,7 @@
     template.innerHTML = markup;
     const wrap = template.content.querySelector('.console-wrap');
     if (view === 'parameters') template.content.querySelector('.console-navigation-tools span').textContent = '参数与标定 · 按实际总线 ID 调试';
-    if (view === 'device') template.content.querySelector('.console-navigation-tools span').textContent = '设备系统与连接状态 · 只读';
+    if (view === 'device') template.content.querySelector('.console-navigation-tools span').textContent = '我的设备 · 连接与运行状态';
     if (view === 'sensors') template.content.querySelector('.console-navigation-tools span').textContent = '只读观察 · IMU / ToF 样例 · 相机独立来源';
     wrap.dataset.consolePage = view;
     wrap.classList.add('wide-console', 'console-layout');

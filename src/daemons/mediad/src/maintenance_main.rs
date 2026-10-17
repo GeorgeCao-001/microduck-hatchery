@@ -1,4 +1,5 @@
 //! Loopback gateway subset. Commands are forwarded; no bus access here.
+mod camera_gateway;
 use duck_ipc_proto::maintenance::MAX_FRAME;
 use serde_json::{Value, json};
 use std::{
@@ -157,7 +158,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             continue;
         }
         let url = request.url().split('?').next().unwrap_or("").to_owned();
-        let command = url == "/api/v1/maintenance/command" && request.method() == &Method::Post;
+        let camera = url == "/api/v1/maintenance/camera";
+        let command = (url == "/api/v1/maintenance/command" || camera) && request.method() == &Method::Post;
         if request.method() != &Method::Get && !command {
             send(
                 request,
@@ -205,6 +207,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "/api/v1/maintenance/ports" => "maintenance.ports",
                 "/api/v1/maintenance/device" => "maintenance.device",
                 "/api/v1/maintenance/command" if command => "maintenance.command",
+                "/api/v1/maintenance/camera" => if command { duck_ipc_proto::maintenance::CAMERA_SET } else { duck_ipc_proto::maintenance::CAMERA_GET },
                 _ => {
                     send(
                         request,
@@ -216,11 +219,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     continue;
                 }
             };
-            let (status, result) = match rpc(rpc_address, &rpc_token, method, params) {
+            let reply = if camera { camera_gateway::call(method, params) } else { rpc(rpc_address, &rpc_token, method, params) };
+            let (status, result) = match reply {
                 Ok(v) => (200, v),
                 Err(e) => (
                     503,
-                    json!({"error":"robotd_unavailable","message":e,"read_only":true}),
+                    json!({"error":if camera {"camera_unavailable"} else {"robotd_unavailable"},"message":e,"read_only":true}),
                 ),
             };
             send(
@@ -237,7 +241,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let mut cookie = None;
                 if path == root.join("index.html") {
                     let html = String::from_utf8(data)?;
-                    data=html.replacen("<head>","<head><script>window.HATCHERY_BACKEND={apiBase:'/api/v1/maintenance',readOnly:true};</script>",1).into_bytes();
+                    let camera_port=env::var("HATCHERY_CAMERA_HTTP_PORT").ok().and_then(|p|p.parse::<u16>().ok()).filter(|p|*p>0).unwrap_or(8080);
+                    let bootstrap=format!("<head><script>window.HATCHERY_BACKEND={{apiBase:'/api/v1/maintenance',readOnly:true,cameraPort:{camera_port}}};</script>");
+                    data=html.replacen("<head>",&bootstrap,1).into_bytes();
                     cookie = Some(format!(
                         "hatchery_session={http_token}; HttpOnly; SameSite=Strict; Path=/"
                     ));

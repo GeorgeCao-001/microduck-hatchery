@@ -1,3 +1,4 @@
+// Hatchery: shared live exposure gate and bounded V4L2 writes.
 //! Software auto-exposure.
 //!
 //! **Because the 3A engine sets the exposure once and then stops.** Rockchip's `rkaiq_3A_server`
@@ -159,6 +160,29 @@ impl Ae {
         Some(next)
     }
 
+    /// Exposure-only adaptation for an unpinned camera mode. Keep gain manual and
+    /// use the driver's range, capped by the existing exposure budget.
+    fn step_shutter(
+        &mut self,
+        mean: f64,
+        target: f64,
+        min: u32,
+        max: u32,
+        step: u32,
+    ) -> Option<u32> {
+        let ratio = (target / mean.max(1.0)).clamp(0.25, 4.0);
+        if (1.0 - ratio).abs() < DEADBAND {
+            return None;
+        }
+        let wanted = (self.exposure * ratio.powf(0.6)).clamp(min as f64, max as f64) as u32;
+        let next = min + (wanted - min) / step.max(1) * step.max(1);
+        if next == self.exposure as u32 {
+            return None;
+        }
+        self.exposure = next as f64;
+        Some(next)
+    }
+
     /// The values as they stand, for the periodic re-assert — and they count as written, so the
     /// heartbeat restarts rather than firing every tick from here on.
     pub fn current(&mut self) -> Controls {
@@ -213,7 +237,29 @@ impl Stop {
 /// controls through it — which is also how the starting exposure gets there, as `v4l2src`'s
 /// `extra-controls`. One node to open, and it is the one we already know we can.
 pub fn spawn(device: String, frames: Frames, exposure_lines: u32, analogue_gain_reg: u32) -> Stop {
+    let runtime = Arc::new(std::sync::Mutex::new(
+        crate::camera_controls::ExposureRuntime {
+            enabled: true,
+            seed: exposure_lines,
+            gain_seed: analogue_gain_reg,
+            shutter_only: false,
+            ..Default::default()
+        },
+    ));
+    spawn_controlled(device, frames, exposure_lines, analogue_gain_reg, runtime)
+}
+
+/// Same metering loop with a shared gate for explicit live controls. The gate
+/// serializes manual writes with automatic exposure; disabling waits out no queue.
+pub fn spawn_controlled(
+    device: String,
+    frames: Frames,
+    exposure_lines: u32,
+    analogue_gain_reg: u32,
+    runtime: crate::camera_controls::ExposureGate,
+) -> Stop {
     let stop = Stop::default();
+    let failed_runtime = runtime.clone();
     let mine = stop.clone();
 
     tracing::info!(
@@ -227,6 +273,8 @@ pub fn spawn(device: String, frames: Frames, exposure_lines: u32, analogue_gain_
     std::thread::Builder::new()
         .name("auto-exposure".into())
         .spawn(move || {
+            runtime.lock().unwrap().available=true;
+            let mut revision=u64::MAX;
             let mut ae = Ae::starting_at(exposure_lines, analogue_gain_reg);
             let mut proven = false;
             // What this run knows about the ISP's digital gain. See `Digital`.
@@ -242,6 +290,8 @@ pub fn spawn(device: String, frames: Frames, exposure_lines: u32, analogue_gain_
                 if mine.stopped() {
                     break;
                 }
+
+                if !runtime.lock().unwrap().enabled { continue; }
 
                 // Asked for, so what gets metered is a frame captured now rather than one left
                 // over from the previous tick — [`Frames`] has why the branch works this way. The
@@ -265,6 +315,13 @@ pub fn spawn(device: String, frames: Frames, exposure_lines: u32, analogue_gain_
                     }
                     continue;
                 };
+                let mut live=runtime.lock().unwrap();
+                if !live.enabled { continue; }
+                if live.revision!=revision {
+                    ae=Ae::starting_at(live.seed,live.gain_seed);
+                    ae.exposure=live.seed as f64;
+                    revision=live.revision;quiet=0;
+                }
                 tracing::debug!(mean_luma = format!("{mean:.1}"), target = TARGET_Y, "metered");
                 since_report += 1;
                 if since_report >= REPORT_TICKS {
@@ -284,7 +341,10 @@ pub fn spawn(device: String, frames: Frames, exposure_lines: u32, analogue_gain_
                     );
                 }
 
-                let controls = match ae.step(mean) {
+                let next=if live.shutter_only {
+                    ae.step_shutter(mean,live.target,live.min,live.max,live.step).map(|exposure| Controls {exposure,..ae.controls()})
+                } else { ae.step(mean*TARGET_Y/live.target) };
+                let controls = match next {
                     Some(controls) => controls,
                     // Nothing to change — but say it to the sensor again every so often, in case
                     // something else has been talking to it. See `REASSERT_TICKS`.
@@ -302,7 +362,11 @@ pub fn spawn(device: String, frames: Frames, exposure_lines: u32, analogue_gain_
                 };
                 quiet = 0;
 
-                match write(&device, controls, &mut digital) {
+                let result=if live.shutter_only {
+                    set(&device,&format!("exposure={}",controls.exposure))
+                } else { write(&device, controls, &mut digital) };
+                if result.is_err() { live.enabled=false; }
+                match result {
                     Err(e) if proven => {
                         // At debug, not an error twice a second for as long as the daemon runs: the
                         // first one already said what is wrong.
@@ -344,10 +408,12 @@ pub fn spawn(device: String, frames: Frames, exposure_lines: u32, analogue_gain_
                     }
                 }
             }
+            let mut live=runtime.lock().unwrap();live.available=false;live.enabled=false;
             tracing::debug!("auto-exposure stopped");
         })
         .map(|_| ())
         .unwrap_or_else(|e| {
+            let mut live=failed_runtime.lock().unwrap();live.available=false;live.enabled=false;
             tracing::error!(error = %e, "no auto-exposure thread; the picture stays at one exposure")
         });
 
@@ -443,16 +509,9 @@ fn worth_writing_gain(gain: u32, digital: Digital) -> bool {
 }
 
 fn set(device: &str, controls: &str) -> std::io::Result<()> {
-    let output = std::process::Command::new("v4l2-ctl")
-        .args(["-d", device, &format!("--set-ctrl={controls}")])
-        .output()?;
-    if output.status.success() {
-        return Ok(());
-    }
-    Err(std::io::Error::other(format!(
-        "{controls}: {}",
-        String::from_utf8_lossy(&output.stderr).trim()
-    )))
+    crate::camera_controls::tool(&["-d", device, &format!("--set-ctrl={controls}")])
+        .map(|_| ())
+        .map_err(std::io::Error::other)
 }
 
 /// Whether a successful write is worth reading back from the sensor.
@@ -468,12 +527,8 @@ fn worth_reading_back(proven: bool, asked: u32, pinned: u32) -> bool {
 
 /// What the sensor says its exposure is now, for the one check above.
 fn read_exposure(device: &str) -> Option<u32> {
-    let output = std::process::Command::new("v4l2-ctl")
-        .args(["-d", device, "--get-ctrl=exposure"])
-        .output()
-        .ok()?;
-    // "exposure: 600"
-    String::from_utf8_lossy(&output.stdout)
+    crate::camera_controls::tool(&["-d", device, "--get-ctrl=exposure"])
+        .ok()?
         .split_once(':')
         .and_then(|(_, value)| value.trim().parse().ok())
 }
@@ -496,6 +551,17 @@ mod tests {
             captured_at: std::time::SystemTime::UNIX_EPOCH,
             data,
         }
+    }
+
+    #[test]
+    fn live_shutter_respects_driver_limits_step_and_target_brightness() {
+        let mut ae = Ae::starting_at(1000, 1024);
+        let exposure = ae.step_shutter(10.0, 90.0, 4, 698, 4).unwrap();
+        assert_eq!(exposure, 696);
+        assert_eq!((exposure - 4) % 4, 0);
+        let darker = ae.step_shutter(250.0, 30.0, 4, 698, 4).unwrap();
+        assert!(darker < exposure && darker >= 4);
+        assert_eq!(ae.step_shutter(90.0, 90.0, 4, 698, 4), None);
     }
 
     #[test]

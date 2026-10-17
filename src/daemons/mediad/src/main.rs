@@ -456,6 +456,22 @@ fn main() -> ExitCode {
             }
         };
 
+        // The media daemon owns both the camera and live exposure arbitration.
+        let exposure_gate=std::sync::Arc::new(std::sync::Mutex::new(mediad::camera_controls::ExposureRuntime {
+            enabled:args.configure_sensor && !args.no_auto_exposure,
+            seed:args.exposure,
+            gain_seed:args.analogue_gain,
+            shutter_only:mediad::pipeline::sensor_mode().is_none(),
+            ..Default::default()
+        }));
+        let (camera_device,camera_source)=match &source {
+            mediad::pipeline::Source::Camera(camera)=>(Some(camera.device.clone()),"hardware"),
+            mediad::pipeline::Source::Test=>(None,"test"),
+            mediad::pipeline::Source::Sim(_)=>(None,"sim"),
+        };
+        let camera_controls=mediad::camera_controls::CameraControls::new(
+            camera_device,camera_source,width,height,fps,exposure_gate.clone());
+
         // A recorder or perception process asks the local Unix socket for one raw frame. It is
         // deliberately not the datachannel: a snapshot is camera-sized, and control has to stay
         // prompt even while a slow local reader is being served. `npu-bringup.md` names this.
@@ -473,7 +489,7 @@ fn main() -> ExitCode {
         let frame_rotate = if args.flip_in_pipeline { 0 } else { rotate };
         tokio::spawn(async move {
             let _lock = frame_lock;
-            if let Err(error) = mediad::frame::serve(frame_listener, frame_source, frame_rotate).await
+            if let Err(error) = mediad::frame::serve_with_controls(frame_listener, frame_source, frame_rotate, Some(camera_controls)).await
             {
                 tracing::error!(error = %format!("{error:#}"), "media.frame endpoint stopped");
             }
@@ -488,24 +504,10 @@ fn main() -> ExitCode {
         // V4L2 controls through `ioctl`, so it exists only where a real camera can. Nothing else
         // in this function cares: the other two sources have no sensor to meter.
         #[cfg(target_os = "linux")]
-        let _exposure = match (&source, args.no_auto_exposure || !args.configure_sensor) {
-            (mediad::pipeline::Source::Camera(camera), false) => Some(mediad::exposure::spawn(
-                camera.device.clone(),
-                frames.clone(),
-                camera.exposure,
-                camera.analogue_gain,
-            )),
-            (mediad::pipeline::Source::Camera(_), true) => {
-                tracing::info!(
-                    exposure = args.exposure,
-                    analogue_gain = args.analogue_gain,
-                    "--no-auto-exposure: the picture stays at the starting exposure"
-                );
-                None
-            }
-            (mediad::pipeline::Source::Test, _) => None,
-            // A simulated camera has no sensor to write, and its brightness is the renderer's.
-            (mediad::pipeline::Source::Sim(_), _) => None,
+        let _exposure = match &source {
+            mediad::pipeline::Source::Camera(camera) => Some(mediad::exposure::spawn_controlled(
+                camera.device.clone(),frames.clone(),camera.exposure,camera.analogue_gain,exposure_gate)),
+            mediad::pipeline::Source::Test | mediad::pipeline::Source::Sim(_) => None,
         };
 
         // **The duck detector, from the same config file as everything else.** `[duck_detector]` lives in

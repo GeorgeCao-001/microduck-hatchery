@@ -19,6 +19,21 @@ pub struct DeviceSnapshot {
     pub interfaces: Option<Vec<DeviceInterface>>,
     pub bluetooth: Option<Vec<DeviceBluetooth>>,
     pub service: DeviceService,
+    /// Read-only program observations; absent in older maintenance backends.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub services: Option<Vec<DeviceDaemon>>,
+}
+
+/// systemd state is separate from executable observation so foreground daemons
+/// remain visible without claiming that an inactive unit manages them.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeviceDaemon {
+    pub name: String,
+    pub unit: Option<String>,
+    pub state: crate::UnitState,
+    pub sub_state: Option<String>,
+    pub main_pid: Option<u32>,
+    pub process_pid: Option<u32>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DeviceIdentity {
@@ -314,4 +329,45 @@ mod tests {
         assert_eq!(joints[0].policy_index, Some(0));
         assert_eq!(joints[14].id, 34);
     }
+}
+
+/// Local mediad camera control; shared with the authenticated maintenance gateway.
+pub const CAMERA_GET: &str = "hatchery.camera.get";
+pub const CAMERA_SET: &str = "hatchery.camera.set";
+pub const CAMERA_VERSION: &str = "hatchery-camera/1";
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CameraState {
+    pub protocol_version: String,
+    pub session_id: String,
+    pub source: String,
+    pub width: u32,
+    pub height: u32,
+    /// Configured capture rate, not a measured browser preview rate.
+    pub target_fps: u32,
+    pub mode: String,
+    pub auto_exposure: Option<bool>,
+    pub controls: Vec<CameraParameter>,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CameraParameter {
+    pub key: String,
+    pub min: i64,
+    pub max: i64,
+    pub step: i64,
+    pub value: Option<i64>,
+    pub writable: bool,
+    pub unit: String,
+    /// sensor, isp, or ae-target; never a browser-only visual filter.
+    pub source: String,
+    #[serde(default)]
+    pub choices: Vec<(i64, String)>,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CameraChange {
+    pub session_id: String,
+    pub request_id: String,
+    pub key: String,
+    pub value: i64,
 }

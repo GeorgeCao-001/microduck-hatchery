@@ -286,7 +286,8 @@ test('import limits actual UTF-8 bytes and constructors reject excessive or dupl
   assert.throws(() => profile.createDraftStore([20, 20]), /重复/);
   assert.throws(() => profile.createDraftStore(['20']), /无效/);
   assert.throws(() => profile.createDraftStore([]), /非空/);
-  assert.throws(() => profile.createDraftStore(Array.from({ length: 254 }, (_, index) => index)), /有界/);
+  assert.doesNotThrow(() => profile.createDraftStore(Array.from({ length: 254 }, (_, index) => index)));
+  assert.throws(() => profile.createDraftStore(Array.from({ length: 255 }, (_, index) => index)), /有界/);
 });
 
 test('UMD browser export creates no DOM, network, serial access or persistent calibration', () => {

@@ -6,11 +6,19 @@
 
 Radxa/Linux 从系统读取主机名、板卡型号、操作系统与内核、CPU 采样差值、内存、运行时间及网络接口；最高温度复用既有 `soc.rs`，代表可读 thermal zones 的最高值，不单独认定为 CPU 温度。地址通过已有 `ip -j address show` 读取；Wi-Fi / USB 类型属于接口识别，不能据此推断浏览器实际经过哪条链路。蓝牙显示系统枚举及可读的 rfkill 状态，不进行配对或配置。缺失工具、未提供字段、首次 CPU 采样和不支持的平台均保留缺测。
 
-系统 `source=host-system` 与 `service.servo_source/servo_fake` 独立。因此 `--fixture` 可显示板子真实系统信息，同时明确舵机为假数据。网页约每 2 秒读取一次；超过 6 秒没有有效回复或请求失败时标为陈旧，保留上次身份并隐藏旧系统数值。协议时间为 Unix 毫秒，浏览器使用自己的单调时钟判断新鲜度。
+程序服务面板只展示板上的 `robotd`、`mediad`、`configd`、`btd`、`padd`、`updaterd` 启动状态。设备快照新增可选 `services` 列表，复用协议 `UnitState`；旧快照仍可读取，缺少列表时显示未知。`robotd/src/services.rs` 对固定单元执行有 400 ms 截止时间的只读 `systemctl show`，读取加载、活动、子状态和主 PID；另在 100 ms / 4096 项限额内按 `/proc/<pid>/exe` 的完整文件名观察程序，覆盖终端直接启动的服务。最多缓存 1 秒，复用网页约 2 秒的轮询。启动 / 重启、失败、停止、单元未安装和无法查询分别呈现；单元未安装不等于可执行文件不存在。重启循环和失败不会因短暂存在进程被显示为正常。
+
+维护程序 `robotd-maintenance` / `mediad-maintenance` 单独放在折叠详情，不计入这六个正式服务的已启动数量。不支持 systemd 或没有读取权限时保留未知，不能用当前维护连接推断正式 `robotd` 已启动。面板没有启动、停止或重启控制，断线后的状态标为上次观测；程序存在不代表相机、总线或整机健康。新增采集需要重新编译并重启维护入口，普通媒体服务不用因此重新编译；Radxa 实际 systemd / 前台进程结果待用户上板验证。
+
+系统 `source=host-system` 与 `service.servo_source/servo_fake` 独立。因此 `--fixture` 可显示板子真实系统信息，同时明确舵机为假数据。网页约每 2 秒读取一次；超过 6 秒没有有效回复或请求失败时标为陈旧，保留并明确标记上次身份、系统读数与服务观测。协议时间为 Unix 毫秒，浏览器使用自己的单调时钟判断新鲜度。
 
 设备名称默认采用主机名；板端可配置 `HATCHERY_DEVICE_NAME`，可选 `HATCHERY_DEVICE_ID`。未配置 ID 时 Linux 使用 machine-id 派生的展示标识，不返回原始 machine-id，也不作为认证凭据。设备页的显示名称和连接方式备注仅影响当前浏览器。顶部设备栏在所有调试页读取同一会话；静态预览不请求设备接口，不生成虚构的系统数值。
 
 旧版二进制没有此接口，需要同步工作区代码并重新编译、重启维护服务。Radxa fixture 验证方式见 [Radxa 指南](RADXA_RUNTIME.md#无外设的设备状态验证)。本地 Windows 构建和只读 RPC / HTTP 契约已验证；Linux/ARM64 系统采集和实际板端连接仍由 George 验证。
+
+## 相机参数
+
+传感器页的相机参数通过同源 `/api/v1/maintenance/camera` 读取及显式修改，gateway 复用既有认证并转发本机 mediad socket，不通过 robotd 串口队列。曝光 / 增益 / 亮度及能力枚举由 mediad 权威处理；帧率、分辨率与采集模式不可写，详见 [相机实时参数](CAMERA_CONTROLS.md)。
 
 ## 轻量台架工作台（2026-10-11）
 

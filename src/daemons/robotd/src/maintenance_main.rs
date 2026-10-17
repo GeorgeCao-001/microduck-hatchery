@@ -1,6 +1,7 @@
 //! Desktop maintenance subset; explicitly enabled bounded bench operations.
 mod maintenance;
 mod device;
+mod services;
 mod soc;
 use duck_control::{
     bus::{BusError, MaintenanceBus},

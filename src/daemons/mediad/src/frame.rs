@@ -1,3 +1,4 @@
+// Hatchery: camera controls share the group-protected local media socket.
 //! A local `media.frame` endpoint for a recorder or perception process on the robot.
 //!
 //! A frame stays out of the WebRTC control channel: at the default geometry the UYVY payload is
@@ -97,6 +98,16 @@ pub async fn bind(socket: &Path) -> Result<(std::fs::File, UnixListener)> {
 /// `rotate` is degrees clockwise the camera is mounted from upright, reported in every frame
 /// header. It is the caller's business whether the pipeline already applied it.
 pub async fn serve(listener: UnixListener, frames: Frames, rotate: u32) -> Result<()> {
+    serve_with_controls(listener, frames, rotate, None).await
+}
+
+/// Camera state and writes share the existing group-protected local socket.
+pub async fn serve_with_controls(
+    listener: UnixListener,
+    frames: Frames,
+    rotate: u32,
+    camera: Option<crate::camera_controls::CameraControls>,
+) -> Result<()> {
     let slots = Arc::new(tokio::sync::Semaphore::new(16));
     loop {
         match listener.accept().await {
@@ -105,11 +116,12 @@ pub async fn serve(listener: UnixListener, frames: Frames, rotate: u32) -> Resul
                     continue;
                 };
                 let frames = frames.clone();
+                let camera = camera.clone();
                 tokio::spawn(async move {
                     let _permit = permit;
                     let _ = tokio::time::timeout(
                         Duration::from_secs(5),
-                        handle(stream, frames, rotate),
+                        handle_with_controls(stream, frames, rotate, camera),
                     )
                     .await;
                 });
@@ -119,7 +131,16 @@ pub async fn serve(listener: UnixListener, frames: Frames, rotate: u32) -> Resul
     }
 }
 
+#[cfg(test)]
 async fn handle(stream: UnixStream, frames: Frames, rotate: u32) -> Result<()> {
+    handle_with_controls(stream, frames, rotate, None).await
+}
+async fn handle_with_controls(
+    stream: UnixStream,
+    frames: Frames,
+    rotate: u32,
+    camera: Option<crate::camera_controls::CameraControls>,
+) -> Result<()> {
     let (read, mut write) = stream.into_split();
     // Bounded *before* the line is buffered. Checking the length afterwards would mean a client
     // could make this process hold an arbitrarily long line first, which is the thing the cap is
@@ -174,6 +195,38 @@ async fn handle(stream: UnixStream, frames: Frames, rotate: u32) -> Result<()> {
                 ),
             )
             .await?;
+            continue;
+        }
+        if [
+            proto::maintenance::CAMERA_GET,
+            proto::maintenance::CAMERA_SET,
+        ]
+        .contains(&request.method.as_str())
+        {
+            let setting = request.method == proto::maintenance::CAMERA_SET;
+            let params = request.params;
+            let camera = camera.clone();
+            let result = tokio::task::spawn_blocking(move || {
+                let camera = camera.ok_or("Camera controls unavailable".to_owned())?;
+                if setting {
+                    let change = serde_json::from_value::<proto::maintenance::CameraChange>(
+                        params.unwrap_or(serde_json::Value::Null),
+                    )
+                    .map_err(|_| "Invalid camera change".to_owned())?;
+                    camera.change(change)
+                } else {
+                    camera.state()
+                }
+            })
+            .await?;
+            let response = match result {
+                Ok(state) => proto::Response::ok(request.id, &state),
+                Err(error) => proto::Response::err(
+                    request.id,
+                    proto::Error::new(proto::code::INVALID_PARAMS, error),
+                ),
+            };
+            write_response(&mut write, response).await?;
             continue;
         }
         if request.method != proto::method::MEDIA_FRAME {
