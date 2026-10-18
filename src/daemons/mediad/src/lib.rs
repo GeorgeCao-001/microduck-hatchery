@@ -25,6 +25,7 @@
 pub mod camera;
 pub mod camera_controls;
 mod rkaiq;
+mod rkaiq_control;
 pub mod config;
 /// The account credential `updaterd` writes, read by the two things here that need it.
 pub mod producer;

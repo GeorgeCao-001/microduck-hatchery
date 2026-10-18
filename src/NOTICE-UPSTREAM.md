@@ -13,3 +13,5 @@ Original tests and tiny model fixtures belong to their source crates. OTA-depend
 - 完整迁入 Microduck `configd/`（同一固定提交 9136aa4），保留 Apache-2.0 许可、模块和原 systemd 参考文件。路径依赖适配 v2，新增 board-runtime binary 门控；Web 复用官方 NetworkManager / BlueZ，增加无线开关、断开、通用设备枚举及按 MAC 操作。已保存网络复用 NM ActivateConnection，WPA3 按扫描结果使用 SAE。逐文件来源见 docs/UPSTREAM_IMPORT.json。
 - `web/prototype/camera-stream.js` 的信令、SDP / ICE 和视频轨道处理改编自同提交 `mediad/webclient/index.html`，Apache-2.0；只接收视频与 media.video，不发送机器人控制调用。
 - `mediad/src/rkaiq.rs` 的报文、校验与参数结构改编自 Rockchip SDK，Copyright 2019–2021 Rockchip Corporation，Apache-2.0。固定来源为 Rockchip Toybrick 官方仓库与 Khadas 厂商镜像，具体原文件、提交和 SHA256 见 docs/RKAIQ_IMPORT.json。没有迁入新的 ISP 算法或整套厂商运行时，继续使用板上 rkaiq_3A_server。
+
+- `mediad/rkaiq/` 复用 Rockchip 3A 服务及自带媒体枚举，固定 JeffyCN SDK 镜像 `bd19d1ee0d4c21945f156f75a8eb1cdafed2777a`，新增同进程 ISP21 API2 参数入口；用户试运行时替代原 3A 实例，不新增服务或算法库。服务及适配使用 Apache-2.0；`common/mediactl` 保留 LGPL-2.1-or-later，完整源文件、许可证和可重链接对象构建步骤一并保留。Gamma 验证网格 / 公式源于同提交官方 API2 实现。逐文件来源见 docs/RKAIQ_SERVER_IMPORT.json。

@@ -138,6 +138,7 @@ python scripts/hatchery-maintenance.py --port COM5 --ids 1 --baud 1000000
 |---|---|
 | 架构依据与当前边界 | [架构 v2](docs/microduck-hatchery-architecture-v2.md)、[ARCHITECTURE](docs/ARCHITECTURE.md) |
 | 接手背景与推进顺序 | [本地开发交接](Microduck-Hatchery-Local-Development-Handoff.md)、[PLAN](docs/PLAN.md) |
+| 当前执行与进度 | [官方源码迁移与 Web 接入计划](docs/OFFICIAL_MIGRATION_EXECUTION.md)：十个里程碑、任务与依据、服务接入矩阵及验收状态 |
 | Web 运行、状态与共同设计 | [Web README](web/README.md)、[Web 文档索引](web/docs/README.md)、[联调说明](web/docs/JOINT_COORDINATION.md)、[总控、七章与联调审查稿](web/docs/LOCAL_REVIEW_PROPOSAL.md) |
 | HD 舵机调试扩展 | [FD1985 接入方案](web/docs/FD1985_INTEGRATION_PROPOSAL.md)、[只读维护后端](docs/MAINTENANCE_BACKEND.md)：B 已完成，C 软件基础可运行，硬件验收待完成 |
 | 正式模块与本地样例 | [src](src/README.md)、[protocol](protocol/README.md)、[hatchery-shell](tools/hatchery-shell/README.md) |

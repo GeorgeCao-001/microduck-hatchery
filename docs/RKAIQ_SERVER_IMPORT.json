@@ -1,0 +1,47 @@
+{
+  "repository": "https://github.com/JeffyCN/mirrors",
+  "commit": "bd19d1ee0d4c21945f156f75a8eb1cdafed2777a",
+  "scope": "Rockchip 3A server and bundled media enumeration; Hatchery adds an ISP21 API2 control socket in this same process. No ISP algorithm library is replaced.",
+  "files": [
+    {
+      "upstream_path": "rkaiq_3A_server/rkaiq_3A_server.cpp",
+      "path": "src/daemons/mediad/rkaiq/rkaiq_3A_server.cpp",
+      "upstream_sha256": "30b0d49d3a88a42748f2803b14a8fc2732ccee08d88dc6551112ef97cc42d185",
+      "license": "Apache-2.0",
+      "installed_sha256": "4b284675370152d248292420afee181d87c76199e7acd37ff29396ffdc592928"
+    },
+    {
+      "upstream_path": "rkaiq_3A_server/common/mediactl/mediactl.c",
+      "path": "src/daemons/mediad/rkaiq/common/mediactl/mediactl.c",
+      "upstream_sha256": "c8d2b472324f28187d69feddc014f98f79dd0fe2a6e7dcac26c2185efcc57d17",
+      "license": "LGPL-2.1-or-later",
+      "installed_sha256": "c8d2b472324f28187d69feddc014f98f79dd0fe2a6e7dcac26c2185efcc57d17"
+    },
+    {
+      "upstream_path": "rkaiq_3A_server/common/mediactl/mediactl.h",
+      "path": "src/daemons/mediad/rkaiq/common/mediactl/mediactl.h",
+      "upstream_sha256": "d4452d2e675960d79dbb2b648280da437c286cc3a3d0a6beab516f4582ab2ae8",
+      "license": "LGPL-2.1-or-later",
+      "installed_sha256": "d4452d2e675960d79dbb2b648280da437c286cc3a3d0a6beab516f4582ab2ae8"
+    },
+    {
+      "upstream_path": "rkaiq_3A_server/common/mediactl/mediactl-priv.h",
+      "path": "src/daemons/mediad/rkaiq/common/mediactl/mediactl-priv.h",
+      "upstream_sha256": "b749a9389b516f540504b18df3f3f6252f132be7513d1145d54d6ecbc61f0f74",
+      "license": "LGPL-2.1-or-later",
+      "installed_sha256": "b749a9389b516f540504b18df3f3f6252f132be7513d1145d54d6ecbc61f0f74"
+    },
+    {
+      "upstream_path": "rkaiq_3A_server/common/mediactl/tools.h",
+      "path": "src/daemons/mediad/rkaiq/common/mediactl/tools.h",
+      "upstream_sha256": "b2cb77164f05ebb30216d3b3bb622b6605cf67d06044643d9e247cd91f55deb1",
+      "license": "LGPL-2.1-or-later",
+      "installed_sha256": "b2cb77164f05ebb30216d3b3bb622b6605cf67d06044643d9e247cd91f55deb1"
+    }
+  ],
+  "gamma_verification_source": {
+    "upstream_path": "rkaiq/uAPI2/rk_aiq_user_api2_agamma.cpp",
+    "upstream_sha256": "2a69738f113e39112d4bd6980d7e37725e9a793593bd25a90c7319c62248d813",
+    "scope": "ISP21 Gamma grid, formula and rounding used only to verify SDK-generated LUT after a parameter write."
+  }
+}

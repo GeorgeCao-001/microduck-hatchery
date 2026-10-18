@@ -4032,8 +4032,17 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   if(typeof module==='object'&&module.exports)module.exports=api;else root.CameraParameters=api;
 })(typeof window!=='undefined'?window:globalThis,function(root){
   'use strict';
-  const names={exposure:'曝光时间',analogue_gain:'模拟增益',brightness:'亮度',gain:'数字增益',digital_gain:'数字增益',contrast:'对比度',saturation:'饱和度',sharpness:'锐度',gamma:'Gamma',white_balance_automatic:'自动白平衡',auto_white_balance:'自动白平衡',white_balance_temperature:'白平衡色温',red_balance:'红色增益',blue_balance:'蓝色增益',noise_reduction:'降噪'};
+  const names={exposure:'曝光时间',analogue_gain:'模拟增益',brightness:'亮度',gain:'数字增益',digital_gain:'数字增益',contrast:'对比度',saturation:'饱和度',sharpness:'锐度',auto_gamma:'Gamma 模式',gamma:'Gamma 系数',white_balance_automatic:'自动白平衡',auto_white_balance:'自动白平衡',white_balance_temperature:'白平衡色温',red_balance:'红色增益',blue_balance:'蓝色增益',noise_reduction:'降噪强度',temporal_noise_reduction:'时域降噪'};
   const basic=['exposure','analogue_gain','brightness'];
+  const advancedKeys=['contrast','saturation','sharpness','auto_gamma','gamma','noise_reduction','temporal_noise_reduction','white_balance_temperature'];
+  const scale=p=>p?.unit==='×0.01' ? .01 : p?.unit==='×0.001' ? .001 : 1;
+  const displayed=(p,n)=>n===null||n===undefined?'':scale(p)===1?String(n):(n*scale(p)).toFixed(scale(p)===.001?3:2);
+  function fromDisplay(p,n){const raw=Number(n)/scale(p);return Number.isFinite(raw)&&Math.abs(raw-Math.round(raw))<1e-6?Math.round(raw):NaN;}
+  function advancedControls(data){
+    const controls=(data?.controls||[]).filter(p=>!basic.includes(p.key));
+    const keys=[...new Set([...controls.map(p=>p.key),...advancedKeys])];
+    return keys.map(key=>({key,parameter:controls.find(p=>p.key===key)}));
+  }
   const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let host=null,state=null,timer=null,reader=null,writer=null,epoch=0,sequence=0,connected=false,onState=null;
   const endpoint='/api/v1/maintenance/camera';
@@ -4050,7 +4059,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   }
   function canEdit(data,key,fresh=true){
     const p=data?.controls.find(p=>p.key===key);
-    return !!(fresh&&data?.source==='hardware'&&p?.writable&&p.value!==null&&!(data.auto_exposure&&['exposure','analogue_gain','gain','digital_gain'].includes(key))&&(!['red_balance','blue_balance','white_balance_temperature'].includes(key)||data.controls.find(c=>['auto_white_balance','white_balance_automatic'].includes(c.key))?.value!==1));
+    return !!(fresh&&data?.source==='hardware'&&p?.writable&&(p.value!==null||['gamma','white_balance_temperature'].includes(key))&&!(data.auto_exposure&&['exposure','analogue_gain','gain','digital_gain'].includes(key))&&!(key==='gamma'&&data.controls.find(c=>c.key==='auto_gamma')?.value===1)&&(!['red_balance','blue_balance','white_balance_temperature'].includes(key)||data.controls.find(c=>['auto_white_balance','white_balance_automatic'].includes(c.key))?.value!==1));
   }
   function change(data,key,value,id){
     if(key==='auto_exposure'){
@@ -4067,13 +4076,13 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     const field=menu?'<select data-camera-param-choice="'+key+'" aria-label="'+names[key]+'">'+choices.map(([v,label])=>'<option value="'+v+'">'+escape(label)+'</option>').join('')+'</select>':'<input type="range" data-camera-param-range="'+key+'" aria-label="'+names[key]+'">';
     return '<div class="camera-param-row" data-camera-param-row="'+key+'"><label>'+names[key]+'</label><span class="camera-param-unit" data-camera-param-unit="'+key+'"></span>'+field+'<input type="number" data-camera-param-number="'+key+'" aria-label="'+names[key]+'数值" placeholder="—"></div>';
   }
-  function render(){return '<div class="camera-adjustments"><div class="camera-exposure-mode"><span>曝光模式</span><div role="group" aria-label="曝光模式"><button type="button" data-camera-exposure-mode="1" aria-pressed="false" disabled>自动</button><button type="button" data-camera-exposure-mode="0" aria-pressed="false" disabled>手动</button></div></div><div data-camera-basic>'+basic.map(k=>row(k,null)).join('')+'</div><details class="camera-advanced"><summary>高级设置</summary><div data-camera-advanced><p class="camera-advanced-empty">暂无可用参数</p></div></details><span class="camera-control-feedback" data-camera-control-feedback role="status">等待相机</span></div>';}
+  function render(){return '<div class="camera-adjustments"><div class="camera-exposure-mode"><span>曝光模式</span><div role="group" aria-label="曝光模式"><button type="button" data-camera-exposure-mode="1" aria-pressed="false" disabled>自动</button><button type="button" data-camera-exposure-mode="0" aria-pressed="false" disabled>手动</button></div></div><div data-camera-basic>'+basic.map(k=>row(k,null)).join('')+'</div><details class="camera-advanced"><summary>高级设置</summary><div data-camera-advanced>'+advancedControls(null).map(p=>row(p.key,null)).join('')+'</div></details><span class="camera-control-feedback" data-camera-control-feedback role="status">等待相机</span></div>';}
   function status(text){const node=host?.querySelector('[data-camera-control-feedback]');if(node)node.textContent=text;}
   function paint(){
     if(!host)return;
-    const advanced=(state?.controls||[]).filter(p=>!basic.includes(p.key)),signature=JSON.stringify(advanced.map(p=>[p.key,p.choices]));
+    const advanced=advancedControls(state),signature=JSON.stringify(advanced.map(p=>[p.key,p.parameter?.choices]));
     const container=host.querySelector('[data-camera-advanced]');
-    if(container.dataset.signature!==signature){container.innerHTML=advanced.length?advanced.map(p=>row(p.key,p)).join(''):'<p class="camera-advanced-empty">暂无可用参数</p>';container.dataset.signature=signature;}
+    if(container.dataset.signature!==signature){container.innerHTML=advanced.map(p=>row(p.key,p.parameter)).join('');container.dataset.signature=signature;}
     host.querySelectorAll('[data-camera-exposure-mode]').forEach(button=>{
       button.disabled=!connected||!!writer||state?.source!=='hardware'||state.auto_exposure===null;
       button.setAttribute('aria-pressed',String(connected&&state?.auto_exposure!==null&&Number(button.dataset.cameraExposureMode)===Number(state?.auto_exposure)));
@@ -4081,12 +4090,14 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     host.querySelectorAll('[data-camera-param-row]').forEach(node=>{
       const key=node.dataset.cameraParamRow,p=state?.controls.find(p=>p.key===key),editing=node.contains(root.document?.activeElement);
       node.classList.toggle('is-disabled',!canEdit(state,key,connected));
-      node.title=!p?'设备未提供此参数':p.source==='ae-target'?'自动曝光目标亮度':p.unit==='lines'?'传感器曝光行数':'';
-      node.querySelector('[data-camera-param-unit]').textContent=p?.unit==='raw'?'raw':p?.unit||'';
+      node.title=!p?(connected?'当前设备未提供此参数':'连接相机后读取可用参数'):key==='auto_gamma'?'自动沿用 IQ 曲线；切换手动从 2.20 开始':key==='white_balance_temperature'?'手动色温与红蓝增益为不同白平衡方式；编辑后切换为色温控制':key==='gamma'&&p.value===null?'当前曲线没有单一系数；明确输入系数后应用':p.source==='ae-target'?'自动曝光目标亮度':p.unit==='lines'?'传感器曝光行数':'';
+      node.querySelector('[data-camera-param-unit]').textContent=!p?(connected?'未提供':'—'):scale(p)!==1?'':p.unit||'';
       node.querySelectorAll('input,select').forEach(input=>{
-        input.disabled=!!writer||!canEdit(state,key,connected);
-        if(p){input.min=p.min;input.max=p.max;input.step=p.step;}
-        if(!editing||writer){input.value=p?.value??(input.type==='range'?0:'');}
+        const numeric=input.type==='number';
+        input.disabled=!!writer||!canEdit(state,key,connected)||(input.type==='range'&&p?.value===null);
+        if(p){input.min=numeric?displayed(p,p.min):p.min;input.max=numeric?displayed(p,p.max):p.max;input.step=numeric?p.step*scale(p):p.step;}
+        if(numeric)input.placeholder=p?.value===null&&p?.writable?'输入数值':'—';
+        if(!editing||writer){input.value=numeric?displayed(p,p?.value):p?.value??(input.type==='range'?0:'');}
       });
     });
   }
@@ -4121,12 +4132,12 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   }
   function input(event){
     const range=event.target.closest('[data-camera-param-range]');
-    if(range){const number=host.querySelector('[data-camera-param-number="'+range.dataset.cameraParamRange+'"]');if(number)number.value=range.value;}
+    if(range){const key=range.dataset.cameraParamRange,p=state?.controls.find(p=>p.key===key),number=host.querySelector('[data-camera-param-number="'+key+'"]');if(number)number.value=displayed(p,Number(range.value));}
   }
   function edit(event){
     const node=event.target;if(!host?.contains(node)||node.disabled)return;
     const key=node.dataset.cameraParamRange||node.dataset.cameraParamNumber||node.dataset.cameraParamChoice;
-    if(key&&node.value.trim()!=='')write(key,Number(node.value));
+    if(key&&node.value.trim()!=='')write(key,node.dataset.cameraParamNumber?fromDisplay(state?.controls.find(p=>p.key===key),node.value):Number(node.value));
   }
   function click(event){
     const button=event.target.closest('[data-camera-exposure-mode]');
@@ -4143,7 +4154,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     host?.removeEventListener('input',input);host?.removeEventListener('change',edit);host?.removeEventListener('click',click);
     host=null;state=null;connected=false;onState=null;
   }
-  return Object.freeze({render,mount,unmount,validate,canEdit,change,refresh});
+  return Object.freeze({render,mount,unmount,validate,canEdit,change,refresh,advancedControls,displayed,fromDisplay});
 });
 
 </script>

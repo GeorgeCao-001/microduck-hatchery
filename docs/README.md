@@ -7,6 +7,7 @@
 | [microduck-hatchery-architecture-v2.md](microduck-hatchery-architecture-v2.md) | 主要架构依据与完整 crate 映射 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | 当前结构、正式控制关系、样例隔离与硬件边界 |
 | [PLAN.md](PLAN.md) | 必需主线、后续源码路径核对与验收条件 |
+| [OFFICIAL_MIGRATION_EXECUTION.md](OFFICIAL_MIGRATION_EXECUTION.md) | 当前详细执行计划与进度主表：官方依据、剩余模块、服务到 Web、十个里程碑及软件／板端验收 |
 | [SOURCES.md](SOURCES.md) | 固定版本的官方来源、FT 对照与核对范围 |
 | [RADXA_RUNTIME.md](RADXA_RUNTIME.md) | 摄像头 / FT 源码范围、板端构建、配置、启动和待验收项 |
 | [UPSTREAM_IMPORT.json](UPSTREAM_IMPORT.json) | 本次运行源码的固定提交、原始 / 本地哈希与修改标记 |

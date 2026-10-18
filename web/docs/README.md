@@ -8,6 +8,7 @@
 |---|---|
 | [NEXT_STEPS.md](../NEXT_STEPS.md) | 官方 Web 源码参考、后续优先级与本阶段提交前事项；建议未实施 |
 | [LOCAL_STATUS.md](LOCAL_STATUS.md) | 本地真实状态、验证范围与已知缺口；样例传输检查不代表实机验收 |
+| [官方迁移与 Web 接入执行计划](../../docs/OFFICIAL_MIGRATION_EXECUTION.md) | 当前服务→页面接入矩阵、任务 ID、来源依据、验收条件与进度；计划不代表功能已实现 |
 | [JOINT_COORDINATION.md](JOINT_COORDINATION.md) | 只读 3D / 纵向联调、全量反馈表、单关节曲线与工作台、独立多关节曲线和共享样例会话的使用与模块边界 |
 | [LOCAL_REVIEW_PROPOSAL.md](LOCAL_REVIEW_PROPOSAL.md) | 第 9–11 节子页、3D 与反馈工作台已实现本地样例；总控与七章仍待审查，真实控制契约待核对 |
 | [FD1985_INTEGRATION_PROPOSAL.md](FD1985_INTEGRATION_PROPOSAL.md) | B 已完成，C 只读软件基础已接入独立维护快照；真实串口、标定与完整 FD 功能待验收 |

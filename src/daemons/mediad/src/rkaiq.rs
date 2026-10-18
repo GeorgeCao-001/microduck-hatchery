@@ -19,11 +19,13 @@ const LIMIT: usize = 16384;
 pub struct Client {
     path: PathBuf,
     io: std::sync::Mutex<()>,
+    advanced: crate::rkaiq_control::Client,
 }
 impl Client {
     pub fn new() -> Self {
         Self {
             io: std::sync::Mutex::new(()),
+            advanced: crate::rkaiq_control::Client::new(),
             path: std::env::var_os("HATCHERY_RKAIQ_SOCKET")
                 .map(PathBuf::from)
                 .unwrap_or_else(|| "/tmp/UNIX.domain0".into()),
@@ -35,6 +37,9 @@ impl Client {
         };
         // One failed probe must not hide controls provided by another interface.
         let mut out = Vec::new();
+        if let Ok(controls) = self.advanced.parameters() {
+            return controls;
+        }
         if let Ok(data) = self.legacy(CPROC_GET, &[]) {
             if let Ok(offset) = cproc_offset(&data) {
                 for (i, key) in ["brightness", "contrast", "saturation"].iter().enumerate() {
@@ -70,6 +75,15 @@ impl Client {
     }
     pub fn set(&self, key: &str, value: i64) -> Result<(), String> {
         let _one = self.io.try_lock().map_err(|_| "ISP controls are busy")?;
+        // Decide the target before writing. A failed advanced write is never retried
+        // through legacy IPC, because its result may already have reached the ISP.
+        if self
+            .advanced
+            .parameters()
+            .is_ok_and(|p| p.iter().any(|p| p.key == key))
+        {
+            return self.advanced.set(key, value);
+        }
         match key {
             "brightness" | "contrast" | "saturation" if (0..=255).contains(&value) => {
                 let mut data = self.legacy(CPROC_GET, &[])?;

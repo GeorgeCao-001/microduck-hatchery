@@ -25,6 +25,8 @@ const KEYS: &[&str] = &[
     "red_balance",
     "blue_balance",
     "noise_reduction",
+    "temporal_noise_reduction",
+    "auto_gamma",
 ];
 
 #[derive(Clone, Debug)]
@@ -281,11 +283,17 @@ impl CameraControls {
                 ])?;
             }
             let readback = self.parameters()?;
-            if readback
+            if !readback
                 .iter()
                 .find(|p| p.key == change.key)
                 .and_then(|p| p.value)
-                != Some(change.value)
+                .is_some_and(|actual| {
+                    if target == "rkaiq" {
+                        crate::rkaiq_control::matches(&change.key, change.value, actual)
+                    } else {
+                        actual == change.value
+                    }
+                })
             {
                 return Err("Camera readback did not match; refresh current value".into());
             }

@@ -216,3 +216,15 @@
 - 传感器页复用官方 mediad WebRTC 信令、SDP / ICE 与视频轨道，不再轮询 PNG；保留原预览尺寸、暂停、快照与离页清理。基础相机区保持紧凑，高级区加入实际支持的白平衡 / 红蓝增益 / 对比度 / 饱和度。Rockchip SDK 的报文、CPROC 与 AWB 接口来源见 docs/RKAIQ_IMPORT.json，沿用板上 RKAIQ 服务；能力查询和写入回读失败时不声称成功。
 - 最新本地检查：121 项 Node、18 项 Edge 模拟交互、11 项实际 Windows gateway 的 loopback HTTP 合约、3 项协议 Rust 测试及 8 项直接引用源文件的最小 Rust harness 测试通过。Windows 两个维护 binary 构建通过；mediad / configd Linux ARM64 类型检查通过。本机 DOCS_RS 跳过 GStreamer 原生探测，不代表 ARM64 原生链接或完整 crate 测试通过；浏览器视频来自明确模拟的 MediaStream，不代表板端画面验收。
 - 两份单文件网页同步。构建与前台启动步骤见 docs/DEVICE_CONNECTIONS.md、docs/CAMERA_CONTROLS.md。特权 systemd 适配被自动审批拒绝，保留未改动的官方参考单元，持久部署尚未完成；未在板上安装、启用服务、切换网络、配对、写 ISP 或操作舵机。板端连接 / 画面 / 权限与参数效果由用户验收；未暂存、提交或推送。
+
+## 2026-10-18 · 官方迁移与 Web 接入执行计划
+
+- 按用户要求建立 docs/OFFICIAL_MIGRATION_EXECUTION.md，包含十个里程碑、41 项任务、用户约束／源码／硬件依据、服务到现有 Web 页面的矩阵、依赖、完成条件与进度模板。源码、本地软件、Web、Radxa 和部署分别记录，不用历史测试或目录占位冒充完成。
+- 只读复核现有 13 成员 workspace、来源、硬件资料、协议和 hooks／Spaces，核对官方候选提交 53230463927095ea890f231d29089bb0a538c06f 的 commit／HEAD 元数据与新模块 netpadd、pad-map、nfc；已迁入 9136aa4 基线保持。当前未提交 ISP／相机工作只登记保护点，没有修改或覆盖。
+- 同步根 README、docs／Web 文档索引、PLAN、SOURCES 和 Radxa 剩余清单，链接到同一进度主表。验证限于 Markdown 本地链接、任务／进度计数与差异空白核对；没有运行程序测试、导入剩余源码、增加依赖、部署、控制实机、暂存、提交或推送。
+
+## 2026-10-18 · ISP21 相机高级设置
+
+- 高级区加入锐度、Gamma 模式 / 系数、降噪 / 时域降噪与白平衡色温，保留原尺寸、浅色风格和折叠布局。小数显示与整数协议分开；自动模式互锁，未知曲线 / 色温不伪造值，缺少能力时禁用。
+- 离线核对用户同版本 Radxa RKAIQ 包，确认旧锐度 / 降噪 / Gamma 入口为不支持占位。复用固定 Rockchip 官方 3A 程序和媒体枚举，给同一进程补 API2 本机接口；mediad / 维护协议继续复用。原安装的算法库与 IQ 文件保留，不新增 systemd 服务或第二个 ISP；用户可前台试运行并恢复原 3A。来源与许可见 docs/RKAIQ_SERVER_IMPORT.json，操作见 docs/CAMERA_CONTROLS.md。
+- 本地通过 8 项相机 Node 测试、9 项实际 Rust 模块测试、三个 Rust 模块的 ARM64 类型检查，以及同版本 SDK 下 3A / 参数接口 / mediactl 的 ARM64 对象编译。全套 Node 在未修改的 console-routes 测试停滞后停止，未计通过；完整原生链接、流事件、参数效果及持续运行等待用户上板验证。两份单文件入口同步；未操作实机、修改系统安装、暂存、提交或推送。

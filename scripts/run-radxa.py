@@ -4,6 +4,8 @@ import argparse
 import os
 from pathlib import Path
 import sys
+import socket
+import stat
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -34,12 +36,13 @@ def binary(name):
         directory = ROOT / 'src' / directory
     path = directory / 'release' / name
     if not path.is_file():
-        raise ValueError(f'{path} is missing; build with sh scripts/build-radxa.sh first.')
+        build = 'python3 scripts/build-rkaiq.py' if name == 'hatchery-rkaiq-3a' else 'sh scripts/build-radxa.sh'
+        raise ValueError(f'{path} is missing; build with {build} first.')
     return str(path)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['robot', 'media', 'maintenance', 'config'])
+    parser.add_argument('mode', choices=['robot', 'media', 'maintenance', 'config', 'isp'])
     parser.add_argument('--env-file', type=Path, default=Path('/etc/robot/hatchery.env'))
     args = parser.parse_args()
     if sys.platform != 'linux':
@@ -54,7 +57,33 @@ def main():
         Path(runtime).mkdir(parents=True, exist_ok=True)
         os.environ['DUCK_RUNTIME_DIR'] = runtime
     params = os.environ.get('HATCHERY_PARAMS', '/etc/robot/robotd.toml')
-    if args.mode == 'robot':
+    if args.mode == 'isp':
+        # This is the same 3A process with an extra local API, not a concurrent engine.
+        for proc in Path('/proc').iterdir():
+            if not proc.name.isdecimal():
+                continue
+            try:
+                name = (proc / 'comm').read_text().strip()
+                if name in ('rkaiq_3A_server', 'hatchery-rkaiq-'):
+                    raise ValueError(f'RKAIQ is already running (PID {proc.name}). Stop its existing unit manually before testing; this launcher will not stop it.')
+            except (OSError, PermissionError):
+                continue
+        required('HATCHERY_CAMERA_DEVICE')
+        path = Path(os.environ.setdefault('HATCHERY_RKAIQ_CONTROL_SOCKET', str(Path(runtime) / 'rkaiq-control.sock')))
+        if path.exists():
+            info = path.lstat()
+            if not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.getuid():
+                raise ValueError(f'Refusing to replace {path}.')
+            with socket.socket(socket.AF_UNIX) as probe:
+                probe.settimeout(.3)
+                try:
+                    probe.connect(str(path))
+                except ConnectionRefusedError:
+                    path.unlink()
+                else:
+                    raise ValueError(f'ISP control socket is already live: {path}')
+        command = [binary('hatchery-rkaiq-3a')]
+    elif args.mode == 'robot':
         command = [binary('robotd'), '--params', params, '--port', required('HATCHERY_SERIAL_PORT'),
                    '--socket', os.environ.get('HATCHERY_ROBOT_SOCKET', str(Path(runtime) / 'robotd.sock')), '--no-policy']
     elif args.mode == 'config':

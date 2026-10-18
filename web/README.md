@@ -89,6 +89,8 @@ web/
 
 传感器页由 `sensor-data.js` 管理独立样例，`sensor-workspace.js/css` 管理 IMU / ToF 和紧凑相机排版，`sensor-camera.js` 管理当前媒体连接与快照生命周期，`camera-stream.js` 是官方客户端信令的仅视频适配。`camera-parameters.js` 独立管理能力校验、参数交互和同源维护接口；基础区为自动 / 手动曝光、曝光时间、模拟增益及亮度，高级参数折叠，采集帧率 / 分辨率 / 模式只读。实际控制由 mediad 执行并回读，缺测禁用，不自动重发；没有新增运行依赖。见 [相机参数](../docs/CAMERA_CONTROLS.md)。
 
+高级设置包含锐度、Gamma 模式 / 系数、降噪 / 时域降噪和白平衡色温；设备未提供时明确禁用。Gamma 和白平衡增益显示小数，协议保留整数精度。ISP21 的 API2 扩展位于原 3A 服务进程，手动试运行时替代原实例，不增加服务；板端启动顺序与恢复步骤见上述文档。
+
 模块职责保持分开：`joint-drafts.js` 管理映射、草稿、反馈与逐项结果；`joint-session.js` 管理样例来源、计时和有界缓存；`joint-console.js/css` 管理目标交互与工作台；`joint-feedback.js/css` 管理只读反馈表、筛选和快照；`single-joint-chart.js/css` 管理跟随当前关节的曲线，`joint-charts.js/css` 保留独立多关节绘图设置，两者只读共享历史；`joint-viewer-model.js` 负责独立显示映射，`joint-viewer-geometry.js` 校验/解码参考网格，`joint-viewer.js/css` 管理只读场景、相机与选中；`console-workspace.js/css` 管理子页、共享导航及显示/采集生命周期，`console-layout.css` 组织工作区排版；`app.js` 连接站点路由与页面事件。加载顺序见 [prototype/index.html](prototype/index.html)。
 
 `device-session.js` 维持唯一同源只读设备会话；`device-telemetry.js` 负责缺测语义、连接状态、程序服务状态、地址筛选与最多 181 帧的单调时间历史；`device-overview.js` 负责设备卡片、仪表、趋势、连接切换与复制交互；`device-workspace.js` 负责共享设备栏、视图生命周期和本地显示偏好。图表复用 `joint-charts.js` 的断点路径函数，没有新增运行依赖。

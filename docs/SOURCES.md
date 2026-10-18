@@ -2,6 +2,8 @@
 
 核对日期：2026-10-05。下列链接均指向固定提交；用于说明本次架构取舍，不替代实机测试或完整 FT runtime 冻结。
 
+2026-10-18 补齐迁移计划：已通过官方 HEAD ref／commit 元数据核对候选提交 `53230463927095ea890f231d29089bb0a538c06f`，其根 tree 为 `c322ea108f02dd937633b7169a8d25eee80181ac`；本地已迁入基线仍为 `9136aa4…`，没有因本次审查而升级。版本对齐、完整模块依赖、硬件依据和逐任务证据规则见 [当前执行计划](OFFICIAL_MIGRATION_EXECUTION.md)。官方新板型／新增模块不等于本机具有对应硬件。
+
 2026-10-11 运行源码迁入：官方 0.15.1 固定 `9136aa4ee88e81edf2bcaf3527e90b65da25f1eb`；FT 总线 / RobotIo 参考 fanhao375/microduck `8db8f00c8fc5278d0bdf43f96934531c37ee2780`；HD 原生包 / 有界读取复用 kissqy/Microduck-kissqy 的 Apache-2.0 Rust 固件部分 `94328f5b43c8ac825c90f0e564e7d1b926cd770d`。范围、硬件限制和启动见 [Radxa 指南](RADXA_RUNTIME.md)，逐文件来源和哈希见 [导入清单](UPSTREAM_IMPORT.json)，署名与修改见 [NOTICE-UPSTREAM](../src/NOTICE-UPSTREAM.md)。这不替换已有维护包和官方 docs 的独立冻结记录，也不引入 FT6 / 第三方 console / 训练实现。
 
 ## 官方 Microduck
