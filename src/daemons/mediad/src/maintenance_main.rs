@@ -1,6 +1,8 @@
 //! Loopback gateway subset. Commands are forwarded; no bus access here.
 mod camera_gateway;
 mod config_gateway;
+mod robot_gateway;
+mod input_gateway;
 use duck_ipc_proto::maintenance::MAX_FRAME;
 use serde_json::{Value, json};
 use std::{
@@ -152,6 +154,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let server = Server::http(http).map_err(|e| std::io::Error::other(e.to_string()))?;
     println!("mediad maintenance gateway: http://{http}/#console/servos/parameters");
     let connections = config_gateway::Connections::new();
+    let runtime = robot_gateway::RobotGateway::new();
+    let input = input_gateway::InputGateway::new();
     for mut request in server.incoming_requests() {
         let host = header(&request, "Host").unwrap_or_default();
         if !allowed_hosts.contains(&host)
@@ -169,7 +173,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let url = request.url().split('?').next().unwrap_or("").to_owned();
         let camera = url == "/api/v1/maintenance/camera";
         let network = url == "/api/v1/maintenance/connections";
-        let command = (url == "/api/v1/maintenance/command" || camera || network)
+        let system = url == config_gateway::SYSTEM_PATH
+            || url.starts_with(&format!("{}/", config_gateway::SYSTEM_PATH));
+        let name = url == format!("{}/name", config_gateway::SYSTEM_PATH);
+        let command = (url == "/api/v1/maintenance/command" || camera || network || name)
             && request.method() == &Method::Post;
         if request.method() != &Method::Get && !command {
             send(
@@ -251,6 +258,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "/api/v1/maintenance/device" => "maintenance.device",
                 "/api/v1/maintenance/command" if command => "maintenance.command",
                 "/api/v1/maintenance/connections" => "hatchery.connections",
+                robot_gateway::PATH => "hatchery.runtime",
+                input_gateway::PATH => "hatchery.input",
+                _ if system => "hatchery.system",
                 "/api/v1/maintenance/camera" => {
                     if command {
                         duck_ipc_proto::maintenance::CAMERA_SET
@@ -270,7 +280,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             };
             let mut reply_error_status = 503;
-            let reply = if network {
+            let reply = if url == robot_gateway::PATH {
+                Ok(runtime.snapshot())
+            } else if url == input_gateway::PATH {
+                Ok(input.snapshot())
+            } else if system {
+                config_gateway::system_route(&url, command, params)
+            } else if network {
                 if command {
                     match params.and_then(|v| {
                         serde_json::from_value::<duck_ipc_proto::connections::Change>(v).ok()
@@ -300,7 +316,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(v) => (200, v),
                 Err(e) => (
                     reply_error_status,
-                    json!({"error":if network {"connection_rejected"} else if camera {"camera_unavailable"} else {"robotd_unavailable"},"message":e,"read_only":true}),
+                    json!({"error":if system {"configd_unavailable"} else if network {"connection_rejected"} else if camera {"camera_unavailable"} else {"robotd_unavailable"},"message":e,"read_only":!command}),
                 ),
             };
             send(
@@ -349,7 +365,7 @@ mod tests {
     #[test]
     fn static_root_rejects_traversal_encoded_paths_and_external_files() {
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../../../..")
+            .join("../../..")
             .join("web/prototype")
             .canonicalize()
             .unwrap();

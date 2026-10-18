@@ -2,7 +2,7 @@
 
 核对日期：2026-10-05。下列链接均指向固定提交；用于说明本次架构取舍，不替代实机测试或完整 FT runtime 冻结。
 
-2026-10-18 补齐迁移计划：已通过官方 HEAD ref／commit 元数据核对候选提交 `53230463927095ea890f231d29089bb0a538c06f`，其根 tree 为 `c322ea108f02dd937633b7169a8d25eee80181ac`；本地已迁入基线仍为 `9136aa4…`，没有因本次审查而升级。版本对齐、完整模块依赖、硬件依据和逐任务证据规则见 [当前执行计划](OFFICIAL_MIGRATION_EXECUTION.md)。官方新板型／新增模块不等于本机具有对应硬件。
+2026-10-18 执行非舵机升级：采用固定 `53230463927095ea890f231d29089bb0a538c06f`（0.17.6 / API 44），FT 控制模块保留 `9136aa4` 基线及本项目既有适配。逐文件区分来源版本，不把协议升级当作旧后端新增功能已实现。完整来源、保护清单与执行记录见 [迁移基线](MIGRATION_BASELINE.md)、[UPSTREAM_IMPORT](UPSTREAM_IMPORT.json)、[执行计划](OFFICIAL_MIGRATION_EXECUTION.md)。两个独立训练仓库及 STL 的单独许可见 [TRAINING_IMPORT](TRAINING_IMPORT.json) 和 [训练说明](../training/README.md)。
 
 2026-10-11 运行源码迁入：官方 0.15.1 固定 `9136aa4ee88e81edf2bcaf3527e90b65da25f1eb`；FT 总线 / RobotIo 参考 fanhao375/microduck `8db8f00c8fc5278d0bdf43f96934531c37ee2780`；HD 原生包 / 有界读取复用 kissqy/Microduck-kissqy 的 Apache-2.0 Rust 固件部分 `94328f5b43c8ac825c90f0e564e7d1b926cd770d`。范围、硬件限制和启动见 [Radxa 指南](RADXA_RUNTIME.md)，逐文件来源和哈希见 [导入清单](UPSTREAM_IMPORT.json)，署名与修改见 [NOTICE-UPSTREAM](../src/NOTICE-UPSTREAM.md)。这不替换已有维护包和官方 docs 的独立冻结记录，也不引入 FT6 / 第三方 console / 训练实现。
 
@@ -46,3 +46,8 @@
 ## FT 只读维护子集（2026-10-10）
 
 按批准方案复查冻结 `tools/servo-web/feetech.py`，仅将包 / 校验 / 参考解码适配到既有 Rust bus / io 边界，未迁入完整官方 daemon。固定 blob、SHA256、Apache-2.0 署名、修改范围与锁定依赖见 [FT_READ_ONLY_SOURCE.md](FT_READ_ONLY_SOURCE.md)。原始字节保留；HD 真实固件 / 寄存器 / 单位仍未确认，当前构建和 fixture 结果不替代硬件验收。
+
+
+## 2026-10-18 · 只读反馈、手柄观察与视觉工具
+
+真实反馈使用固定 5323046 的协议关节名称及 RobotState 单位；padd 观察复用同版本 `padd/src/tap.rs` 的 pad.input / pad.report 合约。浏览器视觉算法改编自同版本 `spaces/vision-demo/filters.py`，使用官方 OpenCV.js 4.13.0，Apache-2.0。固定资产、原许可、下载地址和 SHA-256 见 [OpenCV 说明](../web/prototype/vendor/opencv/NOTICE.md)，本地适配与上游原文哈希见 [来源清单](UPSTREAM_IMPORT.json)。不把作者演示参数视为本机摄像头内参或 FT 校准；本机软件检查与板端实测分别记录。

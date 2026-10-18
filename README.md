@@ -10,18 +10,18 @@ Microduck 整机复刻项目，覆盖机械与电气、运控、仿真与 RL、�
 
 | 部分 | 已有内容 | 尚未完成 |
 |---|---|---|
-| 设备软件与协议 | 13 成员 workspace；官方 robotd / mediad / configd、控制 / 参数 / 支撑库与 IPC；独立维护入口及 FT 只读适配 | HD 固件 / 单位确认、实际 IMU、装机运控、板端链接 / 部署与实测；其余 daemon 尚未迁入 |
-| Hatchery Web | 原生原型、只读 3D 与 15 关节长滑块、紧凑反馈表 / CSV、独立曲线；HD 参考角、参数 / 标定草稿；按 ID 的台架工作台含未归类舵机；当前设备系统状态、Wi-Fi / 蓝牙连接选择及同步顶部栏；IMU / ToF 样例与 WebRTC 相机画面 | 总控、真实传感器接入、装机校准 / 模型映射、完整 FD 与硬件批量调试、正式记录、生产构建 |
+| 设备软件与协议 | 26 成员 workspace；保留 FT 控制，升级非舵机官方代码并补齐服务、工具、Spaces 和 hooks 源码；独立维护入口及 FT 只读适配 | HD 固件 / 单位确认、实际 IMU、装机运控、板端链接 / 部署与实测；新增服务的 Web 能力与安装链尚需逐项验收 |
+| Hatchery Web | 正式只读总控与共享 robotd 状态；后端弧度驱动的只读 3D、15 关节反馈与曲线，静态入口保留样例；参数 / 标定草稿与按 ID 台架调试；设备状态、Wi-Fi / 蓝牙选择、板端名称、程序版本与日志导航；WebRTC 相机、检测框、ToF、手柄输入观察与 OpenCV 视觉工具 | 输入映射编辑 / 控制来源切换、装机校准、完整 FD、正式记录、生产构建与板端验收；IMU 暂缓，保留当前启动方式并暂缓安装 / OTA |
 | 教程 | 当前原型仍为六章结构，七章全栈方案已整理为审查稿 | 七章页面及完整教程内容，须先共同审查 |
 | 本地工具 | Python 静态预览、独立的只读 HTTP/WS 样例服务与检查脚本 | 诊断页 `app.js`、schema 对齐、完整的新环境依赖清单 |
 | 硬件 | BOM 采购与选型记录、厂商规格书、照片及 CAD | 实际装配与接口配置核实、校准、上电和实机验收 |
 | 摄像头与部署 | 官方 V4L2 / GStreamer / WebRTC 源码、传感器页直播与 RKAIQ 参数、Radxa 显式配置和 systemd 参考单元 | 相机 overlay / 节点 / 画面与硬件加速验收；正式 Web 状态订阅、直播 / ISP 实机验收与 configd 持久部署 |
-| 训练 | `training/` 职责说明与阶段计划 | 仿真、RL、标准导出与 FT 策略闭环 |
+| 训练 | 完整 `training/microduck_rl` 与 `training/duck_detector` 固定版本源码、原始许可和逐文件哈希 | 独立环境安装、训练 / 导出 / 仿真实测与 FT 策略适配；未运行或激活模型 |
 | 参考资料 | 官方 docs 的固定提交快照、来源与许可说明 | 官方文档仅作参考，不代表本项目已经实现或验证 |
 
-原联调、曲线、3D 与 Python 服务仍为样例；独立台架入口消费 Rust 后端状态，控制默认禁用、须显式授权。已有本地验证范围见 [实际状态](web/docs/LOCAL_STATUS.md)，来源作者结果与本团队结果分别记录。
+通过 Rust 网关打开时，总控、关节反馈、曲线与 3D 消费共享 robotd 只读状态；静态入口和 Python 样例服务保留演示。缺测不转换为样例，参数 / 台架写入保持原有授权条件。已有本地验证范围见 [实际状态](web/docs/LOCAL_STATUS.md)，来源作者结果与本团队结果分别记录。
 
-完整的 [未迁入与待完成清单](docs/RADXA_RUNTIME.md#尚未迁入与待完成项) 区分源码缺口、硬件适配、Web 通信和板端验收；后续优先补 FT 装机控制及实际 IMU，其余模块按 [阶段计划](docs/PLAN.md) 推进。
+本轮状态以 [执行计划](docs/OFFICIAL_MIGRATION_EXECUTION.md) 和 [迁移基线](docs/MIGRATION_BASELINE.md) 为准。完整的 [未迁入与待完成清单](docs/RADXA_RUNTIME.md#尚未迁入与待完成项) 区分源码缺口、硬件适配、Web 通信和板端验收；后续优先补 FT 装机控制及实际 IMU，其余模块按 [阶段计划](docs/PLAN.md) 推进。
 
 ## 目录与控制边界
 
@@ -109,7 +109,7 @@ python tools/check_shell.py --transport-only
 python scripts/hatchery-maintenance.py --fixture
 ```
 
-打开 <http://127.0.0.1:8088/#console/servos/parameters>。`--fixture` 是明确的 fake 原码夹具；不提供 `--fixture` 或 `--port` 则保持未连接。原联调、曲线与 3D 仍为浏览器样例。
+打开 <http://127.0.0.1:8088/#console/servos/parameters>。`--fixture` 是明确的 fake 原码夹具；不提供 `--fixture` 或 `--port` 则保持未连接。该入口的关节 / 曲线 / 3D 等待正式 robotd；维护 --fixture 不代替正式状态。
 
 USB 台架实际连接：先给舵机供电并在 FD1985 中关闭串口，再按实际端口、ID、波特率启动。下面是本机单颗 ID 1 的设置示例，其他电脑以枚举结果为准：
 

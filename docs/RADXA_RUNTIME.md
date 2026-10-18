@@ -32,11 +32,13 @@ ssh -N -L 8088:127.0.0.1:8088 duck@192.168.8.2
 
 上述 Rust 固件部分为 Apache-2.0，原许可保留在各 crate 的 `LICENSE-UPSTREAM`。kissqy 的 console、训练中控和其他个人非商业部分没有引入，也没有导入其 FT6 IMU 固件、策略权重或发布包。原文件哈希、迁移路径与修改标记见 [UPSTREAM_IMPORT.json](UPSTREAM_IMPORT.json)。来源作者的测试与本项目测试分开记录。
 
-迁入模块以 crate 为单位保留内部布局。`pet-detect`、`sounds`、`duck-detect` 是官方 daemon 当前的编译依赖，音频、检测和策略运行保持关闭，不要求安装 ONNX/NPU 运行库。`test-support` 仅保留官方测试辅助代码；依赖 OTA updater 的集成测试不在本次范围。configd 已按新增授权迁入；updater、BLE、手柄、ToF 和 RL 尚未迁入。
+迁入模块以 crate 为单位保留内部布局。`pet-detect`、`sounds`、`duck-detect` 是官方 daemon 当前的编译依赖，音频、检测和策略运行保持关闭，不要求安装 ONNX/NPU 运行库。`test-support` 仅保留官方测试辅助代码；依赖 OTA updater 的集成测试不在本次范围。configd、updater、BLE、手柄、ToF 与 RL 源码现已迁入；安装 / OTA 和实际 IMU 按用户决定暂缓，源码存在不等于已部署。
 
 ## 尚未迁入与待完成项
 
-以下为当前工作区核对结果（2026-10-11）。目录已建立不表示源码已迁入；本节集中记录剩余范围。
+2026-10-18 更新：26 个 workspace 成员、完整 Spaces、hooks / CI 源码及两个独立训练仓库已迁入；非舵机固定 `5323046` / API 44，FT 驱动、动作、标定与配置保持原版。ARM64 全目标类型检查通过，尚未完成原生链接、安装或上板验收。Web 已接正式只读总控 / 关节 / 曲线 / 3D、手柄观察、相机视觉工具、新增服务观察、ToF 订阅和检测框；其余服务能力按 [执行计划](OFFICIAL_MIGRATION_EXECUTION.md) 推进。IMU 暂缓；新自动 CI 入口已按用户决定改为手动。
+
+下面保留 2026-10-11 的历史缺口快照；其中“只有说明／未导入”不是当前源码状态。当前来源与剩余工作以执行计划及 [迁移基线](MIGRATION_BASELINE.md) 为准。
 
 2026-10-18 的剩余迁移范围、候选新版本、新增 netpadd／pad-map／nfc 的审查、服务接入 Web 和逐项进度，统一见 [官方迁移执行计划](OFFICIAL_MIGRATION_EXECUTION.md)。本节列举的旧范围不表示这些新增模块被排除，也不表示本轮计划已完成源码迁移。
 
@@ -144,7 +146,7 @@ ssh -L 8088:127.0.0.1:8088 -L 8080:127.0.0.1:8080 -L 8443:127.0.0.1:8443 user@ra
 - `http://localhost:8080/frame`：官方媒体链路的 PNG 快照接口。
 - `/reference`：保留的官方媒体控制台参考入口；Hatchery 的联调 UI 没有被替换。WebRTC 还需要 signalling 和 ICE 网络可达，HTTP 转发本身不证明视频 UDP 路径可用。
 
-当前 Hatchery Web 的正式 `robot.*` 状态订阅仍待接入；传感器页已集成 WebRTC 接收，实机视频尚待验收。维护工作台与相机预览可独立运行。用户只确认台架裸机和参考表后，才在配置中设置 `HATCHERY_BENCH_CONTROL=1`；它不解锁整机策略或批量硬件动作。
+当前 Hatchery Web 的正式 `robot.*` 只读状态已接入总控、关节、曲线与 3D；传感器页已集成 WebRTC 接收，实机视频尚待验收。维护工作台与相机预览可独立运行。用户只确认台架裸机和参考表后，才在配置中设置 `HATCHERY_BENCH_CONTROL=1`；它不解锁整机策略或批量硬件动作。
 
 ## 可选 systemd 安装
 
@@ -165,7 +167,7 @@ sudo systemctl start hatchery-maintenance mediad
 
 ## 验收边界
 
-本团队本轮只做源码、路径、配置与编译核对，未运行测试、未安装板端服务、未访问相机或发送舵机目标。Radxa 的实际链接、相机画面/方向/帧率、HD 寄存器和单位、全 15 关节同步读取率、断线/重连、串口互斥和动作验收由 George 进行。Windows/macOS/Linux 三平台实测与稳定 50 Hz 不能由来源作者结果或 ARM64 `cargo check` 推断。
+本团队已做源码、路径、配置、类型检查、单元 / 协议 / 浏览器验证；未安装板端服务、访问实物相机或发送舵机目标。最新软件结果见执行计划，不能代替板端验收。Radxa 的实际链接、相机画面/方向/帧率、HD 寄存器和单位、全 15 关节同步读取率、断线/重连、串口互斥和动作验收由 George 进行。Windows/macOS/Linux 三平台实测与稳定 50 Hz 不能由来源作者结果或 ARM64 `cargo check` 推断。
 
 本地结果：Windows 两个维护 binary 构建通过；robotd / mediad 的 Linux ARM64 cargo check 通过。媒体检查使用 DOCS_RS 跳过 GStreamer / GLib 原生库探测，AWS-LC 的 ARM64 C 部分由本地 Zig 工具编译；这是源码类型检查，不是板端链接或运行结果。板端必须使用上述原生构建，不带 DOCS_RS。工具链和缓存仅在忽略的 .local/，不作为产品依赖或上板文件。
 

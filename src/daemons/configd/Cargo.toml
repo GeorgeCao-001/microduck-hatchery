@@ -12,6 +12,7 @@ description = "Wifi and robot identity — the config service"
 #
 # It stores no credentials. NetworkManager owns those.
 [dependencies]
+robotd-params = { path = "../../libraries/robotd-params" }
 duck-ipc-proto = { path = "../../../protocol/duck-ipc-proto" }
 serde.workspace = true
 serde_json.workspace = true

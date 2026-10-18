@@ -182,6 +182,10 @@
 
 </style>
 <style>
+.input-panel{margin-top:20px;max-width:1250px}.input-panel-body{padding:16px 22px}.input-axes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:18px 0}.input-axes label{display:grid;grid-template-columns:85px 1fr 58px;align-items:center;gap:8px;font-size:12px}.input-axes output{text-align:right;font-family:var(--mono)}.input-axes meter{width:100%;accent-color:var(--moss)}.input-buttons{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.input-key{padding:4px 7px;font:11px var(--mono);border:1px solid var(--line);border-radius:5px;color:var(--muted)}.input-key.pressed{background:var(--moss);border-color:var(--moss);color:white}.input-panel details{margin-top:16px;font-size:12px}.input-panel dl>div{display:flex;justify-content:space-between;gap:20px;padding:6px 0}.input-panel dd{margin:0;overflow-wrap:anywhere}
+
+</style>
+<style>
 /* Shared navigation and full-width console pages. Joint controls and charts own their styles. */
 .console-navigation{display:flex;flex-direction:column;gap:4px;min-width:0}
 .console-sidebar .console-navigation a{display:block;margin:0;white-space:nowrap;font-size:14px;padding:10px 12px;line-height:1.5}
@@ -618,6 +622,14 @@
 
 .sensor-camera-stage>video{width:100%;height:100%;position:absolute;inset:0;object-fit:contain;background:var(--paper)}
 
+.camera-detections{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.camera-detections rect{fill:none;stroke:#f4cf73;stroke-width:2;vector-effect:non-scaling-stroke}
+.camera-detections text{fill:#fff;font-size:18px;stroke:#263e30;stroke-width:3px;paint-order:stroke;stroke-linejoin:round}
+.sensor-camera-actions .camera-detection-toggle{display:inline-flex;align-items:center;gap:6px;margin:0;white-space:nowrap}
+.sensor-camera-actions .camera-detection-toggle input{width:16px;height:16px;min-height:0;margin:0;padding:0;accent-color:var(--moss)}
+
+.camera-vision-output{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--paper);z-index:1}.camera-vision-tools{margin:10px 0;font-size:12px}.camera-vision-tools label{display:flex;align-items:center;gap:10px;margin:10px 0}.camera-vision-tools select{min-height:32px;padding:4px 8px;max-width:200px}.camera-vision-tools small{color:var(--muted);display:block}
+
 </style>
 <style>
 /* Device overview: the existing paper, moss and mustard palette. */
@@ -859,6 +871,14 @@
 
 .console-wrap[data-console-page="device"] .console-heading>div:last-child{flex-wrap:wrap}
 .console-wrap[data-console-page="device"] .console-heading .button{display:inline-flex;align-items:center;gap:8px}
+.device-name-control{display:flex;gap:8px;align-items:center}
+.device-name-control input{min-width:0;flex:1}
+.device-name-control .button{white-space:nowrap;padding:10px 12px;font-size:13px}
+.device-journal-controls{display:flex;align-items:end;flex-wrap:wrap;gap:10px;padding:8px 20px 12px}
+.device-journal-controls label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.device-journal-controls select{max-width:180px;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
+.device-journal-controls .button{padding:9px 12px;font-size:13px}
+.device-journal pre{margin:0 20px 18px;max-height:260px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.7 var(--mono);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px}
 
 </style>
 <style>
@@ -871,6 +891,17 @@
 .connections-row-icon{color:var(--moss);flex-shrink:0}.connections-row-copy{display:grid;gap:4px;min-width:0;flex:1}.connections-row-copy strong{font-size:14px;overflow-wrap:anywhere}.connections-row-copy small{font-size:11px;color:var(--muted)}.connections-row-actions{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end;max-width:130px}.connections-row-actions button{padding:6px 10px;min-height:30px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--moss);font:12px var(--body);cursor:pointer}.connections-row-actions button:disabled{opacity:.5;cursor:default}.connections-row-actions .connections-more{background:transparent;border-color:transparent;color:var(--muted)}
 .connections-empty{padding:25px 10px;text-align:center;color:var(--muted);font-size:13px}.connections-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:15px 24px;border-top:1px solid var(--line);min-height:55px}.connections-bottom>[role=status]{font-size:12px;color:var(--muted);max-width:100%;overflow-wrap:anywhere}.connections-dialog{width:min(420px,calc(100% - 32px));max-height:85vh;border:1px solid var(--line);border-radius:12px;padding:24px;background:var(--surface);color:var(--ink)}.connections-dialog::backdrop{background:#20281f55}.connections-dialog label{display:grid;gap:7px;font-size:13px;margin:17px 0}.connections-dialog input{width:100%;border:1px solid var(--line);border-radius:6px;padding:11px;background:var(--paper);color:var(--ink)}
 @media(max-width:480px){.connections-row{gap:8px}.connections-row-actions{max-width:100px}.connections-toolbar{padding:18px}.connections-tabs{margin:0 16px}.connections-bottom{padding:14px 18px}}
+
+</style>
+<style>
+.robot-overview{display:grid;gap:18px;max-width:1250px}
+.robot-runtime-hero{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 24px}
+.robot-runtime-hero h2{font-size:24px;margin:5px 0 8px}.robot-runtime-hero p{margin:0;color:var(--muted);font-size:14px}
+.robot-runtime-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.robot-runtime-grid .panel-title{padding:17px 20px}.robot-runtime-grid h3{font-size:18px}
+.robot-runtime-value{display:flex;align-items:baseline;gap:8px;padding:17px 20px 5px}.robot-runtime-value strong{font:36px/1.3 var(--mono)}.robot-runtime-value small,.robot-runtime-value>span{color:var(--muted)}.robot-runtime-value strong.robot-policy-name{font-family:var(--body);font-size:25px}
+.robot-overview dl{padding:12px 20px 18px;margin:0}.robot-overview dl>div{display:flex;justify-content:space-between;gap:16px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}.robot-overview dl>div:last-child{border:0}.robot-overview dt{color:var(--muted);flex-shrink:0}.robot-overview dd{margin:0;text-align:right;overflow-wrap:anywhere;min-width:0}
+.robot-runtime-health{padding:20px 20px 5px;font-size:20px;font-weight:700}.robot-runtime-reason{padding:0 20px;margin:0;color:var(--muted);font-size:13px}.robot-runtime-details summary{padding:16px 20px;cursor:pointer;font-size:14px;font-weight:700}
+@media(max-width:1050px){.robot-runtime-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.robot-runtime-grid{grid-template-columns:minmax(0,1fr)}.robot-runtime-hero{padding:18px;align-items:flex-start}.robot-runtime-hero h2{font-size:21px}.robot-runtime-hero .badge{white-space:nowrap}}
 
 </style>
 </head>
@@ -1780,6 +1811,51 @@
 
 </script>
 <script>
+/* Read-only semantic adapter. Backend radians never enter the UI sample tick store. */
+(function(root,factory){const api=factory(root,typeof module==='object'&&module.exports?require('./joint-drafts.js'):root.JointDrafts);if(typeof module==='object'&&module.exports)module.exports=api;else root.RuntimeFeedback=api;})(typeof window!=='undefined'?window:globalThis,function(root,model){
+  'use strict';
+  const finite=n=>typeof n==='number'&&Number.isFinite(n);
+  function decode(snapshot){
+    const d=snapshot?.data,s=d?.state,names=d?.joint_names;
+    if(!snapshot?.fresh||d?.source!=='robotd'||d.joint_unit!=='rad'||!Array.isArray(names)||names.length!==15||new Set(names).size!==15||!model.metadata.every(j=>names.includes(j.raw))||!s||!finite(s.t))return null;
+    const vector=key=>Array.isArray(s[key])&&s[key].length===15&&s[key].every(finite)?s[key]:null;
+    const actual=vector('joints'),goal=vector('targets'),velocity=vector('velocities'),current=vector('currents_ma');
+    return {session:d.session_id,t:s.t,stamp:d.device_mono_ns||String(s.t),joints:model.metadata.map(j=>{const i=names.indexOf(j.raw);return {id:j.id,raw:j.raw,name:j.name,t:s.t,actual:actual?.[i]??null,goal:goal?.[i]??null,velocity:velocity?.[i]??null,current:current?.[i]??null,load:null,volt:null,temp:null};})};
+  }
+  function create(){
+    let frames=[],latest=null,session=null,stamp=null,epoch=0,unsubscribe=null;const listeners=new Set();
+    const snapshot=()=>({frames:frames.map(f=>({...f})),latest:latest?JSON.parse(JSON.stringify(latest)):null,session,epoch,fresh:latest!==null});
+    const emit=()=>listeners.forEach(f=>f(snapshot()));
+    function receive(s){const next=decode(s),incoming=s?.data?.session_id??null;
+      if(incoming!==session){frames=[];stamp=null;session=incoming;epoch++;}
+      if(!next){if(latest){frames=[];stamp=null;epoch++;}latest=null;emit();return;}
+      if(latest&&next.t<latest.t){frames=[];stamp=null;epoch++;}
+      latest=next;if(next.stamp!==stamp){frames.push(...next.joints);stamp=next.stamp;frames=frames.filter(f=>f.t>=next.t-60).slice(-4800);}emit();
+    }
+    function start(){if(!unsubscribe&&root.RobotSession){unsubscribe=root.RobotSession.subscribe(receive);root.RobotSession.start();}}
+    function stop(){unsubscribe?.();unsubscribe=null;frames=[];latest=null;stamp=null;session=null;epoch++;emit();}
+    return {receive,start,stop,snapshot,subscribe(fn){listeners.add(fn);fn(snapshot());return()=>listeners.delete(fn);},history:{frames:()=>frames.map(f=>({...f})),latestTime:()=>latest?.t??0}};
+  }
+  const shared=create();return Object.freeze({decode,create,...shared});
+});
+
+</script>
+<script>
+/* Backend radians, semantic names; display IDs never become bus addresses. */
+(function(root){'use strict';let host=null,unsubscribe=null,select=null;
+  const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const number=v=>typeof v==='number'&&Number.isFinite(v)?v.toFixed(3):'—';
+  function render(){return `<section class="panel runtime-joint-panel" data-runtime-joints><div class="panel-title"><h3>关节反馈</h3><span class="small muted">robotd · 只读</span></div><div class="joint-list-scroll"><table class="joint-table"><thead><tr><th>关节</th><th>实测 rad</th><th>目标 rad</th><th>状态</th></tr></thead><tbody>${root.JointDrafts.metadata.map(j=>`<tr data-runtime-joint-row="${j.id}"><td><button type="button" data-runtime-joint="${j.id}" class="joint-select"><strong>${escape(j.name)}</strong><span>${escape(j.raw)}</span></button></td><td data-runtime-actual>—</td><td data-runtime-goal>—</td><td data-runtime-valid>缺测</td></tr>`).join('')}</tbody></table></div></section>`;}
+  function paint(s){if(!host)return;for(const j of root.JointDrafts.metadata){const row=host.querySelector(`[data-runtime-joint-row="${j.id}"]`),v=s.fresh?s.latest?.joints.find(v=>v.raw===j.raw):null;row.querySelector('[data-runtime-actual]').textContent=number(v?.actual);row.querySelector('[data-runtime-goal]').textContent=number(v?.goal);row.querySelector('[data-runtime-valid]').textContent=v?.actual==null?'缺测':'已回报';}}
+  function setSelected(id){if(!host)return;for(const row of host.querySelectorAll('[data-runtime-joint-row]')){const selected=Number(row.dataset.runtimeJointRow)===id;row.classList.toggle('selected',selected);row.querySelector('button').setAttribute('aria-pressed',String(selected));}}
+  function click(e){const b=e.target.closest('[data-runtime-joint]');if(b){setSelected(Number(b.dataset.runtimeJoint));select?.(Number(b.dataset.runtimeJoint));}}
+  function mount(container,onSelect){unmount();host=container;select=onSelect;if(!host)return;host.addEventListener('click',click);unsubscribe=root.RuntimeFeedback.subscribe(paint);}
+  function unmount(){unsubscribe?.();unsubscribe=null;host?.removeEventListener('click',click);host=null;select=null;}
+  root.RuntimeJoints=Object.freeze({render,mount,unmount,setSelected});
+})(window);
+
+</script>
+<script>
 (function (root, factory) {
   'use strict';
   const model = typeof module === 'object' && module.exports
@@ -1810,7 +1886,10 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
     });
   };
-  const deviceId = id => root.ServoParameters?.mappingFor(id)?.deviceId ?? id;
+  const runtime = () => root.HATCHERY_BACKEND?.apiBase === '/api/v1/maintenance';
+  const deviceId = id => runtime() ? model.metadata.find(j => j.id === id)?.raw : root.ServoParameters?.mappingFor(id)?.deviceId ?? id;
+  const jointLabel = id => (runtime() ? '' : '#') + deviceId(id);
+  const channelFor = key => runtime() ? ({position:{...channels.position,unit:'rad'},error:{...channels.error,unit:'rad'},load:{title:'关节电流',unit:'mA',height:300,keys:['current']},volt:channels.volt,temp:channels.temp}[key]) : channels[key];
   const colorFor = function (id) { return colors[joints.findIndex(function (joint) { return joint.id === id; })] || colors[0]; };
   const numberText = function (value) { return finite(value) ? Number(value.toFixed(2)).toString() : '—'; };
 
@@ -1847,12 +1926,13 @@
     if (!values.length) return null;
     let min = Math.min.apply(null, values), max = Math.max.apply(null, values);
     if (key === 'error') { min = Math.min(min, 0); max = Math.max(max, 0); }
-    const minimumSpan = key === 'volt' ? 0.4 : key === 'temp' ? 2 : 2;
+    const minimumSpan = key === 'volt' ? 0.4 : key === 'temp' ? 2 : runtime() ? 0.02 : 2;
     const padding = Math.max((max - min) * 0.12, minimumSpan / 2);
     return [min - padding, max + padding];
   }
 
-  const history = session.history;
+  const history = {frames:()=>runtime()?root.RuntimeFeedback.history.frames():session.history.frames(),latestTime:()=>runtime()?root.RuntimeFeedback.history.latestTime():session.history.latestTime()};
+  let runtimeEpoch = null;
   let context = { jointId: 23, state: 'example' };
   let visibleJointIds = new Set([23]);
   let visibleChannels = new Set(['position', 'error']);
@@ -1863,11 +1943,11 @@
   function selectionMarkup() {
     return `<details class="chart-selection-tools" ${selectionExpanded ? 'open' : ''}><summary data-chart-selection-summary>${selectionSummary()}</summary><div class="chart-picker-row"><fieldset class="chart-joint-picker"><legend>显示关节 <span>独立于草稿应用范围</span></legend><div class="chart-joint-groups">${['左腿', '右腿', '头颈'].map(function (group) {
       return `<div class="chart-joint-group"><strong>${group === '头颈' ? '头颈与嘴部' : group}</strong>${joints.filter(function (joint) { return joint.group === group; }).map(function (joint) {
-        return `<label><input type="checkbox" data-chart-joint="${joint.id}" ${visibleJointIds.has(joint.id) ? 'checked' : ''}><i style="--joint-chart-color:${colorFor(joint.id)}" aria-hidden="true"></i>${escape(joint.name)} <small title="参数与标定关联草稿">#${deviceId(joint.id)}</small></label>`;
+        return `<label><input type="checkbox" data-chart-joint="${joint.id}" ${visibleJointIds.has(joint.id) ? 'checked' : ''}><i style="--joint-chart-color:${colorFor(joint.id)}" aria-hidden="true"></i>${escape(joint.name)} <small title="${runtime() ? "后端关节名称" : "参数与标定关联草稿"}">${jointLabel(joint.id)}</small></label>`;
       }).join('')}</div>`;
     }).join('')}</div><div class="chart-picker-actions"><button type="button" data-chart-all-joints>显示全部</button><button type="button" data-chart-clear-joints>清空显示</button><span data-chart-count>已选 ${visibleJointIds.size} / 15</span></div></fieldset><fieldset class="chart-channel-picker"><legend>显示数据</legend>${Object.keys(channels).map(function (key) {
-      const label = { position: '目标回读 / 实测位置', error: '跟踪误差', load: 'raw load', volt: '电压', temp: '温度' }[key];
-      return `<label><input type="checkbox" data-chart-channel="${key}" ${visibleChannels.has(key) ? 'checked' : ''}>${label} <small>${channels[key].unit}</small></label>`;
+      const label = { position: '目标回读 / 实测位置', error: '跟踪误差', load: runtime() ? '关节电流' : 'raw load', volt: '电压', temp: '温度' }[key];
+      return `<label><input type="checkbox" data-chart-channel="${key}" ${visibleChannels.has(key) ? 'checked' : ''}>${label} <small>${channelFor(key).unit}</small></label>`;
     }).join('')}<p>按单位分别绘图；目标草稿不会代替目标回读。</p></fieldset></div></details>`;
   }
 
@@ -1876,6 +1956,7 @@
   }
 
   function contextText() {
+    if (runtime()) return root.RuntimeFeedback.snapshot().fresh ? 'robotd · 只读订阅 · 后端关节弧度 · 设备单调时间' : '等待 robotd 有效反馈 · 未标定或未连接的关节保留缺测';
     if (context.state === 'offline') return '离线状态预览 · 写入缺测间隙，未连接设备';
     if (context.state === 'stale') return '反馈陈旧状态预览 · 写入缺测间隙，未延续旧测量';
     if (!['example', 'readonly', 'read-only'].includes(context.state)) return '当前状态无可用样例 · 未连接设备';
@@ -1884,10 +1965,11 @@
 
   function render(options) {
     if (options) setContext(options);
-    return `<section class="panel large-chart-panel" aria-labelledby="large-chart-title"><div class="large-chart-heading"><div><h2 id="large-chart-title">实时曲线</h2><p>选择要一起观察的关节和数据；切换舵机页面后继续采集。</p></div><span class="badge example">只读样例</span></div>${selectionMarkup()}<div class="large-chart-toolbar"><label>时间窗 <select data-chart-window aria-label="曲线时间窗"><option value="10" ${windowSeconds === 10 ? 'selected' : ''}>最近 10 秒</option><option value="30" ${windowSeconds === 30 ? 'selected' : ''}>最近 30 秒</option></select></label><button type="button" data-chart-pause>${paused ? '恢复显示' : '暂停显示'}</button><span data-chart-follow>${paused ? '显示已暂停，样例继续采集' : '跟随最新样例'}</span><output data-chart-relative-time>${displayTime().toFixed(1)} s</output></div><p class="chart-source-status" data-chart-source-status>${contextText()}</p><div data-chart-plots>${plotsMarkup()}</div><p class="large-chart-footnote">仅左膝 #23 有生成的位置样例；温度 32 °C、电压 7.8 V 为常量样例。其他 14 个关节没有反馈，raw load 尚无数据。横轴是本调试台样例会话的单调相对时间，不是设备 Unix 时间；暂停仅暂停显示，不执行任何控制。</p></section>`;
+    return `<section class="panel large-chart-panel" aria-labelledby="large-chart-title"><div class="large-chart-heading"><div><h2 id="large-chart-title">实时曲线</h2><p>选择要一起观察的关节和数据；切换舵机页面后继续采集。</p></div><span class="badge example">${runtime() ? "后端反馈 · 只读" : "只读样例"}</span></div>${selectionMarkup()}<div class="large-chart-toolbar"><label>时间窗 <select data-chart-window aria-label="曲线时间窗"><option value="10" ${windowSeconds === 10 ? 'selected' : ''}>最近 10 秒</option><option value="30" ${windowSeconds === 30 ? 'selected' : ''}>最近 30 秒</option></select></label><button type="button" data-chart-pause>${paused ? '恢复显示' : '暂停显示'}</button><span data-chart-follow>${paused ? '显示已暂停，继续采集' : runtime() ? '跟随最新反馈' : '跟随最新样例'}</span><output data-chart-relative-time>${displayTime().toFixed(1)} s</output></div><p class="chart-source-status" data-chart-source-status>${contextText()}</p><div data-chart-plots>${plotsMarkup()}</div><p class="large-chart-footnote">${runtime() ? "按后端关节名称映射；实测、目标均使用 robotd 弧度值。未提供的逐关节电压、温度保留缺测。断线或会话重启清空旧反馈。" : "仅左膝 #23 有生成的位置样例；温度 32 °C、电压 7.8 V 为常量样例。其他 14 个关节没有反馈，raw load 尚无数据。横轴是本调试台样例会话的单调相对时间，不是设备 Unix 时间；暂停仅暂停显示，不执行任何控制。"}</p></section>`;
   }
 
   function plotsMarkup() {
+    if(runtime() && runtimeEpoch !== root.RuntimeFeedback.snapshot().epoch) frozenFrames=null;
     if (!visibleJointIds.size) return '<div class="chart-empty"><strong>尚未选择显示关节</strong><p>勾选关节后，可在同一个曲线面板观察。</p></div>';
     if (!visibleChannels.size) return '<div class="chart-empty"><strong>尚未选择显示数据</strong><p>勾选位置、误差或其他数据。</p></div>';
     const frames = paused && frozenFrames ? frozenFrames : history.frames();
@@ -1901,7 +1983,7 @@
   }
 
   function plotMarkup(key, frames, start, end, axisStart, axisEnd) {
-    const channel = channels[key], series = [];
+    const channel = channelFor(key), series = [];
     const selectedJoints = joints.filter(function (joint) { return visibleJointIds.has(joint.id); });
     selectedJoints.forEach(function (joint) {
       channel.keys.forEach(function (measurement) {
@@ -1915,10 +1997,10 @@
         return item.joint.id === joint.id && item.points.some(function (point) { return finite(point.value); });
       });
     });
-    const missingMarkup = missing.length ? `<p class="chart-missing" data-chart-missing="${key}">${missing.map(function (joint) { return escape(joint.name) + ' #' + deviceId(joint.id); }).join('、')}：无${key === 'load' ? ' raw load' : ''}数据</p>` : '';
+    const missingMarkup = missing.length ? `<p class="chart-missing" data-chart-missing="${key}">${missing.map(function (joint) { return escape(joint.name) + ' ' + jointLabel(joint.id); }).join('、')}：无${key === 'load' ? ' raw load' : ''}数据</p>` : '';
     const legend = `<div class="large-chart-legend">${series.map(function (item, index) {
       const suffix = item.key === 'goal' ? '目标回读' : item.key === 'actual' ? '实测' : '';
-      return `<span data-chart-legend-joint="${item.joint.id}"><i class="${item.key === 'goal' ? 'goal' : ''}" style="--joint-chart-color:${colorFor(item.joint.id)}" aria-hidden="true"></i>${escape(item.joint.name)} #${deviceId(item.joint.id)}${suffix ? ' · ' + suffix : ''}<b>${numberText(latestValues[index])}</b></span>`;
+      return `<span data-chart-legend-joint="${item.joint.id}"><i class="${item.key === 'goal' ? 'goal' : ''}" style="--joint-chart-color:${colorFor(item.joint.id)}" aria-hidden="true"></i>${escape(item.joint.name)} ${jointLabel(item.joint.id)}${suffix ? ' · ' + suffix : ''}<b>${numberText(latestValues[index])}</b></span>`;
     }).join('')}</div>`;
     if (!extent) return `<section class="large-chart-track chart-${key}" data-chart-track="${key}"><div class="chart-track-heading"><h3>${channel.title}</h3><span>${channel.unit}</span></div><div class="chart-empty chart-empty-track" style="--chart-height:${channel.height}px"><strong>暂无可绘制数据</strong><p>缺测保留为空，不生成替代值。</p></div>${legend}${missingMarkup}</section>`;
     const plotElement = container && container.querySelector('[data-chart-plots]');
@@ -1942,8 +2024,8 @@
       const dot = only.length === 1 ? `<circle cx="${x(only[0].t)}" cy="${y(only[0].value)}" r="3" fill="${colorFor(item.joint.id)}"/>` : '';
       return `<path data-chart-line-joint="${item.joint.id}" data-chart-measurement="${item.key}" d="${path}" fill="none" stroke="${colorFor(item.joint.id)}" stroke-width="2.5" ${item.key === 'goal' ? 'stroke-dasharray="7 5"' : ''} vector-effect="non-scaling-stroke"/>${dot}`;
     }).join('');
-    const notCurrent = context.state === 'offline' || context.state === 'stale';
-    return `<section class="large-chart-track chart-${key}" data-chart-track="${key}"><div class="chart-track-heading"><h3>${channel.title}</h3><span>${channel.unit}${notCurrent ? ' · 当前缺测，仅保留历史样例' : ''}</span></div><svg class="large-chart-svg" style="--chart-height:${height}px" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escape(channel.title)}，${selectedJoints.map(function (joint) { return escape(joint.name); }).join('、')}，浏览器生成的只读样例"><text x="${left}" y="12">${channel.unit}</text>${grid}${paths}</svg>${legend}${missingMarkup}</section>`;
+    const notCurrent = runtime() ? !root.RuntimeFeedback.snapshot().fresh : context.state === 'offline' || context.state === 'stale';
+    return `<section class="large-chart-track chart-${key}" data-chart-track="${key}"><div class="chart-track-heading"><h3>${channel.title}</h3><span>${channel.unit}${notCurrent ? ' · 当前缺测，仅保留历史样例' : ''}</span></div><svg class="large-chart-svg" style="--chart-height:${height}px" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escape(channel.title)}，${selectedJoints.map(function (joint) { return escape(joint.name); }).join('、')}，${runtime() ? 'robotd 只读反馈' : '浏览器生成的只读样例'}"><text x="${left}" y="12">${channel.unit}</text>${grid}${paths}</svg>${legend}${missingMarkup}</section>`;
   }
 
   function paint() {
@@ -1963,7 +2045,8 @@
 
   function handleFrame() {
     if (!container || !container.isConnected) { unmount(); return; }
-    context.state = session.snapshot().state;
+    if (runtime()) { const epoch=root.RuntimeFeedback.snapshot().epoch; if(epoch!==runtimeEpoch){frozenFrames=null;runtimeEpoch=epoch;const plots=container.querySelector('[data-chart-plots]');if(plots)plots.innerHTML=plotsMarkup();} }
+    else context.state = session.snapshot().state;
     paint();
   }
 
@@ -1988,7 +2071,7 @@
       frozenFrames = paused ? history.frames() : null;
       button.textContent = paused ? '恢复显示' : '暂停显示';
       const follow = container.querySelector('[data-chart-follow]');
-      if (follow) follow.textContent = paused ? '显示已暂停，样例继续采集' : '跟随最新样例';
+      if (follow) follow.textContent = paused ? '显示已暂停，继续采集' : runtime() ? '跟随最新反馈' : '跟随最新样例';
       updateSelectionControls();
     }
   }
@@ -2020,6 +2103,8 @@
   function setContext(options) {
     options = options || {};
     if (jointIds.has(options.jointId)) context.jointId = options.jointId;
+    if (options.onlyJoint && jointIds.has(options.jointId)) visibleJointIds = new Set([options.jointId]);
+    if (options.onlyJoint) updateSelectionControls();
     if (typeof options.state === 'string') context.state = options.state;
     // Focus changes intentionally leave the user's curve selection unchanged.
     paint();
@@ -2037,7 +2122,7 @@
       container.addEventListener('change', handleChange);
       container.addEventListener('toggle', handleToggle, true);
     }
-    if (!unsubscribe) unsubscribe = session.subscribe(handleFrame);
+    if (!unsubscribe) { if(runtime()){root.RuntimeFeedback.start();unsubscribe=root.RuntimeFeedback.subscribe(handleFrame);}else unsubscribe = session.subscribe(handleFrame); }
     paint();
     return true;
   }
@@ -2579,7 +2664,20 @@ window.JointConsole = (() => {
     };
   }
 
-  return Object.freeze({ mapping: mapping, poseFromStore: poseFromStore });
+  function poseFromRuntime(snapshot) {
+    const latest = snapshot?.fresh ? snapshot.latest : null;
+    const joints = JointDrafts.metadata.map(joint => {
+      const value = latest?.joints.find(row => row.raw === joint.raw)?.actual;
+      const available = typeof value === 'number' && Number.isFinite(value);
+      return {id:joint.id,raw:joint.raw,name:joint.name,source:'robotd',sampleOnly:false,
+        mode:'runtime',angle:available?value:null,value:available?value:null,available,stale:false,
+        referenceAngle:0,referenceOnly:!available,reason:available?'':'后端未提供有效关节弧度，显示参考姿态'};
+    });
+    return {mode:'runtime',source:'robotd',sampleOnly:false,unit:'radians',inputUnit:'rad',
+      mappingVersion:'robotd-joint-names/1',calibrationVersion:null,joints,
+      summary:{total:joints.length,available:joints.filter(j=>j.available).length,missing:joints.filter(j=>!j.available).length,stale:0}};
+  }
+  return Object.freeze({ mapping: mapping, poseFromStore: poseFromStore, poseFromRuntime: poseFromRuntime });
 });
 
 </script>
@@ -2731,9 +2829,11 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   const assetRoot = 'assets/microduck-reference/';
   let assetPromise = null, enginePromise = null, active = null;
   let mode = 'draft', savedCamera = null, renders = 0;
+  const runtime = () => root.HATCHERY_BACKEND?.apiBase === '/api/v1/maintenance';
 
   function render() {
-    return `<section class="panel joint-viewer-panel" aria-labelledby="joint-viewer-title"><div class="joint-viewer-heading"><div><h2 id="joint-viewer-title">3D 姿态</h2><span class="badge example">参考模型 · 样例映射</span></div><label>显示 <select data-viewer-mode aria-label="3D 姿态来源"><option value="draft" ${mode === 'draft' ? 'selected' : ''}>目标草稿</option><option value="feedback" ${mode === 'feedback' ? 'selected' : ''}>样例反馈</option></select></label></div><div class="joint-viewer-stage" data-viewer-stage><p class="joint-viewer-message" data-viewer-message role="status">正在加载本地 3D 资源…</p></div><div class="joint-viewer-tools"><button type="button" data-viewer-reset>复位视角</button><button type="button" data-viewer-zoom="in" aria-label="放大模型">＋</button><button type="button" data-viewer-zoom="out" aria-label="缩小模型">−</button><span>拖动旋转 · 滚轮缩放 · 点击关节选中</span></div><p class="joint-viewer-source" data-viewer-source role="status">只读姿态展示；没有实机命令。</p><details class="joint-viewer-missing" data-viewer-missing hidden><summary>缺测与参考姿态</summary><ul></ul></details><details class="joint-viewer-notes"><summary>模型与映射说明</summary><p>参考外形来自 Pollen Microduck，经 microduck_rl 与复刻仓库转换；嘴部 #34 的铰链位置为估计。它未匹配本机 Radxa / FT 装配。当前 ticks 仅按 UI 样例范围映射演示角度，不表示真实校准或运动限位。</p><p>模型：CC BY-NC-SA 4.0。<a href="https://github.com/fanhao375/microduck-replica/tree/b5381d86b68d2e4f4606170d54d1f3f46d249ffc/tools/servo-web/model" target="_blank" rel="noopener">来源与署名</a></p></details></section>`;
+    if (runtime()) mode = 'runtime';
+    return `<section class="panel joint-viewer-panel" aria-labelledby="joint-viewer-title"><div class="joint-viewer-heading"><div><h2 id="joint-viewer-title">3D 姿态</h2><span class="badge example">${runtime() ? "后端弧度 · 参考外形" : "参考模型 · 样例映射"}</span></div><label>显示 <select data-viewer-mode aria-label="3D 姿态来源" ${runtime() ? "disabled" : ""}>${runtime() ? '<option value="runtime">后端反馈</option>' : ""}<option value="draft" ${mode === 'draft' ? 'selected' : ''}>目标草稿</option><option value="feedback" ${mode === 'feedback' ? 'selected' : ''}>样例反馈</option></select></label></div><div class="joint-viewer-stage" data-viewer-stage><p class="joint-viewer-message" data-viewer-message role="status">正在加载本地 3D 资源…</p></div><div class="joint-viewer-tools"><button type="button" data-viewer-reset>复位视角</button><button type="button" data-viewer-zoom="in" aria-label="放大模型">＋</button><button type="button" data-viewer-zoom="out" aria-label="缩小模型">−</button><span>拖动旋转 · 滚轮缩放 · 点击关节选中</span></div><p class="joint-viewer-source" data-viewer-source role="status">只读姿态展示；没有实机命令。</p><details class="joint-viewer-missing" data-viewer-missing hidden><summary>缺测与参考姿态</summary><ul></ul></details><details class="joint-viewer-notes"><summary>模型与映射说明</summary><p>参考外形来自 Pollen Microduck，经 microduck_rl 与复刻仓库转换；嘴部 #34 的铰链位置为估计。它未匹配本机 Radxa / FT 装配。${runtime() ? "使用 robotd 已发布的关节弧度，按关节名称对应模型铰链；不推算 FT 编码器或装机校准。" : "当前 ticks 仅按 UI 样例范围映射演示角度，不表示真实校准或运动限位。"}</p><p>模型：CC BY-NC-SA 4.0。<a href="https://github.com/fanhao375/microduck-replica/tree/b5381d86b68d2e4f4606170d54d1f3f46d249ffc/tools/servo-web/model" target="_blank" rel="noopener">来源与署名</a></p></details></section>`;
   }
 
   function embeddedAssets() { return root.HatcheryStandaloneViewer || null; }
@@ -2801,7 +2901,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
 
   function update(instance = active) {
     if (!instance || instance.disposed || !instance.nodes) return;
-    const pose = root.JointViewerModel.poseFromStore(instance.options.store, mode, instance.options.state);
+    const pose = mode === 'runtime' ? root.JointViewerModel.poseFromRuntime(root.RuntimeFeedback.snapshot()) : root.JointViewerModel.poseFromStore(instance.options.store, mode, instance.options.state);
     const signature = JSON.stringify([mode, instance.options.state, instance.options.jointId, pose.joints.map(joint => [joint.angle, joint.available, joint.stale, joint.value, joint.reason])]);
     if (signature === instance.signature) return;
     instance.signature = signature;
@@ -2822,8 +2922,9 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     const detail = instance.container.querySelector('[data-viewer-missing]');
     detail.hidden = missing.length === 0;
     detail.querySelector('summary').textContent = `缺测 ${pose.summary.missing} · 陈旧 ${pose.summary.stale} / 15`;
-    detail.querySelector('ul').innerHTML = missing.map(joint => `<li>#${root.ServoParameters?.mappingFor(joint.id)?.deviceId ?? joint.id} ${escape(joint.name)}：${escape(joint.reason)}</li>`).join('');
+    detail.querySelector('ul').innerHTML = missing.map(joint => `<li>${mode === "runtime" ? escape(joint.raw) : "#" + (root.ServoParameters?.mappingFor(joint.id)?.deviceId ?? joint.id)} ${escape(joint.name)}：${escape(joint.reason)}</li>`).join('');
     instance.container.querySelector('[data-viewer-source]').textContent = `${mode === 'draft' ? '目标草稿' : '样例反馈'} · 可显示 ${pose.summary.available} / 15${pose.summary.stale ? ' · 含陈旧样例' : ''}；灰色透明关节保留中性参考姿态，不代表实测。当前配置 ID #${root.ServoParameters?.mappingFor(instance.options.jointId)?.deviceId ?? instance.options.jointId}。`;
+    if(mode === 'runtime') instance.container.querySelector('[data-viewer-source]').textContent = `robotd 弧度反馈 · 可显示 ${pose.summary.available} / 15；灰色关节缺测。外形为参考模型，关节角度来自后端。`;
     instance.pose = pose;
     schedule(instance);
   }
@@ -2932,6 +3033,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     instance.resizeObserver = new ResizeObserver(() => resize(instance)); instance.resizeObserver.observe(instance.stage);
     if (root.IntersectionObserver) { instance.intersectionObserver = new IntersectionObserver(entries => { instance.visible = entries[0].isIntersecting; if (instance.visible) { resize(instance); schedule(instance); } }); instance.intersectionObserver.observe(instance.stage); }
     root.addEventListener('joint-draft-change', () => update(instance), { signal: instance.abort.signal });
+    if(runtime()) {root.RuntimeFeedback.start();instance.unsubscribeRuntime=root.RuntimeFeedback.subscribe(()=>update(instance));}
     document.addEventListener('visibilitychange', () => { if (!document.hidden) schedule(instance); }, { signal: instance.abort.signal });
   }
 
@@ -2955,6 +3057,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   }
 
   function disposeGraphics(instance) {
+    instance.unsubscribeRuntime?.();
     instance.resizeObserver?.disconnect(); instance.intersectionObserver?.disconnect();
     instance.abort.abort();
     if (instance.frame) cancelAnimationFrame(instance.frame);
@@ -4011,6 +4114,25 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     });
     return {source:'browser-sample',fake:true,hardwareConfirmed:false,t:round(t,2),imu:{roll,pitch,yaw,quat,gyro:[.016*Math.cos(t*.32),-.011*Math.sin(t*.27),.005*Math.cos(t*.09)],gravity:[-.04*Math.cos(t*.27),.05*Math.sin(t*.32),-.998]},tof:{rows:8,cols:8,zones,seq:Math.floor(t*2)}};
   }
+  // Frame::zone in official tof/src/lib.rs at 5323046: ST status 5/9 and positive mm.
+  function decodeTof(frame) {
+    if (!frame || !Number.isSafeInteger(frame.seq) || frame.seq<0 || !finite(frame.at_us) || frame.at_us<0 ||
+      !Number.isInteger(frame.rows) || frame.rows<1 || frame.rows>8 || !Number.isInteger(frame.cols) || frame.cols<1 || frame.cols>8 ||
+      !Array.isArray(frame.distance_mm) || !Array.isArray(frame.status) || frame.distance_mm.length!==frame.rows*frame.cols || frame.status.length!==frame.distance_mm.length ||
+      frame.distance_mm.some(n=>!Number.isInteger(n)||n< -32768||n>32767) || frame.status.some(n=>!Number.isInteger(n)||n<0||n>255)) return null;
+    return {source:'tofd',rows:frame.rows,cols:frame.cols,seq:frame.seq,atUs:frame.at_us,zones:frame.distance_mm.map((distance,i)=>{
+      const statusRaw=frame.status[i],valid=[5,9].includes(statusRaw)&&distance>0;
+      return {statusRaw,kind:valid?'valid':statusRaw===255?'no-return':'invalid',distanceMm:valid?distance:null};
+    })};
+  }
+  function decodeDetections(frame) {
+    if(!frame || !Number.isInteger(frame.width) || frame.width<1 || frame.width>8192 || !Number.isInteger(frame.height) || frame.height<1 || frame.height>8192 ||
+      !finite(frame.took_ms) || frame.took_ms<0 || !Array.isArray(frame.boxes) || frame.boxes.length>128 || frame.boxes.some(b=>!b ||
+        !['x0','y0','x1','y1','score'].every(k=>finite(b[k])) || b.score<0 || b.x0<0 || b.y0<0 ||
+        b.x1>frame.width || b.y1>frame.height || b.x1<=b.x0 || b.y1<=b.y0)) return null;
+    // Official quantized scores can exceed one. Preserve raw values; never invent percentages.
+    return {width:frame.width,height:frame.height,tookMs:frame.took_ms,boxes:frame.boxes.map(b=>({...b}))};
+  }
   function tofSummary(frame) {
     if (!frame || !Number.isInteger(frame.rows) || !Number.isInteger(frame.cols) || !Array.isArray(frame.zones) || frame.zones.length!==frame.rows*frame.cols) return {nearest:null,center:null,valid:0,total:0};
     const valid=frame.zones.filter(z=>z.kind==='valid' && finite(z.distanceMm) && z.distanceMm>=0);
@@ -4021,7 +4143,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     return {nearest:valid.length?Math.min(...valid.map(z=>z.distanceMm)):null,center:centers.length?Math.round(centers.reduce((a,b)=>a+b,0)/centers.length):null,valid:valid.length,total:frame.zones.length};
   }
   function distance(value,unit) { return finite(value)?unit==='cm'?String(round(value/10,1)):String(Math.round(value)):'—'; }
-  return Object.freeze({sample,tofSummary,distance});
+  return Object.freeze({sample,decodeTof,decodeDetections,tofSummary,distance});
 });
 
 </script>
@@ -4160,16 +4282,16 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
 </script>
 <script>
 /* Adapted from Pollen Robotics Microduck mediad/webclient/index.html at 9136aa4.
- * Apache-2.0; see src/NOTICE-UPSTREAM.md. Video-only adapter: no robot commands. */
+ * Apache-2.0; see src/NOTICE-UPSTREAM.md. Video adapter with optional read-only tof.stream from 5323046; no motion calls. */
 (function(root,factory){'use strict';const api=factory(root);if(typeof module==='object'&&module.exports)module.exports=api;else root.CameraStream=api;})(typeof window!=='undefined'?window:globalThis,function(root){
   'use strict';
   function signalling(address,port=8443){try{const u=new URL(address);if(!['http:','https:'].includes(u.protocol)||u.username||u.password||!Number.isInteger(port)||port<1||port>65535)return null;u.protocol=u.protocol==='https:'?'wss:':'ws:';u.port=String(port);u.pathname='/';u.search='';u.hash='';return u.href;}catch(_){return null;}}
-  function create({video,onState}){
+  function create({video,onState,onTelemetry}){
     let ws=null,pc=null,sessionId=null,starting=false,wanted=false,epoch=0,timer=null,ice=[],queue=Promise.resolve(),media=null,phase='idle';
     const state=(next,message)=>{phase=next;onState?.({phase:next,message});};
     const send=message=>{if(ws?.readyState===1)ws.send(JSON.stringify(message));};
     function clearPeer(){if(pc){pc.ontrack=pc.onicecandidate=pc.onconnectionstatechange=pc.ondatachannel=null;pc.close();pc=null;}ice=[];media?.getTracks().forEach(t=>t.stop());media=null;video.pause();video.srcObject=null;video.style.transform='';}
-    function stop(){epoch++;wanted=false;starting=false;root.clearTimeout(timer);timer=null;if(sessionId)send({type:'endSession',sessionId});sessionId=null;if(ws){ws.onopen=ws.onerror=ws.onclose=ws.onmessage=null;ws.close();ws=null;}clearPeer();state('idle','未连接');}
+    function stop(){epoch++;wanted=false;starting=false;root.clearTimeout(timer);timer=null;if(sessionId)send({type:'endSession',sessionId});sessionId=null;if(ws){ws.onopen=ws.onerror=ws.onclose=ws.onmessage=null;ws.close();ws=null;}clearPeer();onTelemetry?.({kind:'closed'});state('idle','未连接');}
     function fail(message){stop();state('error',message);}
     function playing(){if(!wanted||!video.videoWidth||video.readyState<2)return;root.clearTimeout(timer);timer=null;state('live','实时视频 · WebRTC');}
     video.addEventListener('playing',playing);
@@ -4179,8 +4301,23 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
       peer.ontrack=event=>{if(peer!==pc||event.track.kind!=='video')return;media=event.streams[0]||new root.MediaStream([event.track]);video.srcObject=media;video.play().catch(()=>{if(peer===pc&&wanted)state('paused','点击继续播放');});};
       peer.onicecandidate=event=>{if(peer===pc&&event.candidate)send({type:'peer',sessionId,ice:{candidate:event.candidate.candidate,sdpMLineIndex:event.candidate.sdpMLineIndex}});};
       peer.onconnectionstatechange=()=>{if(peer!==pc)return;if(peer.connectionState==='failed')fail('视频连接失败，请检查板端 ICE 连接');else if(peer.connectionState==='disconnected')state('interrupted','视频连接中断');else if(peer.connectionState==='connected'&&phase==='interrupted')playing();};
-      // The producer creates its datachannel. Read only media.video; never send robot RPCs.
-      peer.ondatachannel=event=>{event.channel.onmessage=event=>{try{const msg=JSON.parse(event.data);if(msg.method==='media.video'){const rotation=msg.params?.rotate??msg.params?.rotation??0;if([0,90,180,270].includes(rotation))video.style.transform=`rotate(${rotation}deg)${rotation%180?' scale(.5625)':''}`;}}catch(_){}};};
+      // Same official control channel, one read-only ToF subscription per peer.
+      peer.ondatachannel=event=>{
+        const channel=event.channel;
+        let subscribed=false;
+        const subscribe=()=>{if(peer!==pc||!wanted||!onTelemetry||subscribed)return;subscribed=true;onTelemetry({kind:'waiting'});channel.send(JSON.stringify({jsonrpc:'2.0',id:'hatchery.tof',method:'tof.stream'}));};
+        channel.onopen=subscribe;
+        channel.onclose=()=>{if(peer===pc)onTelemetry?.({kind:'closed'});};
+        channel.onerror=()=>{if(peer===pc)onTelemetry?.({kind:'closed'});};
+        channel.onmessage=event=>{if(peer!==pc||!wanted||typeof event.data!=='string'||event.data.length>65536)return;try{
+          const msg=JSON.parse(event.data);
+          if(msg.method==='media.video'){const rotation=msg.params?.rotate??msg.params?.rotation??0;if([0,90,180,270].includes(rotation))video.style.transform=`rotate(${rotation}deg)${rotation%180?' scale(.5625)':''}`;onTelemetry?.({kind:'video',video:msg.params});}
+          else if(msg.jsonrpc==='2.0'&&msg.method==='media.detections')onTelemetry?.({kind:'detections',frame:msg.params});
+          else if(msg.jsonrpc==='2.0'&&msg.method==='tof.frame')onTelemetry?.({kind:'frame',frame:msg.params});
+          else if(msg.jsonrpc==='2.0'&&msg.id==='hatchery.tof')onTelemetry?.({kind:'status',status:msg.result,error:msg.error});
+        }catch(_){}};
+        if(channel.readyState==='open')subscribe();
+      };
     }
     async function onSignalling(raw,ticket){
       if(typeof raw!=='string'||raw.length>1024*1024)throw Error('Invalid signalling message');
@@ -4231,10 +4368,36 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
 (function(root,factory){'use strict';const api=factory(root);if(typeof module==='object'&&module.exports)module.exports=api;else root.SensorCamera=api;})(typeof window!=='undefined'?window:globalThis,function(root){
   'use strict';
   let host=null,stream=null,address='',paused=false,active=false,download=null;
+  let detectionFrame=null,detectionAt=0,detectionTimer=null;
   const put=(key,text)=>{const n=host?.querySelector('[data-camera-'+key+']');if(n)n.textContent=text;};
   function parseAddress(value){try{const u=new URL(value);if(!['http:','https:'].includes(u.protocol)||u.username||u.password)return null;u.pathname='/frame';u.search='';u.hash='';return u.href;}catch(_){return null;}}
   function controls(){if(!host)return;const info=stream?.snapshot();active=!!info?.active;host.querySelector('[data-camera-connect]').textContent=active?'断开':'连接';host.querySelector('[data-camera-pause]').disabled=!active;host.querySelector('[data-camera-pause]').textContent=paused?'继续':'暂停';host.querySelector('[data-camera-capture]').disabled=!['live','paused'].includes(info?.phase);}
-  function onState(info){if(!host)return;const live=info.phase==='live'||info.phase==='paused';put('status',info.message);put('source',live?info.phase==='paused'?'播放已暂停':'实时视频':'等待视频');host.querySelector('[data-camera-video]').hidden=!live;host.querySelector('[data-camera-empty]').hidden=live;controls();}
+  function onState(info){if(!host)return;const live=info.phase==='live'||info.phase==='paused';put('status',info.message);put('source',live?info.phase==='paused'?'播放已暂停':'实时视频':'等待视频');host.querySelector('[data-camera-video]').hidden=!live;host.querySelector('[data-camera-empty]').hidden=live;controls();paintDetections();}
+  // Adapted from official mediad/webclient onDetections at 5323046, Apache-2.0.
+  function paintDetections(){
+    if(!host)return;const svg=host.querySelector('[data-camera-boxes]');if(!svg)return;
+    const fresh=detectionFrame&&root.performance.now()-detectionAt<=2000;
+    const enabled=host.querySelector('[data-camera-detections]')?.checked;
+    svg.hidden=!fresh||!enabled||paused||stream?.snapshot().phase!=='live';svg.replaceChildren();
+    put('detection-label',fresh?`检测框 ${detectionFrame.boxes.length}`:'检测框');
+    if(svg.hidden)return;
+    svg.setAttribute('viewBox',`0 0 ${detectionFrame.width} ${detectionFrame.height}`);
+    for(const box of detectionFrame.boxes){
+      const rect=root.document.createElementNS('http://www.w3.org/2000/svg','rect');
+      for(const [key,value] of Object.entries({x:box.x0,y:box.y0,width:box.x1-box.x0,height:box.y1-box.y0}))rect.setAttribute(key,String(value));
+      svg.appendChild(rect);
+      const label=root.document.createElementNS('http://www.w3.org/2000/svg','text');
+      label.setAttribute('x',String(box.x0));label.setAttribute('y',String(box.y0>16?box.y0-4:Math.min(detectionFrame.height-4,box.y1+14)));
+      label.textContent='小鸭';svg.appendChild(label);
+    }
+  }
+  function telemetry(message,forward){
+    if(!host)return;
+    if(message.kind==='video'){root.VisionTools.metadata(message.video);return;}
+    if(message.kind==='closed')root.VisionTools.metadata(null);
+    if(message.kind==='detections'){detectionFrame=root.SensorData.decodeDetections(message.frame);detectionAt=root.performance.now();paintDetections();}
+    else {if(message.kind==='closed'){detectionFrame=null;paintDetections();}forward?.(message);}
+  }
   function snapshot(){const video=host.querySelector('[data-camera-video]');if(!video.videoWidth||video.readyState<2)return;const canvas=root.document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d').drawImage(video,0,0);canvas.toBlob(blob=>{if(!blob||!host)return;if(download)root.URL.revokeObjectURL(download);download=root.URL.createObjectURL(blob);const a=root.document.createElement('a');a.href=download;a.download='microduck-camera-'+Date.now()+'.png';a.click();},'image/png');}
   function click(event){const button=event.target.closest('button');if(!button||!host?.contains(button)||button.disabled)return;
     if(button.matches('[data-camera-connect]')){if(active){stream.stop();paused=false;controls();return;}address=host.querySelector('[data-camera-address]').value.trim();if(!parseAddress(address)){put('status','请输入有效的相机服务地址');return;}paused=false;stream.start(address,root.HATCHERY_BACKEND?.signallingPort||8443);controls();}
@@ -4242,13 +4405,67 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     else if(button.matches('[data-camera-capture]'))snapshot();
   }
   function mount(options){unmount();host=options?.container;if(!host)return false;
+    root.VisionTools.mount(host);
     if(root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance'){const u=new URL(root.location.href);u.port=String(root.HATCHERY_BACKEND.cameraPort||8080);u.pathname='/';u.search='';u.hash='';address=u.href;}
     const field=host.querySelector('[data-camera-address]');field.value=address;field.readOnly=root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance';
-    const video=host.querySelector('[data-camera-video]');stream=root.CameraStream.create({video,onState});host.addEventListener('click',click);
+    const video=host.querySelector('[data-camera-video]');stream=root.CameraStream.create({video,onState,onTelemetry:root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance'?message=>telemetry(message,options.onTelemetry):undefined});host.addEventListener('click',click);host.addEventListener('change',paintDetections);detectionTimer=root.setInterval(paintDetections,500);
     root.CameraParameters?.mount({container:host.querySelector('[data-camera-tuning]'),onState:data=>{if(host){put('fps',data.target_fps+' FPS');put('capture-size',data.width+' × '+data.height);put('mode',data.mode);}}});controls();return true;
   }
-  function unmount(){root.CameraParameters?.unmount();stream?.destroy();stream=null;host?.removeEventListener('click',click);if(download)root.URL.revokeObjectURL(download);download=null;host=null;active=false;paused=false;}
+  function unmount(){root.VisionTools?.unmount();if(detectionTimer!==null)root.clearInterval(detectionTimer);detectionTimer=null;detectionFrame=null;detectionAt=0;host?.removeEventListener('change',paintDetections);root.CameraParameters?.unmount();stream?.destroy();stream=null;host?.removeEventListener('click',click);if(download)root.URL.revokeObjectURL(download);download=null;host=null;active=false;paused=false;}
   return Object.freeze({mount,unmount,parseAddress,snapshot:()=>({mounted:!!host,active,paused,hasFrame:!!stream&&['live','paused'].includes(stream.snapshot().phase)})});
+});
+
+</script>
+<script>
+/* Port of spaces/vision-demo/filters.py (5323046), using official OpenCV.js. */
+(function(root,factory){const api=factory(root);if(typeof module==='object'&&module.exports)module.exports=api;else root.VisionTools=api;})(typeof window!=='undefined'?window:globalThis,function(root){
+  'use strict';
+  let library=null;
+  function load(){if(library)return library;library=new Promise((resolve,reject)=>{
+    const tag=root.document.createElement('script');tag.src='vendor/opencv/opencv.js';tag.async=true;
+    const timeout=root.setTimeout(()=>reject(Error('视觉工具加载超时')),20000);
+    tag.onerror=()=>{root.clearTimeout(timeout);reject(Error('视觉工具加载失败'));};
+    tag.onload=()=>{const ready=cv=>{root.clearTimeout(timeout);resolve({cv});};if(root.cv?.Mat)ready(root.cv);else if(typeof root.cv?.then==='function')root.cv.then(ready);else reject(Error('OpenCV 初始化失败'));};root.document.head.append(tag);
+  }).catch(e=>{library=null;throw e;});return library;}
+  function createProcessor(cv){let previous=null;
+    function reset(){previous?.delete();previous=null;}
+    function process(image,mode){const owned=[],mat=(...args)=>{const m=new cv.Mat(...args);owned.push(m);return m;};let source;
+      try{source=cv.matFromImageData(image);owned.push(source);const gray=mat(),output=source.clone();owned.push(output);cv.cvtColor(source,gray,cv.COLOR_RGBA2GRAY);
+        const same=previous&&previous.rows===gray.rows&&previous.cols===gray.cols;
+        if(mode==='edges'||mode==='motion'&&same){const mask=mat(),tint=cv.Mat.zeros(source.rows,source.cols,cv.CV_8UC4);owned.push(tint);
+          if(mode==='edges')cv.Canny(gray,mask,80,180);
+          else{const difference=mat(),kernel=cv.Mat.ones(5,5,cv.CV_8U);owned.push(kernel);cv.absdiff(gray,previous,difference);cv.threshold(difference,mask,18,255,cv.THRESH_BINARY);cv.dilate(mask,mask,kernel);}
+          tint.setTo(mode==='edges'?new cv.Scalar(255,220,40,255):new cv.Scalar(255,60,60,255),mask);cv.addWeighted(source,mode==='edges'?.6:.7,tint,mode==='edges'?1:.9,0,output);
+        }else if(mode==='flow'&&same){const corners=mat(),moved=mat(),found=mat(),error=mat();cv.goodFeaturesToTrack(previous,corners,200,.01,12);
+          if(corners.rows){cv.calcOpticalFlowPyrLK(previous,gray,corners,moved,found,error);for(let i=0;i<corners.rows;i++){if(!found.data[i])continue;const x0=corners.data32F[2*i],y0=corners.data32F[2*i+1],x1=moved.data32F[2*i],y1=moved.data32F[2*i+1];if((x1-x0)**2+(y1-y0)**2<4)continue;cv.arrowedLine(output,new cv.Point(Math.trunc(x0),Math.trunc(y0)),new cv.Point(Math.trunc(x1),Math.trunc(y1)),new cv.Scalar(60,220,255,255),2,cv.LINE_8,0,.35);}}
+        }
+        const result=new Uint8ClampedArray(output.data);for(let i=3;i<result.length;i+=4)result[i]=255;
+        reset();previous=gray.clone();return {data:result,width:source.cols,height:source.rows};
+      }finally{owned.forEach(m=>m.delete());}
+    }return {process,reset,destroy:reset};
+  }
+  let host=null,video=null,canvas=null,timer=null,processor=null,mode='raw',generation=0,lastTime=null,geometry=null;
+  function metadata(value){geometry=value;clear();}
+  function drawGeometry(context,w,h){
+    const i=geometry?.intrinsics,finite=Number.isFinite;
+    if(!i||!['fx','fy','cx','cy'].every(k=>finite(i[k]))||!finite(geometry.width)||!finite(geometry.height)||geometry.width<=0||geometry.height<=0){put('后端尚未提供相机内参');return;}
+    const x=i.cx*w/geometry.width,y=i.cy*h/geometry.height;
+    context.strokeStyle='#fff';context.lineWidth=2;context.beginPath();context.moveTo(x-14,y);context.lineTo(x+14,y);context.moveTo(x,y-14);context.lineTo(x,y+14);context.stroke();
+    put(`fx ${i.fx.toFixed(1)} · fy ${i.fy.toFixed(1)} · cx ${i.cx.toFixed(1)} · cy ${i.cy.toFixed(1)} px · ${i.calibrated===true?'已标定':'后端估计'}`);
+  }
+  const put=text=>{const node=host?.querySelector('[data-vision-status]');if(node)node.textContent=text;};
+  const clear=()=>{if(canvas)canvas.hidden=true;processor?.reset();lastTime=null;};
+  async function change(){const ticket=++generation;mode=host.querySelector('[data-vision-mode]').value;clear();processor?.destroy();processor=null;
+    if(mode==='raw'){put('');return;}if(mode==='geometry'){processor={process:v=>v,reset(){},destroy(){}};put('读取 media.video 内参');return;}put('正在加载…');try{const result=await load();if(ticket!==generation||!host)return;processor=createProcessor(result.cv);put('本机处理 · 最长边 640 px · 5 Hz');}catch(e){if(ticket===generation)put(e.message);}}
+  function tick(){if(!host||mode==='raw'||!processor)return;if(video.hidden||video.paused||video.readyState<2||!video.videoWidth){clear();return;}if(video.currentTime===lastTime)return;
+    const scale=Math.min(1,640/Math.max(video.videoWidth,video.videoHeight)),w=Math.max(1,Math.round(video.videoWidth*scale)),h=Math.max(1,Math.round(video.videoHeight*scale));
+    try{const buffer=root.document.createElement('canvas');buffer.width=w;buffer.height=h;const ctx=buffer.getContext('2d',{willReadFrequently:true});ctx.drawImage(video,0,0,w,h);const result=processor.process(ctx.getImageData(0,0,w,h),mode);canvas.width=w;canvas.height=h;const output=canvas.getContext('2d');output.putImageData(new root.ImageData(result.data,w,h),0,0);if(mode==='geometry')drawGeometry(output,w,h);canvas.style.transform=video.style.transform;canvas.hidden=false;lastTime=video.currentTime;}
+    catch(e){clear();put('视觉处理不可用');processor?.destroy();processor=null;}
+  }
+  function onChange(e){if(e.target.matches('[data-vision-mode]'))change();}
+  function mount(container){unmount();host=container;if(!host)return;video=host.querySelector('[data-camera-video]');canvas=host.querySelector('[data-vision-canvas]');if(root.location?.protocol==='file:'){host.querySelector('[data-vision-mode]').disabled=true;put('请通过板端 Web 使用视觉工具');return;}host.addEventListener('change',onChange);timer=root.setInterval(tick,200);}
+  function unmount(){generation++;if(timer!==null)root.clearInterval(timer);timer=null;host?.removeEventListener('change',onChange);clear();processor?.destroy();processor=null;host=video=canvas=null;mode='raw';geometry=null;}
+  return Object.freeze({createProcessor,mount,unmount,metadata});
 });
 
 </script>
@@ -4264,6 +4481,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   // Owns sensor display only. Samples and media frames have independent sources.
   let host = null, timer = null, state = 'example', startedAt = 0;
   let history = [], frozen = null, paused = false;
+  let tofLink = null;
   let zoneIndex = 27, unit = 'mm', channel = 'gravity';
   const finite = value => typeof value === 'number' && Number.isFinite(value);
   const number = (value, digits = 2) => finite(value) ? value.toFixed(digits) : '—';
@@ -4278,8 +4496,8 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
         <section class="panel sensor-card sensor-camera" aria-labelledby="sensor-camera-title">
           <header class="sensor-card-header"><div><span class="sensor-number">01</span><h3 id="sensor-camera-title">摄像头</h3></div><span class="badge draft" data-camera-source>尚无画面</span></header>
           <div class="sensor-camera-layout" data-sensor-camera>
-            <div class="sensor-camera-stage"><video data-camera-video autoplay muted playsinline hidden aria-label="板端实时视频"></video><img data-camera-image hidden alt="板端媒体服务最近一次快照"><div class="sensor-camera-empty" data-camera-empty><svg viewBox="0 0 240 130" aria-hidden="true"><path d="M32 46V24h34m108 0h34v22m0 38v22h-34m-108 0H32V84" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="120" cy="65" r="24" fill="none" stroke="currentColor"/><path d="M120 31v14m0 40v14M86 65h14m40 0h14" stroke="currentColor"/></svg><strong>相机未连接</strong><p>连接板端媒体服务查看画面。</p></div></div>
-            <div class="sensor-camera-controls"><label for="sensor-camera-address">媒体服务</label><div class="camera-address-row"><input id="sensor-camera-address" data-camera-address type="url" placeholder="http://&lt;Radxa地址&gt;:8080" autocomplete="off" spellcheck="false"><button type="button" class="button primary" data-camera-connect>连接</button></div><div class="sensor-camera-actions"><button type="button" class="button secondary" data-camera-pause disabled>暂停</button><button type="button" class="button secondary" data-camera-capture disabled>快照</button></div><p class="sensor-camera-status" data-camera-status role="status">相机未连接</p><div class="camera-capture-info" aria-label="采集信息，只读"><span data-camera-fps title="配置的采集帧率，非浏览器刷新率">— FPS</span><span data-camera-capture-size>— × —</span><span data-camera-mode>—</span></div><div data-camera-tuning>${root.CameraParameters?.render()||''}</div></div>
+            <div class="sensor-camera-stage"><video data-camera-video autoplay muted playsinline hidden aria-label="板端实时视频"></video><canvas class="camera-vision-output" data-vision-canvas hidden aria-label="当前视频的视觉处理结果"></canvas><svg class="camera-detections" data-camera-boxes hidden aria-label="小鸭检测框" preserveAspectRatio="xMidYMid meet"></svg><img data-camera-image hidden alt="板端媒体服务最近一次快照"><div class="sensor-camera-empty" data-camera-empty><svg viewBox="0 0 240 130" aria-hidden="true"><path d="M32 46V24h34m108 0h34v22m0 38v22h-34m-108 0H32V84" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="120" cy="65" r="24" fill="none" stroke="currentColor"/><path d="M120 31v14m0 40v14M86 65h14m40 0h14" stroke="currentColor"/></svg><strong>相机未连接</strong><p>连接板端媒体服务查看画面。</p></div></div>
+            <div class="sensor-camera-controls"><label for="sensor-camera-address">媒体服务</label><div class="camera-address-row"><input id="sensor-camera-address" data-camera-address type="url" placeholder="http://&lt;Radxa地址&gt;:8080" autocomplete="off" spellcheck="false"><button type="button" class="button primary" data-camera-connect>连接</button></div><div class="sensor-camera-actions"><button type="button" class="button secondary" data-camera-pause disabled>暂停</button><button type="button" class="button secondary" data-camera-capture disabled>快照</button><label class="camera-detection-toggle"><input type="checkbox" data-camera-detections><span data-camera-detection-label>检测框</span></label></div><p class="sensor-camera-status" data-camera-status role="status">相机未连接</p><div class="camera-capture-info" aria-label="采集信息，只读"><span data-camera-fps title="配置的采集帧率，非浏览器刷新率">— FPS</span><span data-camera-capture-size>— × —</span><span data-camera-mode>—</span></div><details class="camera-vision-tools"><summary>视觉工具</summary><label>画面 <select data-vision-mode><option value="raw">原始视频</option><option value="edges">边缘 · Canny</option><option value="motion">画面变化</option><option value="flow">稀疏光流</option><option value="geometry">相机几何</option></select></label><small data-vision-status></small></details><div data-camera-tuning>${root.CameraParameters?.render()||''}</div></div>
           </div>
         </section>
         <div class="sensor-telemetry">
@@ -4293,7 +4511,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
           </div><footer class="sensor-card-footer">选型 LSM6DSV16X · 真实 IMU 尚未接入；安装方向读取后续确认的配置。</footer>
         </section>
         <section class="panel sensor-card sensor-tof" aria-labelledby="sensor-tof-title">
-          <header class="sensor-card-header"><div><span class="sensor-number">03</span><h3 id="sensor-tof-title">ToF · 距离分区</h3></div><span class="badge example" data-sensor-source>浏览器样例</span></header>
+          <header class="sensor-card-header"><div><span class="sensor-number">03</span><h3 id="sensor-tof-title">ToF · 距离分区</h3></div><span class="badge example" data-sensor-source data-sensor-tof-source>浏览器样例</span></header>
           <div class="sensor-card-body">
             <div class="sensor-distance-summary"><div><span>最近有效距离</span><strong class="mono" data-sensor-nearest>—</strong><small data-sensor-unit>${unit}</small></div><div><span>中心有效均值</span><strong class="mono" data-sensor-center>—</strong><small data-sensor-unit>${unit}</small></div><div><span>有效分区</span><strong class="mono" data-sensor-valid>—</strong></div></div>
             <div class="sensor-tof-field">
@@ -4302,7 +4520,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
             <div class="sensor-depth-scale"><span>近 · 0 m</span><i></i><span>远 · 4 m</span></div>
             </div>
             <div class="sensor-zone-detail"><strong data-sensor-zone-title>分区 —</strong><span class="mono" data-sensor-zone-distance>—</span><span data-sensor-zone-state>尚无数据</span><small class="mono" data-sensor-zone-raw>status raw —</small></div>
-          </div><footer class="sensor-card-footer">选型 VL53L5X · 无效与无回波分区保留缺测；网格尺寸、距离及状态以未来板端帧为准。</footer>
+          </div><footer class="sensor-card-footer">选型 VL53L5CX · 连接相机后接收 tofd；板端采集模式待确认。</footer>
         </section>
         </div>
       </div>
@@ -4337,7 +4555,27 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     return `<svg viewBox="0 0 592 132" preserveAspectRatio="none" role="img" aria-label="${channel === 'gyro' ? 'Gyro rad/s' : 'Gravity 单位向量'} XYZ 样例曲线">${grid}${paths}<text x="48" y="128">${number(start, 0)} s</text><text x="568" y="128" text-anchor="end">${number(end, 0)} s</text></svg>`;
   }
 
+  function receiveTof(message) {
+    if(!host)return;
+    if(message.kind==='frame'){
+      const frame=root.SensorData.decodeTof(message.frame);
+      if(!frame){tofLink={frame:null,received:0,label:'数据无效'};paint();return;}
+      tofLink={frame,received:root.performance.now(),label:'板端 · 模式未确认'};
+    } else if(message.kind==='waiting')tofLink={frame:null,received:0,label:'等待测距'};
+    else if(message.kind==='closed'){if(tofLink)tofLink={frame:null,received:0,label:'连接已断开'};}
+    else if(message.kind==='status'){
+      const info=message.status;
+      if(message.error||info?.accepted!==true||info.unavailable)tofLink={frame:null,received:0,label:info?.unavailable?'传感器不可用':'测距服务不可用'};
+    }
+    paint();
+  }
+
   function paintTof(tof) {
+    const board=tofLink!==null, fresh=board&&tofLink.frame&&root.performance.now()-tofLink.received<=2000;
+    if(board)tof=fresh?tofLink.frame:null;
+    const source=host.querySelector('[data-sensor-tof-source]');
+    if(board){source.textContent=tofLink.frame&&!fresh?'测距已过期':tofLink.label;source.className='badge '+(fresh?'draft':'stale');}
+    const suffix=board?'板端':'样例';
     const grid = host.querySelector('[data-sensor-grid]');
     grid.dataset.displayUnit = unit;
     const rows = tof?.rows || 8, cols = tof?.cols || 8, count = rows * cols;
@@ -4349,7 +4587,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     const summary = root.SensorData.tofSummary(tof);
     put('nearest', root.SensorData.distance(summary.nearest, unit)); put('center', root.SensorData.distance(summary.center, unit));
     put('valid', tof ? `${summary.valid} / ${summary.total}` : '—');
-    put('geometry', tof ? `${rows} × ${cols} 样例 · 帧 ${tof.seq}` : '尚无距离帧 · 8 × 8 占位');
+    put('geometry', tof ? `${rows} × ${cols} ${suffix} · 帧 ${tof.seq}` : '尚无距离帧 · 8 × 8 占位');
     host.querySelectorAll('[data-sensor-unit]').forEach(node => { node.textContent = unit; });
     host.querySelectorAll('[data-sensor-unit-choice]').forEach(node => node.setAttribute('aria-pressed', node.dataset.sensorUnitChoice === unit));
     Array.from(grid.children).forEach((button, i) => {
@@ -4363,7 +4601,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     const selected = tof?.zones[zoneIndex], valid = selected?.kind === 'valid' && finite(selected.distanceMm) && selected.distanceMm >= 0;
     put('zone-title', `R${Math.floor(zoneIndex / cols) + 1} · C${zoneIndex % cols + 1}`);
     put('zone-distance', valid ? `${root.SensorData.distance(selected.distanceMm, unit)} ${unit}` : '—');
-    put('zone-state', !selected ? '尚无数据' : valid ? '有效 · 样例' : selected.kind === 'no-return' ? '无回波 · 样例' : '无效 · 样例');
+    put('zone-state', !selected ? '尚无数据' : valid ? `有效 · ${suffix}` : selected.kind === 'no-return' ? `无回波 · ${suffix}` : `无效 · ${suffix}`);
     put('zone-raw', `status raw ${selected?.statusRaw ?? '—'}`);
   }
 
@@ -4395,12 +4633,13 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   function mount(options) {
     unmount(); host = options?.container; if (!host) return false;
     initialize(options.state); host.addEventListener('click', click); host.addEventListener('change', change);
-    root.SensorCamera.mount({ container: host }); paint();
+    root.SensorCamera.mount({ container: host, onTelemetry:receiveTof }); paint();
     timer = root.setInterval(() => {
-      if (!sampleState()) return;
-      history.push(root.SensorData.sample(20 + (root.performance.now() - startedAt) / 1000));
-      if (history.length > 121) history.shift();
-      if (!paused) paint();
+      if (sampleState()) {
+        history.push(root.SensorData.sample(20 + (root.performance.now() - startedAt) / 1000));
+        if (history.length > 121) history.shift();
+      }
+      if (!paused || tofLink) paint();
     }, 500);
     return true;
   }
@@ -4411,7 +4650,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   function unmount() {
     if (timer !== null) root.clearInterval(timer); timer = null;
     root.SensorCamera.unmount(); host?.removeEventListener('click', click); host?.removeEventListener('change', change);
-    host = null; history = []; frozen = null; paused = false;
+    host = null; history = []; frozen = null; paused = false; tofLink = null;
   }
   return Object.freeze({ render, mount, setContext, unmount, snapshot: () => ({ mounted: !!host, state, paused, zoneIndex, unit, channel, historyLength: history.length, displayTime: frame()?.t ?? null }) });
 });
@@ -4445,7 +4684,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     if (v.bluetooth !== null && (!Array.isArray(v.bluetooth) || v.bluetooth.length > 16 || v.bluetooth.some(n => !plain(n) || !text(n.name) || !optionalText(n.address) || (n.blocked !== null && typeof n.blocked !== 'boolean')))) return null;
     // Optional for older backends. Never accept an unvalidated running claim.
     if (v.services != null) {
-      const names=['robotd','mediad','configd','btd','padd','updaterd','robotd-maintenance','mediad-maintenance'];
+      const names=['robotd','mediad','configd','btd','padd','updaterd','tofd','netpadd','nfcd','robotd-maintenance','mediad-maintenance'];
       const pid=n=>n===null || (Number.isInteger(n) && n>0 && n<=4294967295);
       if (!Array.isArray(v.services) || v.services.length>names.length || v.services.some(n=>!plain(n) || !names.includes(n.name) || (n.unit!==null && n.unit!==n.name+'.service') || !['active','restarting','failed','inactive','absent','unknown'].includes(n.state) || !optionalText(n.sub_state) || !pid(n.main_pid) || !pid(n.process_pid)) || new Set(v.services.map(n=>n.name)).size!==v.services.length) return null;
     }
@@ -4531,7 +4770,10 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     {name:'configd',description:'设备配置',icon:'settings'},
     {name:'btd',description:'蓝牙连接',icon:'bluetooth'},
     {name:'padd',description:'手柄输入',icon:'gamepad'},
-    {name:'updaterd',description:'软件更新',icon:'refresh'}
+    {name:'updaterd',description:'软件更新',icon:'refresh'},
+    {name:'tofd',description:'ToF 测距',icon:'chip'},
+    {name:'netpadd',description:'无线手柄输入',icon:'gamepad'},
+    {name:'nfcd',description:'NFC 配对',icon:'bluetooth'}
   ].map(Object.freeze));
   function daemonState(row) {
     if (!row) return {label:'未知',tone:'quiet',running:false,hint:'等待板端回报'};
@@ -4680,6 +4922,96 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
 
 </script>
 <script>
+/* Thin client for official configd system.info / services / logs / set_name.
+ * Persistence and system access remain in configd; no installer or motion RPCs. */
+(function(root,factory){'use strict';const api=factory(root);if(typeof module==='object'&&module.exports)module.exports=api;else root.DeviceSystem=api;})(typeof window!=='undefined'?window:globalThis,function(root){
+  'use strict';
+  const endpoint='/api/v1/maintenance/system';
+  const units=Object.freeze(['robotd','mediad','configd','btd','padd','updaterd','tofd','netpadd','nfcd','bluetooth','NetworkManager']);
+  const states=['active','restarting','failed','inactive','absent','unknown'];
+  const plain=v=>v&&typeof v==='object'&&!Array.isArray(v);
+  const text=(v,max=512)=>typeof v==='string'&&v.length<=max&&!/[\u0000-\u001f\u007f]/.test(v);
+  const optional=v=>v==null||text(v,2048);
+  const pid=v=>Number.isInteger(v)&&v>0&&v<=4294967295;
+  function validate(v){
+    if(!plain(v)||v.protocol_version!=='hatchery-system/1'||typeof v.available!=='boolean')return null;
+    if(v.info!==null&&(!plain(v.info)||!text(v.info.name,128)||!(v.info.serial===null||text(v.info.serial))||!Number.isSafeInteger(v.info.uptime_seconds)||v.info.uptime_seconds<0||(v.info.simulated!==undefined&&typeof v.info.simulated!=='boolean')))return null;
+    if(v.available!==(v.info!==null))return null;
+    if(v.services!==null&&(!Array.isArray(v.services)||v.services.length>9||new Set(v.services.map(s=>s?.unit)).size!==v.services.length||v.services.some(s=>!plain(s)||!units.slice(0,9).some(u=>s.unit===u+'.service')||!states.includes(s.state)||(s.identity!=null&&(!plain(s.identity)||s.identity.service+'.service'!==s.unit||!text(s.identity.version,80)||!pid(s.identity.pid)||!['revision','built_at','exe'].every(k=>optional(s.identity[k])))))))return null;
+    return JSON.parse(JSON.stringify(v));
+  }
+  let data=null,timer=null,poll=null,write=null,epoch=0,revision=0,receipt=null,error='';
+  const listeners=new Set();
+  const available=()=>root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance'&&root.HATCHERY_BACKEND?.readOnly===true;
+  const snapshot=()=>({data:data?JSON.parse(JSON.stringify(data)):null,fresh:!!data?.available&&receipt!==null&&root.performance.now()-receipt<9000,available:available(),pending:!!write,error});
+  const emit=()=>listeners.forEach(fn=>fn(snapshot()));
+  async function request(path,{signal,body}={}){
+    if(!available())throw Error('当前未连接设备');
+    const reply=await root.fetch(endpoint+path,{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',signal,
+      ...(body?{headers:{'Content-Type':'application/json','X-Hatchery-Command':'1'},body:JSON.stringify(body)}:{})});
+    if(!reply.ok)throw Error(reply.status===401?'会话已失效，请刷新网页':reply.status===404?'当前后端尚不支持此功能':'配置服务未完成请求，请刷新确认');
+    const raw=await reply.text();if(raw.length>65536)throw Error('设备回复超过限制');
+    return JSON.parse(raw);
+  }
+  async function refresh(){
+    if(!available()||poll||write)return;
+    const ticket=epoch,version=revision,controller=new root.AbortController();poll=controller;
+    const timeout=root.setTimeout(()=>controller.abort(),6500);
+    try{const next=validate(await request('',{signal:controller.signal}));if(!next)throw Error('设备配置协议校验失败');
+      if(ticket!==epoch||version!==revision)return;data=next;receipt=root.performance.now();error=next.available?'':'配置服务未连接';
+    }catch(failure){if(ticket===epoch&&version===revision){receipt=null;error=failure.name==='AbortError'?'配置服务请求超时':failure.message;}}
+    finally{root.clearTimeout(timeout);if(poll===controller)poll=null;if(ticket===epoch)emit();}
+  }
+  async function rename(name){
+    if(write||!snapshot().fresh||!text(name,24)||!name.trim())throw Error('设备名称暂不可保存');
+    const ticket=epoch,controller=new root.AbortController();write=controller;revision++;poll?.abort();poll=null;emit();
+    const timeout=root.setTimeout(()=>controller.abort(),5000);
+    try{const result=await request('/name',{signal:controller.signal,body:{name:name.trim()}});
+      if(ticket!==epoch)throw Error('页面已离开，请重新查看设备名称');
+      if(!plain(result)||!text(result.name,128)||!result.name)throw Error('设备名称回复无效，请刷新确认');
+      return result;
+    }catch(failure){throw Error(failure.name==='AbortError'?'保存结果未确认，请刷新查看设备名称':failure.message);}
+    finally{root.clearTimeout(timeout);if(write===controller){write=null;emit();if(ticket===epoch)refresh();}}
+  }
+  async function logs(unit,signal){
+    if(!units.includes(unit))throw Error('不支持此服务');
+    const ticket=epoch,result=await request('/logs/'+unit,{signal});
+    if(ticket!==epoch)throw Error('设备会话已离开');
+    if(!plain(result)||result.unit!==unit+'.service'||!Array.isArray(result.lines)||result.lines.length>100||!result.lines.every(s=>typeof s==='string'&&s.length<=8192)||typeof result.truncated!=='boolean')throw Error('日志回复无效');
+    return result;
+  }
+  function start(){if(timer!==null)return;refresh();if(available())timer=root.setInterval(()=>{emit();refresh();},4000);}
+  function stop(){epoch++;revision++;poll?.abort();write?.abort();poll=write=null;root.clearInterval(timer);timer=null;data=null;receipt=null;error='';}
+  function subscribe(fn){listeners.add(fn);fn(snapshot());return()=>listeners.delete(fn);}
+  return Object.freeze({units,validate,snapshot,subscribe,start,stop,refresh,rename,logs});
+});
+
+</script>
+<script>
+(function(root){
+  'use strict';
+  let host=null,request=null,epoch=0;
+  function render(){return `<details class="device-disclosure device-journal" data-device-journal><summary>服务日志</summary><div class="device-journal-controls"><label>程序<select data-journal-unit>${root.DeviceSystem.units.map(u=>`<option value="${u}">${u}</option>`).join('')}</select></label><button type="button" class="button secondary" data-journal-refresh>读取日志</button><span class="device-caption" data-journal-status role="status">本次开机 · 最近 100 条</span></div><pre data-journal-lines tabindex="0" aria-label="服务日志">尚未读取</pre></details>`;}
+  function clear(){epoch++;request?.abort();request=null;if(!host)return;host.querySelector('[data-journal-lines]').textContent='尚未读取';host.querySelector('[data-journal-status]').textContent='本次开机 · 最近 100 条';host.querySelector('[data-journal-refresh]').disabled=false;}
+  async function load(){
+    if(!host||request)return;
+    const ticket=epoch,controller=new root.AbortController(),unit=host.querySelector('[data-journal-unit]').value;request=controller;
+    const button=host.querySelector('[data-journal-refresh]'),status=host.querySelector('[data-journal-status]'),lines=host.querySelector('[data-journal-lines]');
+    button.disabled=true;status.textContent='正在读取…';lines.textContent='';const timeout=root.setTimeout(()=>controller.abort(),6000);
+    try{const result=await root.DeviceSystem.logs(unit,controller.signal);if(!host||ticket!==epoch)return;
+      lines.textContent=result.lines.join('\n')||'此服务在本次开机尚无日志';status.textContent=`${result.lines.length} 条${result.truncated?' · 较早内容已截断':''}`;
+    }catch(error){if(host&&ticket===epoch){status.textContent=error.name==='AbortError'?'日志读取超时':error.message;lines.textContent='未取得日志';}}
+    finally{root.clearTimeout(timeout);if(request===controller)request=null;if(host&&ticket===epoch)button.disabled=false;}
+  }
+  function click(event){if(event.target.closest('[data-journal-refresh]'))load();}
+  function toggle(){if(!host.open)clear();}
+  function mount(container){unmount();host=container;if(!host)return;host.addEventListener('click',click);host.addEventListener('change',clear);host.addEventListener('toggle',toggle);}
+  function unmount(){clear();host?.removeEventListener('click',click);host?.removeEventListener('change',clear);host?.removeEventListener('toggle',toggle);host=null;}
+  root.DeviceJournal=Object.freeze({render,mount,unmount});
+})(window);
+
+</script>
+<script>
 (function (root, factory) {
   'use strict';
   const api=factory(root);
@@ -4730,9 +5062,9 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     <section class="panel device-home-card"><div class="device-profile"><div class="device-portrait" role="img" aria-label="Microduck 参考外观照片"><span>参考外观</span></div><div class="device-profile-copy"><span class="device-kicker">MY MICRODUCK</span><h2 data-device-page-name>我的 Microduck</h2><p data-device-model>连接后识别设备型号</p><div class="device-profile-meta"><span class="device-status-pill" data-device-hero-status>等待连接</span><span data-device-updated>尚无设备读数</span></div></div><div class="device-health" data-device-health data-tone="quiet"><span class="device-health-icon" data-device-health-icon>${icon('network')}</span><div><h3 data-device-health-title>让你的小鸭上线</h3><p data-device-health-detail>连接后查看它的运行与网络状态。</p></div></div></div><div class="device-quick-status"><div>${icon('clock')}<span>本次运行</span><strong data-device-uptime>等待设备</strong></div><div>${icon('network')}<span>网络链路</span><strong data-device-network-summary>待确认</strong></div><div>${icon('chip')}<span>设备服务</span><strong data-device-version>待确认</strong></div></div></section>
     <div class="device-dashboard-grid"><section class="panel device-vitals"><div class="device-panel-heading"><div><span class="device-kicker">VITALS</span><h3>运行状态</h3></div><span class="device-status-pill" data-device-reading-status>等待设备</span></div><div class="device-gauges">${gauge('cpu','CPU 占用','等待首次采样')}${gauge('memory','内存占用','等待内存读数')}${gauge('temperature','板载温度','最高温区读数')}</div><div class="device-trend"><div class="device-trend-heading"><div><h4 data-device-chart-title>CPU 占用趋势</h4><span data-device-chart-subtitle>从连接开始，保留实际采样。</span></div><div class="device-segments" role="group" aria-label="趋势时间范围"><button type="button" data-device-range="60" aria-pressed="true">1 分钟</button><button type="button" data-device-range="180" aria-pressed="false">3 分钟</button></div></div><div class="device-chart-area" data-device-chart tabindex="0" role="group" aria-label="系统趋势图，左右方向键查看采样"><div data-device-chart-content></div><div class="device-chart-tooltip" data-device-tooltip hidden></div></div><div class="device-trend-footer"><span data-device-chart-note>连接后开始记录</span><button type="button" class="device-text-button" data-device-pause aria-pressed="false">${icon('pause')}暂停曲线</button></div></div></section>
     ${root.ConnectionsPanel.render()}</div>
-    <div class="device-bottom-grid"><section class="panel device-functions"><div class="device-panel-heading"><div><span class="device-kicker">BOARD SERVICES</span><h3>程序服务</h3></div><span class="device-caption" data-device-service-summary>等待连接</span></div><div class="device-service-grid" data-device-services></div><details class="device-disclosure"><summary>查看服务详情</summary><div data-device-service-details></div></details></section><section class="panel device-about"><div class="device-panel-heading"><div><span class="device-kicker">THIS DEVICE</span><h3>关于这台设备</h3></div><button type="button" class="device-text-button" data-device-settings>编辑显示名称 ${icon('edit')}</button></div><div data-device-host-info></div><details class="device-disclosure"><summary>网络地址与 SSH</summary><div data-device-addresses></div></details><details class="device-disclosure"><summary>系统与技术详情</summary><div data-device-system-details></div></details></section></div>
-    <p class="device-data-note">系统状态来自当前连接的后端主机；未取得的数据保留未知。名称与连接备注仅保存在当前浏览器。</p>
-    <dialog class="device-settings-dialog" data-device-settings-dialog aria-labelledby="device-settings-title"><form data-device-label-form><div class="device-dialog-heading"><div><span class="device-kicker">MAKE IT YOURS</span><h3 id="device-settings-title">设备显示设置</h3></div><button type="button" class="icon-button" data-device-close aria-label="关闭显示设置">×</button></div><p>给这台设备起个熟悉的名字，方便识别。</p><label>显示名称<input data-device-alias maxlength="80" placeholder="例如：家庭小鸭"></label><label>当前连接方式备注<select data-device-path-choice><option value="unknown">未注明</option><option value="ssh">SSH 转发</option><option value="usb">USB 网络</option><option value="wifi">Wi-Fi</option><option value="local">电脑本地维护</option></select></label><label>SSH 用户名<input data-device-ssh-user maxlength="32" placeholder="duck" autocomplete="off" spellcheck="false"></label><p class="device-caption">仅调整本浏览器的显示和复制命令，不修改板端名称、账号或网络。</p><div class="device-dialog-actions"><button type="button" class="button secondary" data-device-close>取消</button><button class="button primary" type="submit">保存设置</button></div></form></dialog>
+    <div class="device-bottom-grid"><section class="panel device-functions"><div class="device-panel-heading"><div><span class="device-kicker">BOARD SERVICES</span><h3>程序服务</h3></div><span class="device-caption" data-device-service-summary>等待连接</span></div><div class="device-service-grid" data-device-services></div><details class="device-disclosure"><summary>查看服务详情</summary><div data-device-service-details></div></details>${root.DeviceJournal.render()}</section><section class="panel device-about"><div class="device-panel-heading"><div><span class="device-kicker">THIS DEVICE</span><h3>关于这台设备</h3></div><button type="button" class="device-text-button" data-device-settings>设备设置 ${icon('edit')}</button></div><div data-device-host-info></div><details class="device-disclosure"><summary>网络地址与 SSH</summary><div data-device-addresses></div></details><details class="device-disclosure"><summary>系统与技术详情</summary><div data-device-system-details></div></details></section></div>
+    <p class="device-data-note">系统状态来自当前设备；未取得的数据保留未知。</p>
+    <dialog class="device-settings-dialog" data-device-settings-dialog aria-labelledby="device-settings-title"><form data-device-label-form><div class="device-dialog-heading"><div><span class="device-kicker">MAKE IT YOURS</span><h3 id="device-settings-title">设备设置</h3></div><button type="button" class="icon-button" data-device-close aria-label="关闭设备设置">×</button></div><label>设备名称<div class="device-name-control"><input data-device-remote-name maxlength="24" placeholder="连接配置服务后可修改" disabled><button type="button" class="button secondary" data-device-rename disabled>保存到设备</button></div></label><p class="device-caption" data-device-name-result role="status">配置服务未连接</p><label>网页别名（可选）<input data-device-alias maxlength="80" placeholder="仅在当前浏览器显示"></label><label>当前连接方式备注<select data-device-path-choice><option value="unknown">未注明</option><option value="ssh">SSH 转发</option><option value="usb">USB 网络</option><option value="wifi">Wi-Fi</option><option value="local">电脑本地维护</option></select></label><label>SSH 用户名<input data-device-ssh-user maxlength="32" placeholder="duck" autocomplete="off" spellcheck="false"></label><p class="device-caption">别名、备注和 SSH 用户名仅保存在本浏览器。</p><div class="device-dialog-actions"><button type="button" class="button secondary" data-device-close>关闭</button><button class="button primary" type="submit">保存网页设置</button></div></form></dialog>
     <dialog class="device-copy-dialog" data-device-copy-dialog aria-labelledby="device-copy-title"><h3 id="device-copy-title">复制连接信息</h3><p>选中下方内容，使用系统的复制快捷键。</p><input readonly aria-label="要复制的连接信息" data-device-copy-value><button type="button" class="button secondary" data-device-copy-close>完成</button></dialog>
     <div class="device-inline-toast" data-device-message role="status" aria-live="polite" hidden></div></div>`;}
 
@@ -4768,7 +5100,8 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     host.querySelector('[data-device-caption="memory"]').textContent=metric.used===null?'等待内存读数':`${bytes(metric.used)} / ${bytes(metric.total)}`;
     host.querySelector('[data-device-caption="temperature"]').textContent=metric.temperature===null?'温度尚未提供':'最高温区 · 点选看趋势';
     paintChart();paintNetwork();paintServices();
-    inject('host-info',fields([['设备名称',meta.name],['主机名',id?.hostname],['设备型号',id?.model],['操作系统',id?.os]]));
+    const configuration=snapshot.configuration,configured=configuration?.data?.info;
+    inject('host-info',fields([['设备名称',configured?configured.name+(configuration.fresh?'':' · 上次'):null],['网页显示',meta.name],['主机名',id?.hostname],['设备型号',id?.model],['操作系统',id?.os]]));
     inject('system-details',fields([['设备 ID',id?.id],['身份来源',id?.id_source==='configured'?'设备配置':id?.id_source==='machine-id-derived'?'系统身份派生':null],['内核',id?.kernel],['架构',id?.architecture],['Load · 1 min',value(data?.system.load_one,2)],['当前网页入口',meta.endpoint],['快照接收时间',snapshot.receivedAt?new Date(snapshot.receivedAt).toLocaleString()+(snapshot.fresh?'':' · 陈旧'):null]]));
   }
   function paintNetwork(){
@@ -4781,7 +5114,8 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     put('service-summary',fresh?(known?`${rows.filter(row=>row.running).length} / ${rows.length} 已启动`:'服务状态待获取'):data?'上次状态 · 等待更新':'等待连接');
     inject('services',rows.map(row=>`<div class="device-service-card" data-daemon="${row.name}" data-state="${row.row?.state||'unknown'}" ${!fresh?'data-stale="true"':''}><span class="device-service-symbol">${icon(row.icon)}</span><div><div class="device-service-title"><strong class="mono">${row.name}</strong><span class="device-service-state" data-tone="${row.tone}">${escape(row.label)}</span></div><p>${row.description}</p><small>${escape(row.hint)}</small></div></div>`).join(''));
     const unitNames={active:'active',restarting:'activating / restarting',failed:'failed',inactive:'inactive',absent:'not-found',unknown:'unknown'};
-    const details=rows.map(row=>`<div class="device-daemon-detail"><strong class="mono">${row.name}</strong>${fields([['运行方式',row.row?.state==='active'?'systemd 管理':row.row?.process_pid?'独立进程':'未运行'],['服务单元',row.row?.unit],['systemd 状态',row.row?unitNames[row.row.state]:null],['启动阶段',row.row?.sub_state],['单元主进程 PID',row.row?.main_pid],['检测到的程序 PID',row.row?.process_pid]])}</div>`).join('');
+    const details=rows.map(row=>{const observed=view.configuration?.data?.services?.find(s=>s.unit===row.name+'.service'),build=observed?.identity;
+      return `<div class="device-daemon-detail"><strong class="mono">${row.name}</strong>${fields([['运行方式',row.row?.state==='active'?'systemd 管理':row.row?.process_pid?'独立进程':'未运行'],['服务单元',row.row?.unit],['systemd 状态',row.row?unitNames[row.row.state]:null],['启动阶段',row.row?.sub_state],['单元主进程 PID',row.row?.main_pid],['检测到的程序 PID',row.row?.process_pid],['程序版本',build?build.version+(view.configuration.fresh?'':' · 上次'):null],['源码版本',build?.revision],['程序路径',build?.exe]])}</div>`;}).join('');
     const maintenance=(data?.services||[]).filter(row=>['robotd-maintenance','mediad-maintenance'].includes(row.name));
     inject('service-details',`<p class="device-service-explanation">每约 2 秒只读更新。独立进程与 systemd 单元分别核对；未安装服务单元不代表磁盘中没有可执行程序。${fresh?'':' 当前没有新状态。'}</p>${details}<div class="device-daemon-detail"><strong>当前维护连接</strong>${fields([['状态接口',service?.name],['软件版本',service?.version],...maintenance.map(row=>[row.name,row.process_pid?`PID ${row.process_pid}${fresh?'':' · 上次'}`:'未取得进程信息'])])}</div>`);
   }
@@ -4855,11 +5189,13 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     unmount();if(!options.container?.querySelector('.device-workspace'))return;
     host=options.container;settings=options.onSettings;
     root.ConnectionsPanel.mount(host.querySelector('.connections-panel'));
+    root.DeviceJournal.mount(host.querySelector('[data-device-journal]'));
     if(root.ResizeObserver){resizeObserver=new root.ResizeObserver(()=>{if(host&&metadata&&view)paintChart();});resizeObserver.observe(host.querySelector('[data-device-chart]'));}
     for(const [name,handler] of Object.entries({click,keydown,pointermove:pointer,pointerout:pointer}))host.addEventListener(name,handler);
   }
   function unmount(){
     root.ConnectionsPanel.unmount();
+    root.DeviceJournal.unmount();
     for(const [name,handler] of Object.entries({click,keydown,pointermove:pointer,pointerout:pointer}))host?.removeEventListener(name,handler);
     host?.querySelectorAll('[data-device-settings-dialog],[data-device-copy-dialog]').forEach(d=>{if(d.open)d.close();});
     root.clearTimeout(toastTimer);resizeObserver?.disconnect();resizeObserver=null;ui.frozen=null;ui.hover=null;host=null;settings=null;metadata=null;
@@ -4887,22 +5223,24 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
       if(saved[key]&&typeof saved[key]==='object'&&!Array.isArray(saved[key]))preferences[key]=Object.assign(Object.create(null),Object.fromEntries(Object.entries(saved[key]).slice(0,64).filter(([k,v])=>k.length<=256&&typeof v==='string'&&v.length<=80&&(key!=='paths'||Object.hasOwn(routes,v))&&(key!=='users'||validUser(v)))));
     }
   }catch(_){/* Browser preferences are optional. */}
-  let host=null,unsubscribe=null,view=null,page='device';
+  let host=null,unsubscribe=null,unsubscribeSystem=null,view=null,page='device',generation=0;
   const endpoint=()=>['http:','https:'].includes(root.location?.protocol)?root.location.origin:'离线文件';
   const identityKey=snapshot=>snapshot?.data?.identity.id||endpoint();
-  const nameFor=snapshot=>preferences.aliases[identityKey(snapshot)]||snapshot?.data?.identity.name||snapshot?.data?.identity.hostname||'我的 Microduck';
+  const nameFor=snapshot=>preferences.aliases[identityKey(snapshot)]||snapshot?.configuration?.data?.info?.name||snapshot?.data?.identity.name||snapshot?.data?.identity.hostname||'我的 Microduck';
   const sshUser=()=>preferences.users[identityKey(view)]||'duck';
   const busText=service=>!service?'待确认':service.servo_fake?'舵机样例':service.servo_connection==='open'?'串口已打开':'串口未连接';
   function headerMarkup(){return `<div class="devicebar"><div class="device-id"><span class="device-icon device-header-icon">${root.DeviceOverview.icon('duck')}</span><div><strong data-device-name>Hatchery · 等待设备</strong><p class="mono" data-device-identity>正在确认设备身份</p></div><span class="badge draft" data-device-online>等待连接</span></div><div class="device-stats"><div>当前入口<strong class="mono" data-device-endpoint>${escape(endpoint())}</strong></div><div>连接方式<strong data-device-path>尚未备注</strong></div><div>舵机状态<strong data-device-bus>待确认</strong></div></div></div>`;}
-  function render(){return root.DeviceOverview.render();}
+  function render(){return root.DeviceOverview.render()+root.InputPanel.render();}
   function banner(snapshot){
+    if(page==='overview')return '总控只读观察正式 robotd；连接、数据模式与有效性以面板状态为准。';
     if(!snapshot.available)return '静态预览 · 尚未连接设备，系统状态保留未知。';
     if(!snapshot.fresh)return(snapshot.data?'连接暂时中断 · 保留上次设备信息。':'设备后端未连接 · ')+(snapshot.error||'正在获取状态。');
     const source=busText(snapshot.data.service);
-    return page==='parameters'?`系统信息来自当前设备；${source}。`:`系统信息来自当前设备；${page==='sensors'?'IMU / ToF':'联调、曲线与 3D'}仍为浏览器样例，${source}。`;
+    return page==='parameters'?`系统信息来自当前设备；${source}。`:page==='sensors'?`IMU 为样例；相机与 ToF 以各自连接状态为准，${source}。`:`系统信息来自当前设备；曲线与 3D 读取 robotd 反馈，缺测保留为空，${source}。`;
   }
   function paint(snapshot){
     if(!host)return;
+    snapshot={...snapshot,configuration:root.DeviceSystem.snapshot()};
     view=snapshot;root.DeviceOverview.observe(snapshot);
     const data=snapshot.data,live=snapshot.fresh?data:null,id=data?.identity,name=nameFor(snapshot),status=root.DeviceTelemetry.connection(snapshot);
     const put=(key,text)=>host.querySelectorAll('[data-device-'+key+']').forEach(n=>{n.textContent=text;});
@@ -4913,6 +5251,9 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     const online=host.querySelector('[data-device-online]');if(online){online.textContent=status.label;online.className='badge '+(snapshot.fresh?'readonly':snapshot.data?'stale':'draft');}
     const notice=host.querySelector('[data-device-banner]');if(notice){notice.textContent=banner(snapshot);notice.className='status-banner'+(snapshot.available&&!snapshot.fresh&&snapshot.status!=='connecting'?' offline':'');}
     root.DeviceOverview.paint(snapshot,{name,endpoint:endpoint(),sshUser:sshUser()});
+    const field=host.querySelector('[data-device-remote-name]'),button=host.querySelector('[data-device-rename]');
+    if(field)field.disabled=!snapshot.configuration.fresh||snapshot.configuration.pending;
+    if(button)button.disabled=!snapshot.configuration.fresh||snapshot.configuration.pending;
   }
   function submit(event){
     if(!event.target.matches('[data-device-label-form]'))return;
@@ -4924,27 +5265,143 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     let saved=true;try{root.localStorage.setItem(storageKey,JSON.stringify(preferences));}catch(_){saved=false;}
     paint(view);root.DeviceOverview.closeSettings();root.DeviceOverview.message(saved?'显示设置已保存到本浏览器':'设置已应用；当前浏览器无法持久保存');
   }
-  function click(event){
-    const button=event.target.closest('button');if(!button||!host?.contains(button)||!button.matches('[data-device-refresh]'))return;
-    root.DeviceSession.refresh();root.DeviceOverview.message(view?.available?'正在刷新设备状态':'当前是静态预览，请先连接设备');
+  async function click(event){
+    const button=event.target.closest('button');if(!button||!host?.contains(button)||button.disabled)return;
+    if(button.matches('[data-device-rename]')){
+      const ticket=generation,field=host.querySelector('[data-device-remote-name]'),result=host.querySelector('[data-device-name-result]');
+      result.textContent='正在保存…';
+      try{const saved=await root.DeviceSystem.rename(field.value);if(ticket!==generation||!host)return;field.value=saved.name;result.textContent='已保存到设备';}
+      catch(error){if(ticket===generation&&host)result.textContent=error.message;}
+    }else if(button.matches('[data-device-refresh]')){
+      root.DeviceSession.refresh();root.DeviceSystem.refresh();root.DeviceOverview.message(view?.available?'正在刷新设备状态':'当前是静态预览，请先连接设备');
+    }
   }
   function input(event){if(event.target.matches('[data-device-ssh-user]'))event.target.setCustomValidity('');}
   function mount(options){
     unmount();host=options?.container;page=options?.view||'device';if(!host)return;
+    root.InputPanel.mount(host.querySelector('[data-input-panel]'));
     host.addEventListener('submit',submit);host.addEventListener('click',click);host.addEventListener('input',input);
     root.DeviceOverview.mount({container:host,onSettings:()=>{
+      const configuration=root.DeviceSystem.snapshot();
+      host.querySelector('[data-device-remote-name]').value=configuration.data?.info?.name||'';
+      host.querySelector('[data-device-name-result]').textContent=configuration.fresh?'由板端配置服务保存':configuration.error||'配置服务未连接';
       host.querySelector('[data-device-alias]').value=preferences.aliases[identityKey(view)]||'';
       host.querySelector('[data-device-path-choice]').value=preferences.paths[endpoint()]||'unknown';
       const user=host.querySelector('[data-device-ssh-user]');user.value=sshUser();user.setCustomValidity('');
     }});
     unsubscribe=root.DeviceSession.subscribe(paint);root.DeviceSession.start();
+    unsubscribeSystem=root.DeviceSystem.subscribe(()=>paint(root.DeviceSession.snapshot()));root.DeviceSystem.start();
   }
   function unmount(){
+    root.InputPanel.unmount();
+    generation++;unsubscribeSystem?.();unsubscribeSystem=null;root.DeviceSystem.stop();
     unsubscribe?.();unsubscribe=null;host?.removeEventListener('submit',submit);host?.removeEventListener('click',click);host?.removeEventListener('input',input);
     root.DeviceOverview.unmount();host=null;
   }
   return Object.freeze({render,headerMarkup,mount,unmount});
 });
+
+</script>
+<script>
+/* Official padd raw-input monitor. It does not claim robot control ownership. */
+(function(root,factory){const api=factory(root);if(typeof module==='object'&&module.exports)module.exports=api;else root.InputPanel=api;})(typeof window!=='undefined'?window:globalThis,function(root){
+  'use strict';
+  const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const integer=Number.isSafeInteger,plain=v=>v&&typeof v==='object'&&!Array.isArray(v);
+  function validate(v){
+    if(!plain(v)||v.protocol_version!=='hatchery-input/1'||v.source!=='padd'||typeof v.session_id!=='string'||v.session_id.length>100||typeof v.connected!=='boolean'||typeof v.fresh!=='boolean'||(v.fresh&&!v.connected))return null;
+    if(v.device!==null){const d=v.device;if(!plain(d)||typeof d.name!=='string'||d.name.length>512||!integer(d.bus)||!Array.isArray(d.axes)||d.axes.length>64||!Array.isArray(d.buttons)||d.buttons.length>256)return null;
+      if(!d.axes.every(a=>plain(a)&&integer(a.code)&&typeof a.name==='string'&&a.name.length<=100&&['min','max','value'].every(k=>integer(a[k]))&&a.min<a.max)||!d.buttons.every(b=>plain(b)&&integer(b.code)&&typeof b.name==='string'&&b.name.length<=100&&typeof b.pressed==='boolean'))return null;}
+    return JSON.parse(JSON.stringify(v));
+  }
+  let host=null,timer=null,request=null,generation=0,last=null,lastAt=0;
+  function render(){return `<section class="panel input-panel" data-input-panel><div class="panel-title"><h3>输入设备</h3><span class="badge draft" data-input-status>等待连接</span></div><div class="input-panel-body"><strong data-input-name>未发现手柄</strong><p class="small muted" data-input-message>连接板端 padd 后查看按键与摇杆。</p><div class="input-axes" data-input-axes></div><div class="input-buttons" data-input-buttons></div><details><summary>输入详情</summary><dl data-input-detail></dl></details></div></section>`;}
+  function paint(v,message){if(!host)return;const d=v?.device,live=v?.fresh&&d;
+    host.querySelector('[data-input-name]').textContent=d?.name||'未发现手柄';
+    host.querySelector('[data-input-status]').textContent=!v?.connected?'服务未连接':live?'正在接收':d?'等待新输入':'等待手柄';
+    host.querySelector('[data-input-message]').textContent=message||(d?`${d.bus===5?'蓝牙':d.bus===3?'USB':'其他总线'} · ${live?'实时输入':'输入值暂不显示'} · 仅观察`:'可在上方蓝牙面板配对手柄，也可通过 USB 连接。');
+    host.querySelector('[data-input-axes]').innerHTML=(d?.axes||[]).map(a=>`<label><span>${escape(a.name)}</span><meter min="${a.min}" max="${a.max}" value="${live?a.value:a.min}" ${live?'':'hidden'}></meter><output>${live?a.value:'—'}</output></label>`).join('');
+    host.querySelector('[data-input-buttons]').innerHTML=(d?.buttons||[]).map(b=>`<span class="input-key ${live&&b.pressed?'pressed':''}" aria-label="${escape(b.name)} ${live?(b.pressed?'按下':'松开'):'状态未知'}">${escape(b.name)}</span>`).join('');
+    host.querySelector('[data-input-detail]').innerHTML=[['来源','padd · pad.input'],['设备节点',d?.node||'—'],['输入序号',v?.frame?.seq??'—'],['距离最近输入',v?.age_ms==null?'—':`${Math.round(v.age_ms)} ms`],['控制来源','该只读报告不声明运动控制权']].map(([k,x])=>`<div><dt>${escape(k)}</dt><dd>${escape(x)}</dd></div>`).join('');
+  }
+  async function refresh(){if(!host||request)return;const id=generation,ctrl=new root.AbortController();request=ctrl;const timeout=root.setTimeout(()=>ctrl.abort(),2500);try{const response=await root.fetch('/api/v1/maintenance/input',{credentials:'same-origin',cache:'no-store',signal:ctrl.signal});if(!response.ok)throw Error('输入服务不可用');const raw=await response.text();if(raw.length>131072)throw Error('输入报告过大');const value=validate(JSON.parse(raw));if(!value)throw Error('输入报告无效');if(id===generation){last=value;lastAt=root.performance.now();paint(value);}}catch(e){if(id===generation)paint(null,e.name==='AbortError'?'输入读取超时':e.message);}finally{root.clearTimeout(timeout);if(request===ctrl)request=null;}}
+  function mount(container){unmount();host=container;if(!host)return;if(root.HATCHERY_BACKEND?.apiBase!=='/api/v1/maintenance'){paint(null,'离线预览 · 不读取设备输入');return;}refresh();timer=root.setInterval(()=>{if(last&&root.performance.now()-lastAt>=1500)paint({...last,fresh:false},'输入读取已过期');refresh();},500);}
+  function unmount(){generation++;request?.abort();request=null;if(timer!==null)root.clearInterval(timer);timer=null;host=null;last=null;lastAt=0;}
+  return Object.freeze({render,mount,unmount,validate});
+});
+
+</script>
+<script>
+/* Official robotd read-only subscription, cached once by the existing gateway. */
+(function(root,factory){'use strict';const api=factory(root);if(typeof module==='object'&&module.exports)module.exports=api;else root.RobotSession=api;})(typeof window!=='undefined'?window:globalThis,function(root){
+  'use strict';
+  const plain=v=>v&&typeof v==='object'&&!Array.isArray(v),finite=n=>typeof n==='number'&&Number.isFinite(n);
+  const text=v=>typeof v==='string'&&v.length<=512,optional=v=>v==null||text(v);
+  const vector=v=>Array.isArray(v)&&v.length<=32&&v.every(finite);
+  function validate(v){
+    if(!plain(v)||v.protocol_version!=='hatchery-runtime/1'||v.source!=='robotd'||v.capture_mode!=='unreported'||!text(v.session_id)||!v.session_id||!['connected','fresh','health_fresh'].every(k=>typeof v[k]==='boolean')||!text(v.error))return null;
+    if(v.device_mono_ns!=null&&!(typeof v.device_mono_ns==='string'&&/^\d{1,20}$/.test(v.device_mono_ns)))return null;
+    if(v.hello!==null&&(!plain(v.hello)||!Number.isInteger(v.hello.api_version)||v.hello.api_version<37||v.hello.api_version>44||!optional(v.hello.daemon_version)||!optional(v.hello.revision)))return null;
+    if(v.connected!==(v.hello!==null))return null;
+    const h=v.health;
+    if(h!==null&&(!plain(h)||typeof h.healthy!=='boolean'||(h.degraded!==undefined&&typeof h.degraded!=='boolean')||!optional(h.reason)))return null;
+    if(h?.control_loop&&(!plain(h.control_loop)||!finite(h.control_loop.target_hz)||(h.control_loop.achieved_hz!=null&&!finite(h.control_loop.achieved_hz))||!['ticks','missed','last_tick_age_ms'].every(k=>Number.isSafeInteger(h.control_loop[k])&&h.control_loop[k]>=0)))return null;
+    if(h?.battery&&(!finite(h.battery.volts)||h.battery.volts<0))return null;
+    if(h?.imu&&(!plain(h.imu)||typeof h.imu.ready!=='boolean'))return null;
+    const s=v.state;
+    if(s!==null&&(!plain(s)||!finite(s.t)||s.t<0||!text(s.policy)||!plain(s.loop)||!finite(s.loop.hz)||s.loop.hz<0||!Number.isSafeInteger(s.loop.missed)||s.loop.missed<0||!plain(s.safety)||!['fallen','limp'].every(k=>typeof s.safety[k]==='boolean')||!['joints','targets'].every(k=>vector(s[k]))))return null;
+    if(v.fresh&&(!v.connected||s===null||!finite(v.frame_age_ms)||v.frame_age_ms<0||v.frame_age_ms>=1500))return null;
+    if(v.health_fresh&&(!v.connected||h===null))return null;
+    const sub=v.subscription;
+    if(sub!==null&&(!plain(sub)||sub.accepted!==true||!['walk','stand','unavailable'].every(k=>optional(sub[k]))))return null;
+    return JSON.parse(JSON.stringify(v));
+  }
+  let data=null,received=null,timer=null,controller=null,epoch=0,error='';const listeners=new Set();
+  const available=()=>root.HATCHERY_BACKEND?.apiBase==='/api/v1/maintenance'&&root.HATCHERY_BACKEND?.readOnly===true;
+  function snapshot(){const age=received===null?Infinity:root.performance.now()-received;return {data:data?JSON.parse(JSON.stringify(data)):null,available:available(),fresh:!!data?.fresh&&age<2000,healthFresh:!!data?.health_fresh&&age<3000,error,receivedMono:received};}
+  const emit=()=>listeners.forEach(fn=>fn(snapshot()));
+  async function refresh(){
+    if(!available()||controller)return;
+    const ticket=epoch,request=new root.AbortController();controller=request;const timeout=root.setTimeout(()=>request.abort(),2500);
+    try{const reply=await root.fetch('/api/v1/maintenance/runtime',{method:'GET',credentials:'same-origin',cache:'no-store',signal:request.signal});if(!reply.ok)throw Error(reply.status===404?'当前网关尚未提供正式状态接口':'正式状态接口不可用');
+      const raw=await reply.text();if(raw.length>131072)throw Error('正式状态超过限制');const next=validate(JSON.parse(raw));if(!next)throw Error('正式状态协议校验失败');
+      if(ticket!==epoch)return;data=next;received=root.performance.now();error='';
+    }catch(failure){if(ticket===epoch){received=null;error=failure.name==='AbortError'?'正式状态请求超时':failure.message;}}
+    finally{root.clearTimeout(timeout);if(controller===request)controller=null;if(ticket===epoch)emit();}
+  }
+  function start(){if(timer!==null)return;if(!available()){emit();return;}refresh();timer=root.setInterval(()=>{emit();refresh();},500);}
+  function stop(){epoch++;controller?.abort();controller=null;root.clearInterval(timer);timer=null;data=null;received=null;error='';}
+  function subscribe(fn){listeners.add(fn);fn(snapshot());return()=>listeners.delete(fn);}
+  return Object.freeze({validate,start,stop,refresh,subscribe,snapshot});
+});
+
+</script>
+<script>
+(function(root){
+  'use strict';let host=null,unsubscribe=null;
+  const escape=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const number=(v,d=1)=>typeof v==='number'&&Number.isFinite(v)?v.toFixed(d):'—';
+  function render(){return `<div class="robot-overview"><section class="panel robot-runtime-hero"><div><span class="device-kicker">LIVE ROBOT</span><h2 data-runtime-title>等待正式 robotd</h2><p data-runtime-message>连接板端程序后，显示实时运行状态。</p></div><span class="badge draft" data-runtime-link>只读</span></section><div class="robot-runtime-grid"><section class="panel"><div class="panel-title"><h3>控制循环</h3><span class="small muted" data-runtime-loop-state>等待程序</span></div><div class="robot-runtime-value"><strong data-runtime-hz>—</strong><span>Hz</span><small data-runtime-target></small></div><dl><div><dt>累计周期</dt><dd data-runtime-ticks>—</dd></div><div><dt>超时周期</dt><dd data-runtime-missed>—</dd></div><div><dt>最近周期</dt><dd data-runtime-tick-age>—</dd></div></dl></section><section class="panel"><div class="panel-title"><h3>策略与状态</h3><span class="small muted" data-runtime-frame-state>等待帧</span></div><div class="robot-runtime-value"><strong class="robot-policy-name" data-runtime-policy>—</strong></div><dl><div><dt>姿态判定</dt><dd data-runtime-posture>—</dd></div><div><dt>已报告关节</dt><dd data-runtime-joints>—</dd></div><div><dt>母线电压</dt><dd data-runtime-voltage>—</dd></div></dl></section><section class="panel"><div class="panel-title"><h3>程序检查</h3><span class="small muted">robot.health</span></div><div class="robot-runtime-health" data-runtime-health>等待结果</div><p class="robot-runtime-reason" data-runtime-reason></p><dl><div><dt>IMU 就绪</dt><dd data-runtime-imu>—</dd></div><div><dt>状态帧年龄</dt><dd data-runtime-age>—</dd></div><div><dt>数据模式</dt><dd>后端未声明</dd></div></dl></section></div><details class="panel robot-runtime-details"><summary>运行详情</summary><dl data-runtime-details></dl></details></div>`;}
+  function paint(view){
+    if(!host)return;const d=view.data,health=view.healthFresh?d?.health:null,frame=view.fresh?d?.state:null,loop=health?.control_loop;
+    const put=(key,value)=>{host.querySelector('[data-runtime-'+key+']').textContent=value;};
+    put('title',!view.available?'连接后查看实时状态':d?.connected?(view.fresh?'正式状态正在更新':view.healthFresh?'robotd 已连接':'等待新的运行状态'):'等待正式 robotd');
+    put('message',!view.available?'当前为静态预览。':frame?'只读观察当前控制循环；动作与参数修改保持在原入口。':health?.reason||view.error||'尚未收到正式状态帧；可以先查看设备页的程序服务。');
+    put('link',view.fresh?'实时 · 只读':view.healthFresh?'程序已连接':'尚无实时数据');
+    host.querySelector('[data-runtime-link]').className='badge '+(view.fresh||view.healthFresh?'readonly':'draft');
+    put('hz',number(loop?loop.achieved_hz:frame?.loop.hz));put('target',loop?' / '+number(loop.target_hz,0)+' Hz':'');
+    put('loop-state',loop?'板端回报':'未提供');put('ticks',loop?String(loop.ticks):'—');put('missed',loop?String(loop.missed):frame?String(frame.loop.missed):'—');put('tick-age',loop?loop.last_tick_age_ms+' ms':'—');
+    put('frame-state',view.fresh?'实时':d?.state?'已过期':'未收到');put('policy',frame?({held:'保持',walk:'行走策略',stand:'站立策略'}[frame.policy]||frame.policy):'—');
+    put('posture',frame?(frame.safety.fallen?'后端报告倾倒':frame.safety.limp?'后端报告卸力':'后端未报告倾倒'):'—');put('joints',frame?frame.joints.length+' 个':'—');put('voltage',health?.battery?number(health.battery.volts,2)+' V':'—');
+    put('health',health?(health.healthy?'程序检查通过':health.degraded?'硬件条件未满足':'程序检查未通过'):'等待新结果');put('reason',health?.reason||'');
+    put('imu',health?.imu?(health.imu.ready?'后端报告就绪':'后端尚未就绪'):'未提供');put('age',view.fresh?number(d.frame_age_ms,0)+' ms':'—');
+    const rows=[['状态会话',d?.session_id],['程序版本',d?.hello?.daemon_version],['API',d?.hello?.api_version],['源码版本',d?.hello?.revision],['设备单调时钟 ns',d?.device_mono_ns],['保持原因',d?.subscription?.unavailable],['接口诊断',view.error||d?.error]];
+    host.querySelector('[data-runtime-details]').innerHTML=rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${escape(v||'—')}</dd></div>`).join('');
+  }
+  function mount(container){unmount();host=container;if(host)unsubscribe=root.RobotSession.subscribe(paint);}
+  function unmount(){unsubscribe?.();unsubscribe=null;host=null;}
+  root.RobotOverview=Object.freeze({render,mount,unmount});
+})(window);
 
 </script>
 <script>
@@ -4978,7 +5435,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     const link = (href, name, active, extra = '') => `<a href="${href}" class="${active ? 'active' : ''} ${extra}" ${active ? 'aria-current="page"' : ''}>${name}</a>`;
     const servos = servoViews.includes(view);
     return `<nav class="console-navigation" aria-label="调试台导航">
-      ${link('#console/overview', '总控 <small>待实现</small>', view === 'overview')}
+      ${link('#console/overview', '总控', view === 'overview')}
       ${link('#console/device', '设备', view === 'device')}
       <div class="console-nav-group ${servos ? 'active-group' : ''}"><a href="#console/servos" class="console-nav-parent" ${servos ? 'aria-current="true"' : ''}>舵机</a><div class="console-nav-children">
         ${link('#console/servos/joint', '关节联调', view === 'joint')}
@@ -4989,7 +5446,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
       ${link('#console/sensors', '传感器', view === 'sensors')}
       ${link('#console/logs', '日志', view === 'logs')}
       <hr class="divider">${link('#records', '实验记录', false)}${link('#learn', '教程', false)}
-      <p>${view === 'device' ? '查看当前设备的连接与运行情况。' : view === 'parameters' ? '扫描和选择实际舵机 ID；关联关节、调节、参数与标定在同一页。' : view === 'sensors' ? '观察 IMU、ToF 与相机画面；各项独立标明数据来源。' : '真实舵机调试位于参数与标定；其他页面仍使用浏览器样例。'}</p>
+      <p>${view === 'device' ? '查看当前设备的连接与运行情况。' : view === 'parameters' ? '扫描和选择实际舵机 ID；关联关节、调节、参数与标定在同一页。' : view === 'sensors' ? '观察 IMU、ToF 与相机画面；各项独立标明数据来源。' : '曲线与 3D 读取后端反馈；参数修改在参数与标定中进行。'}</p>
     </nav>`;
   }
 
@@ -4997,6 +5454,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     const { state, jointId } = options;
     const isMaintenance = options.view === 'parameters';
     const isDevice = options.view === 'device';
+    const isRuntime = options.view === 'overview' || root.HATCHERY_BACKEND?.apiBase === '/api/v1/maintenance' && ['joint','single','charts'].includes(options.view);
     const model = root.JointDrafts;
     const joint = model.metadata.find(item => item.id === jointId) || model.metadata[0];
     const store = root.JointConsole.store;
@@ -5008,7 +5466,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
       const f = store.getFeedback(item.id, state);
       return `<tr class="${item.id === joint.id ? 'selected' : ''}"><td><button class="joint-select" data-joint="${item.id}" aria-pressed="${item.id === joint.id}"><strong>${escape(item.name)}</strong><span>#${root.ServoParameters?.boundId(item.id) ?? item.id} · ${escape(item.raw)}</span></button></td><td class="mono">${f.available ? numberText(f.value) : '—'}</td><td class="mono">${f.available ? numberText(f.temp) : '—'}</td><td class="joint-status">${f.available ? (f.stale ? '陈旧' : '样例') : '缺测'}</td></tr>`;
     }).join('')).join('');
-    return `<div class="console-wrap"><section class="console-heading"><div><span class="eyebrow">${isDevice ? 'MY MICRODUCK' : 'DEVICE WORKSPACE'}</span><h1>${isDevice ? '我的设备' : '调试台'}</h1><p>${isDevice ? '认识你的小鸭，随时了解它的状态。' : '先核对设备与反馈，再进行台架操作。'}</p></div><div>${isMaintenance || isDevice ? '' : `<label for="state-select" class="small muted">预览状态</label><select id="state-select" class="design-state-select">${Object.keys(stateNames).map(value => `<option value="${value}" ${value === state ? 'selected' : ''}>${stateNames[value]}</option>`).join('')}</select>`}${isDevice ? `<button type="button" class="button secondary" data-device-refresh>${root.DeviceOverview.icon('refresh')}刷新</button><button type="button" class="button secondary" data-device-settings>${root.DeviceOverview.icon('edit')}显示设置</button>` : ''}<button class="button secondary" data-connect-open ${isMaintenance ? 'data-connect-default="maintenance"' : ''}>连接说明</button></div></section>
+    return `<div class="console-wrap"><section class="console-heading"><div><span class="eyebrow">${isDevice ? 'MY MICRODUCK' : 'DEVICE WORKSPACE'}</span><h1>${isDevice ? '我的设备' : '调试台'}</h1><p>${isDevice ? '认识你的小鸭，随时了解它的状态。' : '先核对设备与反馈，再进行台架操作。'}</p></div><div>${isMaintenance || isDevice || isRuntime ? '' : `<label for="state-select" class="small muted">预览状态</label><select id="state-select" class="design-state-select">${Object.keys(stateNames).map(value => `<option value="${value}" ${value === state ? 'selected' : ''}>${stateNames[value]}</option>`).join('')}</select>`}${isDevice ? `<button type="button" class="button secondary" data-device-refresh>${root.DeviceOverview.icon('refresh')}刷新</button><button type="button" class="button secondary" data-device-settings>${root.DeviceOverview.icon('edit')}显示设置</button>` : ''}<button class="button secondary" data-connect-open ${isMaintenance ? 'data-connect-default="maintenance"' : ''}>连接说明</button></div></section>
       ${isDevice ? '' : root.DeviceWorkspace.headerMarkup() + '<div class="status-banner" data-device-banner>正在核对设备身份与后端状态…</div>'}
       <div class="console-grid"><aside class="console-sidebar"></aside>
         <section class="panel joint-panel"><div class="panel-title"><h2>单舵机调试</h2><span class="small muted">配置 15 个关节</span></div><div class="joint-list-scroll" tabindex="0" role="region" aria-label="关节列表，可滚动"><table class="joint-table"><thead><tr><th>名称 / ID</th><th>位置 ticks</th><th>温度 °C</th><th>状态</th></tr></thead><tbody>${rows}</tbody></table></div><p class="joint-note">完整列出 15 个关节；ID 读取参数与标定的关联草稿；实机校准仍待核对。</p></section>
@@ -5027,12 +5485,14 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
 
   function render(options) {
     const view = options.view || 'joint';
+    const runtime = root.HATCHERY_BACKEND?.apiBase === '/api/v1/maintenance';
     const markup = root.JointConsole.render(baseMarkup(options), { ...options, view: view === 'single' ? 'single' : 'joint' });
     const template = root.document.createElement('template');
     template.innerHTML = markup;
     const wrap = template.content.querySelector('.console-wrap');
     if (view === 'parameters') template.content.querySelector('.console-navigation-tools span').textContent = '参数与标定 · 按实际总线 ID 调试';
     if (view === 'device') template.content.querySelector('.console-navigation-tools span').textContent = '我的设备 · 连接与运行状态';
+    if (runtime && ['joint','single','charts','overview'].includes(view)) template.content.querySelector('.console-navigation-tools span').textContent = 'robotd 反馈 · 只读';
     if (view === 'sensors') template.content.querySelector('.console-navigation-tools span').textContent = '只读观察 · IMU / ToF 样例 · 相机独立来源';
     wrap.dataset.consolePage = view;
     wrap.classList.add('wide-console', 'console-layout');
@@ -5049,10 +5509,12 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
       viewer.id = 'joint-viewer';
       viewer.innerHTML = root.JointViewer.render();
       workspace.append(viewer, grid.querySelector('.joint-panel'));
+      if(runtime) {workspace.querySelector('.joint-panel').remove();workspace.insertAdjacentHTML('beforeend',root.RuntimeJoints.render());}
       content.append(workspace);
       const feedback = root.document.createElement('div');
       feedback.id = 'joint-feedback';
       feedback.innerHTML = root.JointFeedback.render({ ...options, store: root.JointConsole.store });
+      if(runtime) feedback.innerHTML = '';
       content.append(feedback);
       grid.append(content);
     }
@@ -5062,6 +5524,7 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
       content.className = 'console-page-content single-workspace';
       content.innerHTML = `<div id="joint-feedback">${root.JointFeedback.render({ ...options, store: root.JointConsole.store })}</div><div class="single-detail-grid"><div id="single-joint-chart">${root.SingleJointChart.render(options)}</div><section class="panel single-workbench" id="joint-workbench">${root.JointConsole.detailControls(options.jointId, options.state)}</section></div>`;
       grid.append(content);
+      if(runtime) content.innerHTML = `${root.RuntimeJoints.render()}<div id="joint-charts">${root.JointCharts.render({...options,onlyJoint:true})}</div>`;
     }
     if (view !== 'joint' && view !== 'single') {
       grid.querySelectorAll('.joint-panel,.console-detail,.coordination-workspace').forEach(element => element.remove());
@@ -5076,6 +5539,11 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
         content.innerHTML = `<div id="device-workspace">${root.DeviceWorkspace.render(options)}</div>`;
       } else if (view === 'sensors') {
         content.innerHTML = `<div id="sensor-workspace">${root.SensorWorkspace.render(options)}</div>`;
+      } else if (view === 'overview') {
+        content.innerHTML = `<div id="robot-overview">${root.RobotOverview.render()}</div>`;
+      } else if (view === 'logs') {
+        content.innerHTML = `<section class="panel" id="runtime-journal"><div class="panel-title"><h2>程序日志</h2><span class="small muted">当前设备 · 只读</span></div>${root.DeviceJournal.render()}</section>`;
+        content.querySelector('[data-device-journal]').open = true;
       }
       else content.innerHTML = placeholder(view);
       grid.append(content);
@@ -5090,7 +5558,11 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
   }
 
   function mount(options) {
+    root.RobotOverview.unmount();
+    root.RobotSession.start();
+    root.RuntimeFeedback.start();
     root.JointCharts.unmount();
+    root.RuntimeJoints.unmount();
     root.JointViewer.unmount();
     root.JointFeedback.unmount();
     root.SingleJointChart.unmount();
@@ -5099,13 +5571,15 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     root.SensorWorkspace.unmount();
     root.DeviceWorkspace.unmount();
     context = { ...options };
-    root.JointSession.start({ state: context.state, onFrame: onSampleFrame });
+    if(root.HATCHERY_BACKEND?.apiBase !== '/api/v1/maintenance')root.JointSession.start({ state: context.state, onFrame: onSampleFrame });else root.JointSession.stop();
     const container = root.document.querySelector('#joint-charts');
-    if (context.view === 'charts' && container) root.JointCharts.mount({ container, state: context.state, jointId: context.jointId });
+    if (container) root.JointCharts.mount({ container, state: context.state, jointId: context.jointId, onlyJoint:context.view==='single' });
+    root.RuntimeJoints.mount(root.document.querySelector('.runtime-joint-panel'),context.onSelect);
+    root.RuntimeJoints.setSelected(context.jointId);
     const viewer = root.document.querySelector('#joint-viewer');
     if (context.view === 'joint' && viewer) root.JointViewer.mount({ container: viewer, store: root.JointConsole.store, state: context.state, jointId: context.jointId, onSelect: context.onSelect });
     const feedback = root.document.querySelector('#joint-feedback');
-    if (feedback) root.JointFeedback.mount({ container: feedback, store: root.JointConsole.store, state: context.state, jointId: context.jointId, onSelect: context.onSelect });
+    if (feedback?.childElementCount) root.JointFeedback.mount({ container: feedback, store: root.JointConsole.store, state: context.state, jointId: context.jointId, onSelect: context.onSelect });
     const singleChart = root.document.querySelector('#single-joint-chart');
     if (context.view === 'single' && singleChart) root.SingleJointChart.mount({ container: singleChart, state: context.state, jointId: context.jointId });
     const parameters = root.document.querySelector('#servo-parameters');
@@ -5114,14 +5588,17 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     const sensors = root.document.querySelector('#sensor-workspace');
     if (context.view === 'sensors' && sensors) root.SensorWorkspace.mount({ container:sensors, state:context.state });
     root.DeviceWorkspace.mount({ container:root.document.querySelector('#main'), view:context.view });
+    root.RobotOverview.mount(root.document.querySelector('#robot-overview'));
+    if (context.view === 'logs') root.DeviceJournal.mount(root.document.querySelector('#runtime-journal [data-device-journal]'));
     root.JointConsole.restoreScroll();
   }
 
   function setContext(options) {
     if (!context) return;
     context = { ...context, ...options };
+    root.RuntimeJoints.setSelected(context.jointId);
     root.JointSession.setState(context.state);
-    root.JointCharts.setContext({ state: context.state, jointId: context.jointId });
+    root.JointCharts.setContext({ state: context.state, jointId: context.jointId, onlyJoint:context.view==='single' });
     root.JointViewer.setContext({ state: context.state, jointId: context.jointId });
     root.JointFeedback.setContext({ state: context.state, jointId: context.jointId });
     root.SingleJointChart.setContext({ state: context.state, jointId: context.jointId });
@@ -5134,12 +5611,14 @@ window.HatcheryStandaloneViewer={"model": {"source": "apirrone/microduck_rl robo
     if (workbench) workbench.innerHTML = root.JointConsole.detailControls(options.jointId, options.state);
   }
 
-  function unmountView() { root.JointCharts.unmount(); root.JointViewer.unmount(); root.JointFeedback.unmount(); root.SingleJointChart.unmount(); root.ServoParameters.unmount(); root.ServoBackend.unmount(); root.SensorWorkspace.unmount(); root.DeviceWorkspace.unmount(); }
+  function unmountView() { root.RuntimeJoints.unmount(); root.RobotOverview.unmount(); root.JointCharts.unmount(); root.JointViewer.unmount(); root.JointFeedback.unmount(); root.SingleJointChart.unmount(); root.ServoParameters.unmount(); root.ServoBackend.unmount(); root.SensorWorkspace.unmount(); root.DeviceWorkspace.unmount(); }
 
   function leave() {
     unmountView();
     root.JointSession.stop();
     root.DeviceSession.stop();
+    root.RuntimeFeedback.stop();
+    root.RobotSession.stop();
     context = null;
   }
 

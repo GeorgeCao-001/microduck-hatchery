@@ -125,9 +125,9 @@ pub fn render_all(p: &Personality, out_dir: &Path) -> Result<Vec<PathBuf>> {
 
 /// The voice seed this hardware derives — the SoC's efuse serial hashed to a u32.
 ///
-/// The serial is burned into the chip, survives reflashes, and the supported boards expose
-/// it at the same path. `/etc/machine-id` (unique per OS install) is the fallback for a
-/// board without one. sha256 decorrelates consecutive factory serials so two robots from
+/// The serial is burned into the chip and survives reflashes; it is the same value configd names
+/// the robot from, read where this board keeps a per-chip one ([`robotd_params::serial`]).
+/// `/etc/machine-id` (unique per OS install) is the fallback for a board without one. sha256 decorrelates consecutive factory serials so two robots from
 /// the same batch don't get neighbouring (and thus meaninglessly different) seeds.
 pub fn hardware_seed() -> Result<u32> {
     // **One machine, several ducks** — the one situation where deriving identity from hardware is
@@ -138,15 +138,12 @@ pub fn hardware_seed() -> Result<u32> {
     if let Some(named) = std::env::var_os("DUCK_IDENTITY") {
         return Ok(seed_from_id(&named.to_string_lossy()));
     }
-    let id = std::fs::read("/proc/device-tree/serial-number")
-        .map(|raw| {
-            String::from_utf8_lossy(&raw)
-                .trim_matches(char::from(0))
-                .trim()
-                .to_owned()
-        })
-        .or_else(|_| std::fs::read_to_string("/etc/machine-id").map(|s| s.trim().to_owned()))
-        .context("neither /proc/device-tree/serial-number nor /etc/machine-id is readable")?;
+    let id = match robotd_params::serial::soc_serial() {
+        Some(serial) => serial,
+        None => std::fs::read_to_string("/etc/machine-id")
+            .map(|s| s.trim().to_owned())
+            .context("no SoC serial, and /etc/machine-id is not readable")?,
+    };
     Ok(seed_from_id(&id))
 }
 

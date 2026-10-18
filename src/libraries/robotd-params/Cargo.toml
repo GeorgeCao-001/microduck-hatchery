@@ -10,6 +10,7 @@ description = "robotd's startup parameters — the schema, the defaults, and the
 # file with the real types, the real defaults and the real validation, instead of a copied
 # schema that drifts. `robotd` re-exports this as `crate::params`, so nothing there changed.
 [dependencies]
+semver.workspace = true
 # The theremin's defaults are `kinematics::hand::Config`'s, and its socket default is the
 # protocol crate's — the sections mirror the daemons they configure. Both are pure-Rust
 # library crates; nothing here grows a C toolchain or a network stack.

@@ -1,0 +1,19 @@
+# Datasets and everything derived from them. The repo carries the recipe, not the data:
+# a session is tens of megabytes of JPEG and belongs in object storage or on a NAS.
+/datasets/
+/runs/
+/exports/
+*.onnx
+*.rknn
+*.pt
+
+# The Label Studio instance `review` runs: its database, its media, and the password this repo
+# invented for it. Disposable — deleting it is how you start the correction pass over.
+/.label-studio/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/

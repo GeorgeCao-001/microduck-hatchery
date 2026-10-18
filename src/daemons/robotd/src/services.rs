@@ -11,7 +11,9 @@ use std::{
     time::{Duration, Instant},
 };
 
-const DAEMONS: &[&str] = &["robotd", "mediad", "configd", "btd", "padd", "updaterd"];
+const DAEMONS: &[&str] = &[
+    "robotd", "mediad", "configd", "btd", "padd", "updaterd", "tofd", "netpadd", "nfcd",
+];
 const MAINTENANCE: &[&str] = &["robotd-maintenance", "mediad-maintenance"];
 static CACHE: Mutex<Option<(Instant, Vec<DeviceDaemon>)>> = Mutex::new(None);
 
@@ -98,7 +100,7 @@ fn systemd() -> Option<String> {
         .stderr(Stdio::null())
         .spawn()
         .ok()?;
-    // Six fixed units and five small systemd properties fit in the pipe. Never query
+    // Fixed units and five small systemd properties fit in the pipe. Never query
     // descriptions, environments, journals or arbitrary caller-supplied unit names.
     let deadline = Instant::now() + Duration::from_millis(400);
     loop {
@@ -225,7 +227,7 @@ mod tests {
         assert_eq!(rows[1].state, UnitState::Restarting);
         assert_eq!(rows[1].main_pid, None);
         assert_eq!(rows[2].state, UnitState::Unknown);
-        assert_eq!(rows.len(), 8);
+        assert_eq!(rows.len(), 11);
     }
 
     #[test]

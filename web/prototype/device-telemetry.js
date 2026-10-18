@@ -34,7 +34,10 @@
     {name:'configd',description:'设备配置',icon:'settings'},
     {name:'btd',description:'蓝牙连接',icon:'bluetooth'},
     {name:'padd',description:'手柄输入',icon:'gamepad'},
-    {name:'updaterd',description:'软件更新',icon:'refresh'}
+    {name:'updaterd',description:'软件更新',icon:'refresh'},
+    {name:'tofd',description:'ToF 测距',icon:'chip'},
+    {name:'netpadd',description:'无线手柄输入',icon:'gamepad'},
+    {name:'nfcd',description:'NFC 配对',icon:'bluetooth'}
   ].map(Object.freeze));
   function daemonState(row) {
     if (!row) return {label:'未知',tone:'quiet',running:false,hint:'等待板端回报'};

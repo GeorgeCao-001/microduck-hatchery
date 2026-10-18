@@ -104,6 +104,120 @@ impl Connections {
         Ok(operation)
     }
 }
+
+// Reuse configd's official system.* calls. This adapter never invokes journalctl,
+// edits the name store, starts services, or exposes arbitrary RPC methods.
+pub const SYSTEM_PATH: &str = "/api/v1/maintenance/system";
+pub const SYSTEM_UNITS: [&str; 11] = [
+    "robotd",
+    "mediad",
+    "configd",
+    "btd",
+    "padd",
+    "updaterd",
+    "tofd",
+    "netpadd",
+    "nfcd",
+    "bluetooth",
+    "NetworkManager",
+];
+
+pub fn system_route(path: &str, write: bool, params: Option<Value>) -> Result<Value, String> {
+    use duck_ipc_proto as proto;
+    if path == SYSTEM_PATH && !write {
+        let info = call(proto::method::SYSTEM_INFO, None, Duration::from_secs(2)).and_then(|v| {
+            serde_json::from_value::<proto::SystemInfoResult>(v)
+                .map_err(|_| "Invalid system identity".into())
+        });
+        let services =
+            call(proto::method::SYSTEM_SERVICES, None, Duration::from_secs(2)).and_then(|v| {
+                serde_json::from_value::<Vec<proto::ServiceUnit>>(v)
+                    .map_err(|_| "Invalid system services".into())
+            });
+        return Ok(
+            json!({"protocol_version":"hatchery-system/1", "available":info.is_ok(),
+            "info":info.ok(), "services":services.ok()}),
+        );
+    }
+    if path == format!("{SYSTEM_PATH}/name") && write {
+        let p: proto::SetNameParams = serde_json::from_value(params.ok_or("Missing device name")?)
+            .map_err(|_| "Invalid device name")?;
+        if p.name.trim().is_empty() || p.name.len() > 128 || p.name.chars().any(char::is_control) {
+            return Err("Invalid device name".into());
+        }
+        let result = call(
+            proto::method::SYSTEM_SET_NAME,
+            Some(json!(p)),
+            Duration::from_secs(3),
+        )?;
+        let result: proto::SetNameResult =
+            serde_json::from_value(result).map_err(|_| "Invalid name result")?;
+        return Ok(json!(result));
+    }
+    if let Some(unit) = path.strip_prefix(&format!("{SYSTEM_PATH}/logs/")) {
+        if write || !SYSTEM_UNITS.contains(&unit) {
+            return Err("Unknown service journal".into());
+        }
+        let params = proto::LogsParams {
+            unit: unit.to_owned(),
+            lines: 100,
+            boot: 0,
+        };
+        let value = call(
+            proto::method::SYSTEM_LOGS,
+            Some(json!(params)),
+            Duration::from_secs(4),
+        )?;
+        return journal_result(unit, value);
+    }
+    Err("Unknown system endpoint".into())
+}
+
+fn journal_result(unit: &str, value: Value) -> Result<Value, String> {
+    let mut result: duck_ipc_proto::LogsResult =
+        serde_json::from_value(value).map_err(|_| "Invalid journal result")?;
+    if result.unit != format!("{unit}.service") || result.lines.len() > 1000 {
+        return Err("Invalid journal result".into());
+    }
+    // configd can insert process-restart markers on top of journalctl's line
+    // count. Keep the newest 100 entries instead of refusing a crash-loop tail.
+    if result.lines.len() > 100 {
+        result.lines.drain(..result.lines.len() - 100);
+        result.truncated = true;
+    }
+    result.lines = result.lines.iter().map(|line| redact_log(line)).collect();
+    Ok(json!(result))
+}
+
+fn redact_log(line: &str) -> String {
+    let compact: String = line
+        .chars()
+        .filter(|c| !c.is_whitespace())
+        .flat_map(char::to_lowercase)
+        .collect();
+    if [
+        "password",
+        "passwd",
+        "psk",
+        "token",
+        "secret",
+        "authorization",
+        "bearer",
+        "cookie",
+        "pin=",
+        "pin:",
+        "\"pin\"",
+    ]
+    .iter()
+    .any(|key| compact.contains(key))
+    {
+        return "[sensitive log entry hidden]".into();
+    }
+    line.chars()
+        .filter(|c| !c.is_control() || *c == '\t')
+        .take(2048)
+        .collect()
+}
 #[cfg(unix)]
 fn call(method: &str, params: Option<Value>, timeout: Duration) -> Result<Value, String> {
     use std::io::{BufRead, BufReader, Read, Write};
@@ -166,6 +280,60 @@ fn call(_method: &str, _params: Option<Value>, _timeout: Duration) -> Result<Val
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn system_adapter_refuses_unknown_methods_units_and_invalid_names() {
+        for path in [
+            "/api/v1/maintenance/system/reboot",
+            "/api/v1/maintenance/system/logs/sshd",
+            "/api/v1/maintenance/system/logs/robotd/extra",
+        ] {
+            assert!(system_route(path, false, None).is_err());
+        }
+        let name = format!("{SYSTEM_PATH}/name");
+        assert!(system_route(&name, false, Some(json!({"name":"duck"}))).is_err());
+        for params in [
+            json!({"name":""}),
+            json!({"name":"duck\n"}),
+            json!({"name":"a".repeat(129)}),
+            json!({"name":"duck","shell":"oops"}),
+        ] {
+            assert!(system_route(&name, true, Some(params)).is_err());
+        }
+    }
+    #[test]
+    fn journal_filter_hides_credentials_and_control_sequences() {
+        for line in [
+            "psk = hunter2",
+            "Authorization: Bearer abc",
+            "TOKEN=abc",
+            "pin : 123456",
+            "{\"pin\":\"123456\"}",
+        ] {
+            assert_eq!(redact_log(line), "[sensitive log entry hidden]");
+        }
+        assert_eq!(redact_log("robotd[123]: running"), "robotd[123]: running");
+        assert_eq!(redact_log("hello\u{1b}\rworld"), "helloworld");
+    }
+    #[test]
+    fn restart_markers_keep_the_newest_bounded_tail() {
+        let lines: Vec<_> = (0..105).map(|i| format!("line {i}")).collect();
+        let value = journal_result(
+            "mediad",
+            json!({"unit":"mediad.service","lines":lines,"truncated":false}),
+        )
+        .unwrap();
+        assert_eq!(value["lines"].as_array().unwrap().len(), 100);
+        assert_eq!(value["lines"][0], "line 5");
+        assert_eq!(value["lines"][99], "line 104");
+        assert_eq!(value["truncated"], true);
+        assert!(
+            journal_result(
+                "mediad",
+                json!({"unit":"robotd.service","lines":[],"truncated":false})
+            )
+            .is_err()
+        );
+    }
     #[test]
     fn wrong_sessions_and_invalid_commands_are_rejected_before_dispatch() {
         let gateway = Connections::new();

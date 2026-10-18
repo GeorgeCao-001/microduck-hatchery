@@ -1,14 +1,14 @@
 /* Adapted from Pollen Robotics Microduck mediad/webclient/index.html at 9136aa4.
- * Apache-2.0; see src/NOTICE-UPSTREAM.md. Video-only adapter: no robot commands. */
+ * Apache-2.0; see src/NOTICE-UPSTREAM.md. Video adapter with optional read-only tof.stream from 5323046; no motion calls. */
 (function(root,factory){'use strict';const api=factory(root);if(typeof module==='object'&&module.exports)module.exports=api;else root.CameraStream=api;})(typeof window!=='undefined'?window:globalThis,function(root){
   'use strict';
   function signalling(address,port=8443){try{const u=new URL(address);if(!['http:','https:'].includes(u.protocol)||u.username||u.password||!Number.isInteger(port)||port<1||port>65535)return null;u.protocol=u.protocol==='https:'?'wss:':'ws:';u.port=String(port);u.pathname='/';u.search='';u.hash='';return u.href;}catch(_){return null;}}
-  function create({video,onState}){
+  function create({video,onState,onTelemetry}){
     let ws=null,pc=null,sessionId=null,starting=false,wanted=false,epoch=0,timer=null,ice=[],queue=Promise.resolve(),media=null,phase='idle';
     const state=(next,message)=>{phase=next;onState?.({phase:next,message});};
     const send=message=>{if(ws?.readyState===1)ws.send(JSON.stringify(message));};
     function clearPeer(){if(pc){pc.ontrack=pc.onicecandidate=pc.onconnectionstatechange=pc.ondatachannel=null;pc.close();pc=null;}ice=[];media?.getTracks().forEach(t=>t.stop());media=null;video.pause();video.srcObject=null;video.style.transform='';}
-    function stop(){epoch++;wanted=false;starting=false;root.clearTimeout(timer);timer=null;if(sessionId)send({type:'endSession',sessionId});sessionId=null;if(ws){ws.onopen=ws.onerror=ws.onclose=ws.onmessage=null;ws.close();ws=null;}clearPeer();state('idle','未连接');}
+    function stop(){epoch++;wanted=false;starting=false;root.clearTimeout(timer);timer=null;if(sessionId)send({type:'endSession',sessionId});sessionId=null;if(ws){ws.onopen=ws.onerror=ws.onclose=ws.onmessage=null;ws.close();ws=null;}clearPeer();onTelemetry?.({kind:'closed'});state('idle','未连接');}
     function fail(message){stop();state('error',message);}
     function playing(){if(!wanted||!video.videoWidth||video.readyState<2)return;root.clearTimeout(timer);timer=null;state('live','实时视频 · WebRTC');}
     video.addEventListener('playing',playing);
@@ -18,8 +18,23 @@
       peer.ontrack=event=>{if(peer!==pc||event.track.kind!=='video')return;media=event.streams[0]||new root.MediaStream([event.track]);video.srcObject=media;video.play().catch(()=>{if(peer===pc&&wanted)state('paused','点击继续播放');});};
       peer.onicecandidate=event=>{if(peer===pc&&event.candidate)send({type:'peer',sessionId,ice:{candidate:event.candidate.candidate,sdpMLineIndex:event.candidate.sdpMLineIndex}});};
       peer.onconnectionstatechange=()=>{if(peer!==pc)return;if(peer.connectionState==='failed')fail('视频连接失败，请检查板端 ICE 连接');else if(peer.connectionState==='disconnected')state('interrupted','视频连接中断');else if(peer.connectionState==='connected'&&phase==='interrupted')playing();};
-      // The producer creates its datachannel. Read only media.video; never send robot RPCs.
-      peer.ondatachannel=event=>{event.channel.onmessage=event=>{try{const msg=JSON.parse(event.data);if(msg.method==='media.video'){const rotation=msg.params?.rotate??msg.params?.rotation??0;if([0,90,180,270].includes(rotation))video.style.transform=`rotate(${rotation}deg)${rotation%180?' scale(.5625)':''}`;}}catch(_){}};};
+      // Same official control channel, one read-only ToF subscription per peer.
+      peer.ondatachannel=event=>{
+        const channel=event.channel;
+        let subscribed=false;
+        const subscribe=()=>{if(peer!==pc||!wanted||!onTelemetry||subscribed)return;subscribed=true;onTelemetry({kind:'waiting'});channel.send(JSON.stringify({jsonrpc:'2.0',id:'hatchery.tof',method:'tof.stream'}));};
+        channel.onopen=subscribe;
+        channel.onclose=()=>{if(peer===pc)onTelemetry?.({kind:'closed'});};
+        channel.onerror=()=>{if(peer===pc)onTelemetry?.({kind:'closed'});};
+        channel.onmessage=event=>{if(peer!==pc||!wanted||typeof event.data!=='string'||event.data.length>65536)return;try{
+          const msg=JSON.parse(event.data);
+          if(msg.method==='media.video'){const rotation=msg.params?.rotate??msg.params?.rotation??0;if([0,90,180,270].includes(rotation))video.style.transform=`rotate(${rotation}deg)${rotation%180?' scale(.5625)':''}`;onTelemetry?.({kind:'video',video:msg.params});}
+          else if(msg.jsonrpc==='2.0'&&msg.method==='media.detections')onTelemetry?.({kind:'detections',frame:msg.params});
+          else if(msg.jsonrpc==='2.0'&&msg.method==='tof.frame')onTelemetry?.({kind:'frame',frame:msg.params});
+          else if(msg.jsonrpc==='2.0'&&msg.id==='hatchery.tof')onTelemetry?.({kind:'status',status:msg.result,error:msg.error});
+        }catch(_){}};
+        if(channel.readyState==='open')subscribe();
+      };
     }
     async function onSignalling(raw,ticket){
       if(typeof raw!=='string'||raw.length>1024*1024)throw Error('Invalid signalling message');

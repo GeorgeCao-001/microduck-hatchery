@@ -72,6 +72,8 @@ microduck-hatchery/
 | `padd` | `src/daemons/padd` |
 | `mediad` | `src/daemons/mediad` |
 | `tof` | `src/daemons/tof` |
+| `netpadd` | `src/daemons/netpadd` |
+| `nfc` | `src/daemons/nfc` |
 | `duck-control` | `src/libraries/duck-control` |
 | `robotd-params` | `src/libraries/robotd-params` |
 | `kinematics` | `src/libraries/kinematics` |
@@ -80,6 +82,7 @@ microduck-hatchery/
 | `pet-detect` | `src/libraries/pet-detect` |
 | `duck-detect` | `src/libraries/duck-detect` |
 | `pad-imu` | `src/libraries/pad-imu` |
+| `pad-map` | `src/libraries/pad-map` |
 | `uyvy` | `src/libraries/uyvy` |
 | `duck-ipc-proto` | `protocol/duck-ipc-proto` |
 | `duck-ble` | `protocol/duck-ble` |
@@ -88,7 +91,8 @@ microduck-hatchery/
 | `xtask` | `tools/xtask` |
 | `test-support` | `tools/test-support` |
 | `duck-ether` | `tools/duck-ether` |
-| `microduck_rl` | `training/` |
+| `microduck_rl` | `training/microduck_rl/` |
+| `duck_detector` | `training/duck_detector/` |
 
 ---
 

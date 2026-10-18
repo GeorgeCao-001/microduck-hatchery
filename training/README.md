@@ -1,11 +1,14 @@
-# Microduck Hatchery 仿真与训练
+# 训练与离线视觉工具
 
-`training/` 是整机复现必需主线，负责模型、仿真、RL、评估和标准策略导出。当前只有说明文件，没有导入训练源码、安装训练依赖、生成模型或运行训练。
+按原仓库结构保存两个独立来源，具体逐文件哈希、模式和提交见 [TRAINING_IMPORT.json](../docs/TRAINING_IMPORT.json)。本目录不参与板端 Cargo 默认构建，不在 Radxa 上自动安装训练依赖。
 
-依据 [架构 v2](../docs/microduck-hatchery-architecture-v2.md)，后续引入选定训练来源时保持其内部目录、导出入口和运行逻辑，不提前另建 models/configs/evaluation/export 分类或空脚本。固定来源 SHA、锁文件和环境后，再核对 FT 模型、实物参数与设备运行时。
+| 目录 | 来源提交 | 当前状态 |
+|---|---|---|
+| [microduck_rl](microduck_rl/README.md) | `b02fdea4902c2b93b7d34a83a6f05da4ececb7d3` | 原样源码与锁文件，未运行训练、导出或部署 |
+| [duck_detector](duck_detector/README.md) | `cc1b52eb3ace9643c8948320e63f46a85cf6fb65` | 原样采集、标注、训练、导出、浏览器 watch 工具；未下载模型或数据集 |
 
-训练使用独立环境；具体 Python/CUDA/Linux 或 WSL2 要求以选定冻结版本与本机硬件为准。当前 Windows 样例服务能运行不表示训练环境可用。
+microduck_rl 仍为官方 XL330 / BAM 执行器模型，不能当作飞特 HD1910 已适配。FT 物理模型、三种关节索引和实测参数需要独立验证；本轮不更改现有舵机逻辑、不启用这些策略。
 
-标准产物必须匹配 14 维动作、15 个物理关节、HOME、动作缩放、观察顺序、归一化、IMU 坐标、频率与延迟。mouth #34 始终保留在设备关节表。浏览器不加载、转换或推理策略；训练产物由匹配的 FT 运行时使用。
+代码保留原 Apache-2.0 许可；RL 的 STL 文件另受 [LICENSE-MODELS.md](microduck_rl/LICENSE-MODELS.md) 所列 CC BY-NC-SA-4.0 许可约束，未修改网格。原仓库 AGENTS / CLAUDE 文件只作用于其子目录，不替代 Hatchery 根目录约束及用户最新决定。
 
-checkpoint、模型、视频与实验样本遵循 [日志规则](../logs/README.md)，作者结果与团队结果分别记录。实施条件见 [PLAN.md](../docs/PLAN.md)，来源见 [SOURCES.md](../docs/SOURCES.md)。
+普通 Web 保留设备观察与已接入能力；官方训练 watch 是独立离线工具，未伪装成已上线的 Hatchery 功能。没有执行 Hub 上传、远程任务或发布。

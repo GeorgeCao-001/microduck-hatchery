@@ -228,3 +228,37 @@
 - 高级区加入锐度、Gamma 模式 / 系数、降噪 / 时域降噪与白平衡色温，保留原尺寸、浅色风格和折叠布局。小数显示与整数协议分开；自动模式互锁，未知曲线 / 色温不伪造值，缺少能力时禁用。
 - 离线核对用户同版本 Radxa RKAIQ 包，确认旧锐度 / 降噪 / Gamma 入口为不支持占位。复用固定 Rockchip 官方 3A 程序和媒体枚举，给同一进程补 API2 本机接口；mediad / 维护协议继续复用。原安装的算法库与 IQ 文件保留，不新增 systemd 服务或第二个 ISP；用户可前台试运行并恢复原 3A。来源与许可见 docs/RKAIQ_SERVER_IMPORT.json，操作见 docs/CAMERA_CONTROLS.md。
 - 本地通过 8 项相机 Node 测试、9 项实际 Rust 模块测试、三个 Rust 模块的 ARM64 类型检查，以及同版本 SDK 下 3A / 参数接口 / mediactl 的 ARM64 对象编译。全套 Node 在未修改的 console-routes 测试停滞后停止，未计通过；完整原生链接、流事件、参数效果及持续运行等待用户上板验证。两份单文件入口同步；未操作实机、修改系统安装、暂存、提交或推送。
+
+## 2026-10-18 · 非舵机官方升级与首批 Web 接入
+
+- 经用户选择，从 `9136aa4` / API 37 升级非舵机源码到固定 `5323046` / API 44，workspace 从 13 增至 26 成员。补齐 updater、btd、padd、tofd、netpadd、nfcd、BLE / 输入库与官方工具，保留完整 crate 和 v2 分类；Spaces、hooks、新部署脚本及 CI 源码已迁入。独立训练来源为 duck_detector `cc1b52e`、microduck_rl `b02fdea`，280 个文件保留原始结构和许可，没有安装训练依赖或运行训练。
+- FT 驱动、寄存器、读写、动作、标定、映射及配置段保持。robotd 仅补新版状态默认字段并扩展只读服务列表；95 文件保护清单中 90 个未变，5 个明确例外为两处兼容 / 观察代码和三个 Web 测试。API 44 不表示冻结 FT 后端支持新版休眠、拾起检测或 vetbook 行为；策略 pin v5 与串口库 4.10.1 保留。裸 LSM6DSV16X 与官方 imu_to_dxl 接法不同，用户决定暂缓 IMU。
+- 设备页增加三个真实服务状态的观察。ToF 复用 mediad 官方 WebRTC tof.stream / tof.frame，按 ST 有效状态解码；相机页复用 media.detections 叠加“小鸭”框，紧凑开关仅控制显示。断线、暂停或过期清除旧数据，坏帧不回退样例；原协议未报告硬件 / fake 模式，不伪称真机测距。检测 raw score 不当作百分比。统一独立于相机的正式会话、输入面板与模型运行能力仍待完成。
+- 本地结果：26 成员及测试目标的 ARM64 类型检查通过，显式开启 robotd / mediad / configd board-runtime；DOCS_RS 跳过 GStreamer 原生探测，不能代替 Radxa 链接 / 运行。协议 crate 68、参数 crate 123、直接引用 services.rs 的 Windows harness 3、Node 129 和模拟传输 Edge 9 项检查通过；两个 Windows 维护 binary 构建通过。完整 Windows daemon 测试受 native zstd 构建环境限制，未计通过；板端成像、ISP、测距、连接和服务运行等待用户验收。
+- 用户授权仅本轮新迁入工作流改为手动；6 个自动入口已改，原 promote 与 3 个 workflow_call 保持，prune dry_run 默认 true 保留。部分 v2 Cargo / 资源路径已适配，105 条打包 include、117 份 Python AST、6 份 shell 语法及来源哈希核对通过；未运行 CI、Docker、hook 或安装。443 条主来源记录与训练清单见 docs/UPSTREAM_IMPORT.json、docs/TRAINING_IMPORT.json。
+- 安装审查发现现有 `/opt/microduck-hatchery` 源码启动与官方 `/opt/robot/daemon/current/bin` OTA 布局冲突，已暂停相关改动，等待用户选择保留当前启动并延后 OTA，或适配官方发布布局。进度与两个具体方案统一记在 docs/OFFICIAL_MIGRATION_EXECUTION.md；已完成 M0 三项、M1 前三项，其余不因源码存在标成完成。本轮未访问板子、部署、启停系统服务、修改网络、操作硬件、暂存、提交或推送。临时验证脚本与输出位于系统 TEMP。
+
+## 2026-10-18 · 保留启动方式与设备诊断接入
+
+- 用户选择保留现有源码目录启动，暂缓安装 / OTA。现有启动器、systemd 单元与 FT 逻辑保持；IMU 继续暂缓。当前不提供更新写操作，此决定不阻塞其他服务接入。
+- 复用固定官方 configd 的 system.info / system.services / system.set_name / system.logs，在原维护 gateway 增加受同源、cookie、命令头和固定参数约束的薄适配。名称仍由官方 Store 保存，24 字符规则沿用；设备设置分别提供板端名称与本浏览器别名，不用别名冒充板端保存。服务详情补运行版本、revision 和 exe，缺失不推测。
+- 服务日志默认折叠，仅显式读取当前开机最近 100 条，固定 9 个程序与 bluetooth / NetworkManager；不执行任意 shell 或接收 journalctl 参数。过滤常见凭据字段行，以纯文本显示；官方进程重启标记超出条数时保留最新尾部，过期 / 离页 / 换服务的迟到响应不覆盖当前界面。
+- 本批通过 136 项 Node、6 项 mediad-maintenance Rust、14 项实际 Windows gateway HTTP 合约和 13 项 Edge 模拟交互；Windows gateway 构建与 ARM64 gateway 类型检查通过。修正原资源测试中相对 crate 目录多退一层的查根路径，保留安全断言。一次本地增量编译停滞后关闭该编译进程，本次命令设置 CARGO_INCREMENTAL=0 复验通过；未改全局环境。
+- 结果只覆盖软件契约与明确模拟的命名 / 日志成功路径；没有在 Radxa 写名称、读取 journal、配对、切网或安装。M2.3、M4.4 记为软件完成，真实 robot.* 会话、配对配置及其他待办保持未完成。来源、接口、前台步骤与板端边界见 docs/UPSTREAM_IMPORT.json、docs/DEVICE_CONNECTIONS.md、docs/OFFICIAL_MIGRATION_EXECUTION.md。两份单文件同步，临时工具 / 输出在系统 TEMP；未暂存、提交或推送。
+
+## 2026-10-18 · 二十分钟批次：共享正式状态与总控
+
+- 按用户给定的 20 分钟推进接入，优先完成正式只读状态和总控。现有维护 gateway 增加固定 GET runtime，使用官方类型和冻结后端已有的 hello / robot.subscribe（5 Hz）/ robot.health；共用一条上游订阅、有限帧缓存和浏览器只读会话。跨页保留；过期、断线、重启或时钟回退停止使用实时数据；无人读取后约 6—7 秒结束订阅，不启动控制进程或发送动作。
+- 总控替换占位页，显示程序检查、循环计数 / 频率、策略、有效帧与已报告关节数量。未知值不补零，单调时钟保留字符串精度；官方协议未声明 fake / 实物模式，明确保留未声明。日志导航复用现有 DeviceJournal，可显式读取固定服务日志。保留原浅色、紧凑布局和 FT / IMU / OTA 决定，不改已有启动器、服务或舵机逻辑。
+- 通过 142 项 Node、11 项维护 Rust、18 项实际 Windows HTTP 合约与 17 项 Edge 检查。Rust 含真实 TCP 字节流上的模拟 robotd 握手 / 订阅 / 健康交互和分片通知；浏览器含跨页单会话、未知 / 重启 / 过期、1440 / 390 布局、日志入口与实际 file:// 离线页面。Windows 构建和 ARM64 网关类型检查通过；不代表 Radxa Unix socket、真实传感器或硬件验收。
+- M2.1 软件完成；M2.2 的共享状态基础完成，但曲线 / 3D 尚未消费真实关节映射，M2.4、输入面板和部分视觉工具仍待后续。来源、状态与运行路径同步到主计划、架构和 DEVICE_CONNECTIONS。所有临时工具 / 截图 / 输出位于系统 TEMP；未在板上运行、改网络、写参数、部署、暂存、提交或推送。
+
+
+### 2026-10-18 · 用户要求暂停
+
+停止继续开发，保留全部未提交修改。新增真实反馈显示、padd 输入观察与相机视觉工具目前处于待浏览器验证状态；已执行的检查和恢复工作顺序见 docs/OFFICIAL_MIGRATION_EXECUTION.md 的同日暂停记录。未提交、推送、部署或控制实机。
+
+
+### 2026-10-18 · 恢复并完成只读 Web 接入收尾
+
+补齐关节反馈 / 曲线 / 3D 的官方 rad 映射、padd 只读输入面板和相机 OpenCV 视觉工具，修复真实模式页面切换与选择器冲突，更新来源 / 许可 / 保护例外并重建两份单文件。151 项 Node、15 项 Rust、23 项 Windows HTTP、27 项 Edge 分组检查、Windows 构建与 ARM64 gateway 类型检查通过。全部为本地软件验证，模拟服务和合成视频不计实机结果；具体证据、边界与仍未接入的映射写操作见执行计划。FT 驱动、动作、标定和配置保持，未提交、推送、部署或操作实机。

@@ -2,9 +2,9 @@
 
 主要依据是用户提供的 [microduck-hatchery-architecture-v2.md](microduck-hatchery-architecture-v2.md)。本文件解释当前落地状态，发生冲突按最新用户决定和 v2 处理。设备模块位于 `src/daemons` 和 `src/libraries`，保留完整 crate 边界。
 
-当前范围：已按授权迁入摄像头和舵机所需官方完整 crate，修正分类后的 workspace / path dependency、资源路径和启动单元。Radxa 部署、实机测试和动作验收由用户执行；源码到位不表示硬件能力已验证。详细范围见 [RADXA_RUNTIME.md](RADXA_RUNTIME.md)。
+当前范围：在既有摄像头与 FT 舵机基础上，按用户授权升级非舵机官方源码并补齐剩余 crate；FT 驱动和控制逻辑保留原版。版本、保留范围与核对结果见 [迁移基线](MIGRATION_BASELINE.md)，逐阶段状态见 [执行计划](OFFICIAL_MIGRATION_EXECUTION.md)。Radxa 部署、实机测试和动作验收由用户执行；源码到位不表示硬件能力已验证。详细范围见 [RADXA_RUNTIME.md](RADXA_RUNTIME.md)。
 
-Web 的只读 3D 使用本地 Three.js 与带许可的参考模型，不改变设备权威、crate 边界或生产栈。原联调 / 曲线 / 3D 仍属样例，实际台架入口独立；真实装机校准与正式 robot.* 订阅尚未接通，见 [联调说明](../web/docs/JOINT_COORDINATION.md)。
+Web 的只读 3D 使用本地 Three.js 与带许可的参考模型，不改变设备权威、crate 边界或生产栈。正式 robot.* 只读订阅通过共享缓存供总控、关节反馈、曲线与 3D 使用；以官方关节名称映射后端 rad，独立于本地 ticks 草稿和总线 ID。未标定的 FT 后端不发布有效角度时保持缺测。设备输入观察使用官方 padd 的只读 tap，相机视觉工具在浏览器处理既有视频，不增加采集器。静态入口保留样例；实际装机标定仍由后端裁决，见 [联调说明](../web/docs/JOINT_COORDINATION.md)。
 
 ## 目录
 
@@ -12,10 +12,10 @@ Web 的只读 3D 使用本地 Three.js 与带许可的参考模型，不改变�
 microduck-hatchery/
 ├─ src/
 │  ├─ daemons/
-│  │  └─ robotd/、updater/、configd/、btd/、padd/、mediad/、tof/
+│  │  └─ robotd/、updater/、configd/、btd/、padd/、mediad/、tof/、netpadd/、nfc/
 │  └─ libraries/
 │     └─ duck-control/、robotd-params/、kinematics/、odometry/、
-│        sounds/、pet-detect/、duck-detect/、pad-imu/、uyvy/
+│        sounds/、pet-detect/、duck-detect/、pad-imu/、pad-map/、uyvy/
 ├─ protocol/
 │  ├─ duck-ipc-proto/、duck-ble/
 │  └─ mappings/、fixtures/、schemas/（既有样例 JSON）
@@ -29,12 +29,12 @@ microduck-hatchery/
 ├─ deploy/           Radxa 配置与部署说明
 ├─ hooks/            安装钩子位置
 ├─ scripts/          样例 / 维护启动、Radxa 构建和媒体依赖入口
-├─ spaces/           hello/、policy-playground/、shared/、vision-demo/
+├─ spaces/           hello/、policy-playground/、shared/、vision-demo/、vetbook/
 ├─ docs/
 └─ logs/
 ```
 
-目录位置保持 v2。workspace 当前 13 成员：robotd、mediad、configd、duck-control、robotd-params、kinematics、odometry、sounds、uyvy、pet-detect、duck-detect、duck-ipc-proto、test-support。完整 crate 保留内部结构；其余 daemon、pad-imu、BLE 和工具尚未迁入。hooks / spaces / training 不生成空实现。
+目录位置保持 v2。workspace 当前 26 成员，完整 crate 保留内部结构。新增 updater、btd、padd、tof、netpadd、nfc、pad-imu、pad-map、duck-ble、robotctl、duckctl、duck-ether、xtask；默认仍仅构建 robotd / mediad。Spaces 与 hooks 源码已迁入，training 已按独立来源冻结并迁入两个原始仓库；源码存在不代表已部署或 Web 功能接通。
 
 分类不拆 crate、不改 crate 名，不创建 drivers / runtime / robot_io 框架。官方 obs / policy / safety 已迁入；FT bus_select / bus_feetech 复用现有分支，原生 FT 包实现复用 kissqy 的 Apache-2.0 固件部分。硬件差异留在 bus / io，上层不用 FT 寄存器。
 
@@ -48,7 +48,7 @@ microduck-hatchery/
 
 ## 正式控制关系
 
-控制边界如下；正式 Hatchery robot.* 前端整合尚未接通，维护入口保持独立协议：
+控制边界如下；Hatchery 总控已接正式 robot.* 只读观察，动作与关节映射整合仍待完成，维护入口保持独立协议：
 
 ```mermaid
 flowchart TD
@@ -84,14 +84,14 @@ Python 只读样例位于 [tools/hatchery-shell/](../tools/hatchery-shell/README
 
 ## 构建与路径
 
-src/Cargo.toml / Cargo.lock / rust-toolchain.toml 管理 13 个成员，锁定官方依赖基线与维护所需的小量补充。daemon / library 分类后修正 path dependency；顶层 IPC 和 test-support 显式指向 ../../src。默认输出 src/target/，维护启动器区分 debug / release 和维护 binary；板端脚本显式构建 board-runtime。参数配置与资源 include 路径同步调整，未导入的模块不生成空 manifest。
+src/Cargo.toml / Cargo.lock / rust-toolchain.toml 管理 26 个成员，锁定官方依赖基线与维护所需的小量补充。daemon / library 分类后修正 path dependency；顶层 IPC 和 test-support 显式指向 ../../src。默认输出 src/target/，维护启动器区分 debug / release 和维护 binary；板端脚本显式构建 board-runtime。参数配置与资源 include 路径同步调整，未导入的模块不生成空 manifest。
 
 尚未分配关节的台架 ID（如 ID 1）只进入维护协议的 `unassigned_devices`，没有 runtime / policy 索引；15 个物理关节的映射不会由串口枚举或 PING 改写。只读维护允许显式指定最多 32 个独立总线 ID，拒绝重复和广播 ID，不进行自动扫描。
 
-本轮 systemd 单元保留在 daemon crate 内，通过统一 Radxa 配置启动；维护单元位于 deploy/radxa。未迁入官方 xtask、CI、OTA hooks 和 provision，也不宣称这些路径已经验收。后续迁入仍须核对查根、发布和测试资源路径；分类路径不等于安装路径。
+本轮 systemd 单元保留在 daemon crate 内，通过统一 Radxa 配置启动；维护单元位于 deploy/radxa。官方 xtask、CI、OTA hooks 和 provision 已作为源码迁入，尚未安装或验收。仍须核对查根、发布和测试资源路径；分类路径不等于安装路径。
 
 运行部署需区分源码、发布文件、设备配置/校准、可变状态与临时 socket；具体路径和权限按 Radxa 镜像核对。`logs/` 保存开发记录及日志规则，不替代板端日志系统。
 
-仿真、RL、标准策略导出、FT 运行时和实机验证仍属于必需全栈主线。`training/` 后续保留所选上游内部结构，浏览器不执行训练或策略推理。七章仍按 [共同审查方案](../web/docs/LOCAL_REVIEW_PROPOSAL.md) 推进；[联调](../web/docs/JOINT_COORDINATION.md) 已实现为本地样例，不能替代正式协议、校准或控制。WiFi、USB-C gadget 网络和 BLE 桥均需独立验收，BLE 不默认用于高频运动控制。
+仿真、RL、标准策略导出、FT 运行时和实机验证仍属于必需全栈主线。`training/` 保留 RL 与检测训练上游内部结构，浏览器不执行训练或策略推理。七章仍按 [共同审查方案](../web/docs/LOCAL_REVIEW_PROPOSAL.md) 推进；[联调](../web/docs/JOINT_COORDINATION.md) 已实现为本地样例，不能替代正式协议、校准或控制。WiFi、USB-C gadget 网络和 BLE 桥均需独立验收，BLE 不默认用于高频运动控制。
 
 实施顺序见 [PLAN.md](PLAN.md)，来源见 [SOURCES.md](SOURCES.md)，实际验证见 [LOCAL_STATUS.md](../web/docs/LOCAL_STATUS.md)。

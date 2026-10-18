@@ -176,14 +176,18 @@ impl Model {
 
     /// The value the file currently sets for a key, if any.
     fn file_value(&self, key: &str) -> Option<toml_edit::Value> {
-        let (section, name) = key.split_once('.').expect("registry keys are section.key");
-        self.doc.get(section)?.get(name)?.as_value().cloned()
+        key.split('.')
+            .try_fold(self.doc.as_item(), |item, part| item.get(part))?
+            .as_value()
+            .cloned()
     }
 
     /// The built-in default, rendered — `unset` for the Option fields that resolve elsewhere.
     fn default_for(&self, key: &str) -> String {
-        let (section, name) = key.split_once('.').expect("registry keys are section.key");
-        match self.defaults.get(section).and_then(|s| s.get(name)) {
+        match key
+            .split('.')
+            .try_fold(&self.defaults, |value, part| value.get(part))
+        {
             Some(toml::Value::String(s)) => s.clone(),
             Some(value) => value.to_string(),
             // Not serialized: an `Option` at `None`. The registry doc says what unset means.
@@ -337,16 +341,31 @@ impl Model {
     pub fn rendered(&self) -> String {
         let mut doc = self.doc.clone();
         for (key, edit) in &self.pending {
-            let (section, name) = key.split_once('.').expect("section.key");
+            let (section, name) = key.rsplit_once('.').expect("section.key");
             match edit {
                 Edit::Set(value) => {
-                    let table = doc
-                        .entry(section)
-                        .or_insert(toml_edit::Item::Table(toml_edit::Table::new()));
-                    table[name] = toml_edit::Item::Value(value.clone());
+                    let mut item = doc.as_item_mut();
+                    for part in section.split('.') {
+                        let table = item.as_table_like_mut().expect("validated table");
+                        if !table.contains_key(part) {
+                            table.insert(part, toml_edit::Item::Table(toml_edit::Table::new()));
+                        }
+                        item = table.get_mut(part).expect("just inserted");
+                    }
+                    let table = item.as_table_like_mut().expect("validated table");
+                    let value = toml_edit::Item::Value(value.clone());
+                    if let Some(existing) = table.get_mut(name) {
+                        *existing = value;
+                    } else {
+                        table.insert(name, value);
+                    }
                 }
                 Edit::Clear => {
-                    if let Some(table) = doc.get_mut(section).and_then(|i| i.as_table_mut()) {
+                    if let Some(table) = section
+                        .split('.')
+                        .try_fold(doc.as_item_mut(), |item, part| item.get_mut(part))
+                        .and_then(|item| item.as_table_like_mut())
+                    {
                         table.remove(name);
                     }
                 }
@@ -651,6 +670,19 @@ pub fn bind_pad(path: &Path, button: &str, skill: &str) -> Result<(), String> {
     model.save()
 }
 
+/// Declare the board, written out even when it is the default.
+///
+/// Unlike every other edit, which clears a key set to its default: `zero3` is the default *and* a
+/// declaration, and a robot whose file says it is one that was asked, where an absent key is one
+/// that never was. Same document, same validation and same save as the rest.
+pub fn set_board(path: &Path, board: crate::board::Board) -> Result<(), String> {
+    let mut model = Model::load(path)?;
+    model
+        .pending
+        .insert("board.version", Edit::Set(board.label().into()));
+    model.save()
+}
+
 /// Record which file a policy slot runs — or clear the key, which is what a reset is.
 ///
 /// **The daemon's half of `robot.loadPolicy`.** A slot is `[policy] <slot>` in the config file
@@ -712,7 +744,12 @@ mod tests {
         let m = model("");
         for row in m.rows() {
             assert!(!row.overridden(), "{}", row.entry.key);
-            assert!(!row.effective().is_empty(), "{}", row.entry.key);
+            // Empty port requires an explicit FT device selection; empty pad bindings disable it.
+            if matches!(row.entry.key, "bus.port" | "pad.x" | "pad.y" | "pad.lb" | "pad.rb") {
+                assert!(row.effective().is_empty(), "{}", row.entry.key);
+            } else {
+                assert!(!row.effective().is_empty(), "{}", row.entry.key);
+            }
         }
         // Spot-check values against the daemon's documented defaults.
         let rows = m.rows();
@@ -1001,7 +1038,7 @@ mod tests {
         let bindings = super::pad_bindings(&path).unwrap();
         assert_eq!(bindings.x, "polite-bow");
         assert_eq!(
-            bindings.lb, "kick_left",
+            bindings.b, "ground_pick",
             "the rest resolve to their defaults"
         );
     }
@@ -1012,16 +1049,16 @@ mod tests {
     fn binding_the_default_removes_the_key() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("robotd.toml");
-        std::fs::write(&path, "[pad]\nx = \"polite-bow\"\n").unwrap();
+        std::fs::write(&path, "[pad]\nb = \"polite-bow\"\n").unwrap();
 
-        super::bind_pad(&path, "x", "roulade").unwrap();
+        super::bind_pad(&path, "b", "ground_pick").unwrap();
         let written = std::fs::read_to_string(&path).unwrap();
         assert!(!written.contains("polite-bow"), "{written}");
         assert!(
-            !written.contains("x ="),
+            !written.contains("b ="),
             "the default is not pinned: {written}"
         );
-        assert_eq!(super::pad_bindings(&path).unwrap().x, "roulade");
+        assert_eq!(super::pad_bindings(&path).unwrap().b, "ground_pick");
     }
 
     /// **Resetting a button clears it back to the default and leaves the file clean.** The undo
@@ -1057,7 +1094,80 @@ mod tests {
     fn a_missing_config_still_has_bindings() {
         let dir = tempfile::tempdir().unwrap();
         let bindings = super::pad_bindings(&dir.path().join("nothing.toml")).unwrap();
-        assert_eq!(bindings.a, "ground_pick");
+        assert_eq!(bindings.a, "sit_toggle");
+        assert_eq!(bindings.b, "ground_pick");
+    }
+
+    /// The shipped file, its `[board]` commented out, gains a real key — the default included,
+    /// which an ordinary edit would have cleared — and keeps its comments.
+    #[test]
+    fn declaring_the_board_writes_even_the_default() {
+        use crate::board::Board;
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("robotd.toml");
+        std::fs::write(&path, SHIPPED).unwrap();
+        assert_eq!(Board::declared(&path), None);
+
+        set_board(&path, Board::Zero3).unwrap();
+        assert_eq!(Board::declared(&path), Some(Board::Zero3));
+        set_board(&path, Board::Beta).unwrap();
+        assert_eq!(Board::declared(&path), Some(Board::Beta));
+
+        let written = std::fs::read_to_string(&path).unwrap();
+        assert!(written.contains("# Hatchery schema/edit fixture"), "{written}");
+        assert_eq!(written.matches("[board]").count(), 1, "{written}");
+    }
+
+    #[test]
+    fn nested_axis_edits_preserve_defaults_comments_and_inline_tables() {
+        for text in [
+            "# my pad\n[pad_axes.drive.vyaw]\n# reverse steering\ninvert = false\n",
+            "# my pad\npad_axes = { drive = { vyaw = { invert = false } } }\n",
+        ] {
+            let dir = tempfile::tempdir().unwrap();
+            let path = dir.path().join("robotd.toml");
+            std::fs::write(&path, text).unwrap();
+            let mut model = Model::load(&path).unwrap();
+            model
+                .edit(entry("pad_axes.drive.vyaw.gain"), "0.5")
+                .unwrap();
+            model.save().unwrap();
+            let params = crate::Params::load(&path, true).unwrap();
+            assert_eq!(params.pad_axes.drive.vyaw.gain, 0.5);
+            assert!(!params.pad_axes.drive.vyaw.invert);
+            assert_eq!(
+                params.pad_axes.drive.vyaw.source,
+                crate::pad_axes::AxisSource::RightX
+            );
+            assert!(std::fs::read_to_string(&path).unwrap().contains("# my pad"));
+            model
+                .edit(entry("pad_axes.drive.vyaw.gain"), "1.0")
+                .unwrap();
+            model.save().unwrap();
+            let written = std::fs::read_to_string(&path).unwrap();
+            let document: toml::Value = toml::from_str(&written).unwrap();
+            assert!(
+                document["pad_axes"]["drive"]["vyaw"].get("gain").is_none(),
+                "override still written: {written}"
+            );
+            assert_eq!(
+                document["pad_axes"]["drive"]["vyaw"]["invert"].as_bool(),
+                Some(false)
+            );
+            assert!(written.contains("# my pad"));
+            if text.contains("# reverse steering") {
+                assert!(written.contains("# reverse steering"));
+            }
+            assert_eq!(
+                crate::Params::load(&path, true)
+                    .unwrap()
+                    .pad_axes
+                    .drive
+                    .vyaw
+                    .gain,
+                1.0
+            );
+        }
     }
 
     /// Sections come out in registry order, once each — the editor's headers.
@@ -1067,6 +1177,7 @@ mod tests {
         assert_eq!(
             s,
             vec![
+                "board",
                 "bus",
                 "control",
                 "update_gate",
@@ -1074,6 +1185,8 @@ mod tests {
                 "safety",
                 "duck_detector",
                 "chorale",
+                "idle",
+                "pickup",
                 "theremin",
                 "head_imu",
                 "audio",
@@ -1082,7 +1195,12 @@ mod tests {
                 // buttons do, which is the thing somebody browses for rather than tunes.
                 "pad",
                 "pad_imu_head_control",
-                "pad_drive"
+                "pad_drive",
+                "pad_axes",
+                "pad_head",
+                "pad_body",
+                "pad_roller",
+                "netpad"
             ]
         );
     }

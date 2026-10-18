@@ -6,7 +6,7 @@
 
 补齐官方运行服务、协议、库、工具、Spaces、安装 hooks 与发布链路，按既有 v2 分类保留完整 crate 和上游内部结构。将用户可操作的能力接入现有 Hatchery Web，让 Radxa 可通过浏览器完成观察、配置及条件满足后的控制；设备权威继续在官方 daemon 与 duck-control 中。
 
-本次交付为计划、依赖分析、Web 接入矩阵、任务与验收定义，不在本次文档工作中导入剩余源码、增加运行依赖、部署、切换网络或控制硬件。执行阶段按本计划逐包推进，不因前一个硬件验收待用户执行而停止无关的软件迁移。
+本计划已按用户后续授权进入执行：迁入非舵机源码并完成分批软件与 Web 检查；部署、切换网络和控制硬件不在本轮本地执行范围。执行阶段按本计划逐包推进，不因前一个硬件验收待用户执行而停止无关的软件迁移；出现新决策或重大改动时先停下对应工作。
 
 必须保留的用户决定：
 
@@ -19,7 +19,7 @@
 - U7：板上测试由用户执行；本地构建、模拟与类型检查分别记录，不代替 Radxa 的画面、连接和动作验收。
 - U8：所有阶段有依据、可见进度及可复现交付；不擅自提交、推送、发布或修改用户系统。
 
-## 2. 当前起点：已有成果与剩余范围
+## 2. 执行前起点（当前进度见第 7 节）
 
 以下是 2026-10-18 的只读核对结果。历史测试仅覆盖当时版本，不能自动覆盖当前未提交修改。
 
@@ -28,7 +28,7 @@
 | workspace | 13 成员，官方基线 `9136aa4`，含 robotd、mediad、configd 和相关库 | 维护与正式协议并存 | 新基线依赖审查、剩余成员迁入 |
 | 设备与连接 | 主机信息、服务观察、官方 configd 的 NM／BlueZ 后端已有 | 设备概览、Wi-Fi／蓝牙选择已接代码 | 板上连接验收、正式身份／日志等能力统一 |
 | 相机 | mediad、WebRTC、V4L2／RKAIQ 参数已有 | 视频与基础／高级参数已接代码 | 板端协商与成像效果验收；最新高级 ISP 修改复验 |
-| 当前 ISP 工作 | 存在未提交 `rkaiq_control.rs`、同进程 3A 适配、构建脚本与来源清单 | 高级设置有未提交修改 | 保留当前工作，核对对应差异后纳入 M3，不能覆盖或沿用旧测试结论 |
+| 当前 ISP 工作 | 执行前 HEAD `6b8a110` 已提交 `rkaiq_control.rs`、同进程 3A 适配、构建脚本与来源清单 | 高级设置已包含于执行前 HEAD | 保留当前工作，核对对应差异后纳入 M3，不能覆盖或沿用旧测试结论 |
 | 舵机 | 任意 ID 维护、扫描、单颗受限动作、ID 修改与草稿基础已有 | 参数与标定统一入口；联调／曲线／3D 仍有样例 | 正式配置生效、完整参数读写、装机标定和正式反馈 |
 | IMU／ToF | FT 运行端尚无真实 IMU；ToF 只有目录说明 | 明确的样例 | 实际 LSM6DSV16X 适配、ToF 服务与真实数据接入 |
 | 视觉检测 | duck-detect、uyvy 与 mediad 检测模块已迁入 | 尚未接入检测结果 | 模型来源、CPU／NPU 运行验证、画面叠加 |
@@ -44,7 +44,7 @@
 |---|---|---|
 | E1 | [架构 v2](microduck-hatchery-architecture-v2.md)、[当前架构](ARCHITECTURE.md)、[AGENTS](../AGENTS.md) | 分类、完整 crate、控制权威、日志与授权边界 |
 | E2 | [已迁入来源清单](UPSTREAM_IMPORT.json)、[NOTICE](../src/NOTICE-UPSTREAM.md)、[来源说明](SOURCES.md) | 已安装基线 `9136aa4ee88e81edf2bcaf3527e90b65da25f1eb`、许可、路径与哈希 |
-| E3 | [本次官方审查提交](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f)、[workspace](https://github.com/pollen-robotics/microduck/blob/53230463927095ea890f231d29089bb0a538c06f/Cargo.toml) | 2026-10-18 只读核对的候选迁移基线；包含新板型、netpadd／pad-map／nfc，尚未升级本地源码 |
+| E3 | [本次官方审查提交](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f)、[workspace](https://github.com/pollen-robotics/microduck/blob/53230463927095ea890f231d29089bb0a538c06f/Cargo.toml) | 2026-10-18 经用户选择采用的非舵机基线；FT 控制模块保留旧版本 |
 | E4 | [本地 IPC](../protocol/duck-ipc-proto/src/lib.rs)、[官方候选 IPC](https://github.com/pollen-robotics/microduck/blob/53230463927095ea890f231d29089bb0a538c06f/duck-ipc-proto/src/lib.rs)、[官方 mediad](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f/mediad) | RPC、数据结构、传输及服务所有权，以实际分发实现核对可用性 |
 | E5 | [BOM](../hardware/microduck_bom.xlsx)、[厂商资料](../hardware/vendor_docs/)、[Radxa 指南](RADXA_RUNTIME.md) | 板卡、IMX219、LSM6DSV16X、FT、ToF 的实际适配。ToF 资料包含 VL53L5CX；实物丝印与地址待确认 |
 | E6 | [相机说明](CAMERA_CONTROLS.md)、[RKAIQ IPC 来源](RKAIQ_IMPORT.json)、[3A 程序来源](RKAIQ_SERVER_IMPORT.json) | 兼容用户板上 ISP21／RKAIQ，保留最新相机工作；来源包含独立 LGPL 文件时分别履行许可 |
@@ -54,7 +54,7 @@
 | E10 | [padd](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f/padd)、[netpadd](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f/netpadd)、[pad-map](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f/pad-map)、[nfc](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f/nfc) | 手柄映射、输入失联与 NFC 配对；NFC 没有对应硬件时保持可选 |
 | E11 | [官方 Spaces](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f/spaces)、[duck-detect](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f/duck-detect) | 完整示例、共享通信、OpenCV 与板端检测复用 |
 | E12 | [updater](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f/updater)、[hooks](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f/hooks)、[xtask](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f/xtask)、[scripts](https://github.com/pollen-robotics/microduck/tree/53230463927095ea890f231d29089bb0a538c06f/scripts) | 官方安装、模板生成、升级、健康检查、回滚与发布机制 |
-| E13 | [官方 duck_detector](https://github.com/pollen-robotics/duck_detector)、[microduck_rl 审查提交](https://github.com/pollen-robotics/microduck_rl/tree/b02fdea4902c2b93b7d34a83a6f05da4ececb7d3) | 检测训练与仿真／RL 单独冻结。duck_detector 的完整树和 SHA 本次 API 未成功取得，不能宣称已完整审查或迁入 |
+| E13 | [官方 duck_detector](https://github.com/pollen-robotics/duck_detector)、[microduck_rl 审查提交](https://github.com/pollen-robotics/microduck_rl/tree/b02fdea4902c2b93b7d34a83a6f05da4ececb7d3) | 检测训练与仿真／RL 单独冻结。duck_detector 后续固定 `cc1b52eb3ace9643c8948320e63f46a85cf6fb65` 并原样迁入；两个独立来源见 TRAINING_IMPORT.json |
 | E14 | [Web 设计](../web/docs/Microduck-Hatchery-Visual-Design.md)、[页面审查稿](../web/docs/LOCAL_REVIEW_PROPOSAL.md)、[联调说明](../web/docs/JOINT_COORDINATION.md) | 复用现有页面、紧凑布局与样例隔离；最新 U4—U6 优先 |
 
 M0 先比较 E2 与 E3，再固定本轮版本。默认以 E3 为完整兼容集合审查，已有 FT／维护／ISP 改动逐项保留；如果发现必须暂留旧版的模块，记录具体提交、协议差异与验证结果，不能把两版接口直接拼起来。迁移进行期间不追逐移动的 main。
@@ -95,9 +95,9 @@ M0 先比较 E2 与 E3，再固定本轮版本。默认以 E3 为完整兼容集
 
 依赖：无。依据：U1—U3、U7—U8；E1—E6、E13。
 
-- [ ] M0.1：形成 E2→E3 的模块／协议／依赖差异清单，固定主仓库及独立训练来源；列出新主分支新增项与排除原因。
-- [ ] M0.2：保存现有修改清单及来源，特别是 FT seam、维护 binary、Web 和未提交 ISP 工作；为每项确定保留／移植位置，避免覆盖。
-- [ ] M0.3：建立平台能力表：系统／内核、串口、相机／ISP、IMU／ToF 总线、音频与 NFC；已知事实注明依据，未知项列为用户后续只读核对，不用假定值。
+- [x] M0.1：形成 E2→E3 的模块／协议／依赖差异清单，固定主仓库及独立训练来源；列出新主分支新增项与排除原因。
+- [x] M0.2：保存现有修改清单及来源，特别是 FT seam、维护 binary、Web 和执行前已提交 ISP 工作；为每项确定保留／移植位置，避免覆盖。
+- [x] M0.3：建立平台能力表：系统／内核、串口、相机／ISP、IMU／ToF 总线、音频与 NFC；已知事实注明依据，未知项列为用户后续只读核对，不用假定值。
 
 交付：差异表、选定完整 SHA、依赖闭包、硬件能力表与明确的迁入范围。完成条件：每个官方根模块都有处理决定，协议版本混用风险已定位；不要求此时把所有硬件插好。
 
@@ -105,9 +105,9 @@ M0 先比较 E2 与 E3，再固定本轮版本。默认以 E3 为完整兼容集
 
 依赖：M0。依据：U1、U8；E1—E3、E9—E13。
 
-- [ ] M1.1：先对齐 duck-ipc-proto、robotd-params、共享库；迁入 duck-ble、pad-imu、pad-map 等依赖，保留 crate 内部布局。
-- [ ] M1.2：迁入 updater、btd、padd、tof；按 M0 结论纳入 netpadd、nfc。建议新分类为 `src/daemons/netpadd`、`src/daemons/nfc`、`src/libraries/pad-map`，先更新架构映射，再实际落地；无 NFC 硬件不阻止源码审查和可选构建。
-- [ ] M1.3：迁入 robotctl、duckctl、duck-ether、xtask、必要 test-support；明确板端／桌面构建集合，维护入口保持轻量，不能默认让板子编译桌面工具。
+- [x] M1.1：先对齐 duck-ipc-proto、robotd-params、共享库；迁入 duck-ble、pad-imu、pad-map 等依赖，保留 crate 内部布局。
+- [x] M1.2：迁入 updater、btd、padd、tof；按 M0 结论纳入 netpadd、nfc。建议新分类为 `src/daemons/netpadd`、`src/daemons/nfc`、`src/libraries/pad-map`，先更新架构映射，再实际落地；无 NFC 硬件不阻止源码审查和可选构建。
+- [x] M1.3：迁入 robotctl、duckctl、duck-ether、xtask、必要 test-support；明确板端／桌面构建集合，维护入口保持轻量，不能默认让板子编译桌面工具。
 - [ ] M1.4：迁入完整 spaces、hooks 以及所需 scripts／deploy／CI 文件；固定原始哈希、许可、可执行位及符号链接，修正工作区／资源／打包查根路径。导入原文件不等于安装或执行。
 
 交付：完整模块与来源清单、Cargo.lock 的逐项依赖理由、官方／Hatchery 差异记录。完成条件：选定软件集合能做相应构建检查；未纳入项有理由；保留已有维护入口，官方硬件默认参数不会覆盖 FT 配置。
@@ -116,9 +116,9 @@ M0 先比较 E2 与 E3，再固定本轮版本。默认以 E3 为完整兼容集
 
 依赖：M1 的协议与基础服务，可按已通过的服务逐个交付。依据：U4—U8；E4、E7、E14。
 
-- [ ] M2.1：梳理正式 robot.* 与现有 maintenance.* 路由，扩展现有 mediad gateway／session；固定允许方法及类型，不新建第二个生产 Python API 服务。
-- [ ] M2.2：建立共享的真实会话／订阅缓存，包含设备身份、启动会话、来源、单调时间、有效性与断线清理；总控、曲线、3D 和传感器复用订阅，不各自重复轮询总线。
-- [ ] M2.3：设备服务面板接入迁入后的实际服务，分别展示未安装、未运行、启动中、运行中、故障、独立运行、状态未知；程序运行不等于对应硬件已就绪。
+- [x] M2.1：梳理正式 robot.* 与现有 maintenance.* 路由，扩展现有 mediad gateway／session；固定允许方法及类型，不新建第二个生产 Python API 服务。
+- [x] M2.2：建立共享的真实会话／订阅缓存，包含设备身份、启动会话、来源、单调时间、有效性与断线清理；总控、曲线、3D 和传感器复用订阅，不各自重复轮询总线。
+- [x] M2.3：设备服务面板接入迁入后的实际服务，分别展示未安装、未运行、启动中、运行中、故障、独立运行、状态未知；程序运行不等于对应硬件已就绪。
 - [ ] M2.4：统一写操作结果和错误语义、超时／取消／去重；保留同源、认证与固定方法校验。旧后端缺少能力时可读地降级，静态／单文件入口不发真实命令。
 
 交付：矩阵中每项能力的接口契约与页面落点；服务状态和只读正式数据先可用。完成条件：真实／fixture／未知可区分，迟到响应不覆盖新会话，无重连补发写操作；断线不继续显示为实时。
@@ -142,7 +142,7 @@ M0 先比较 E2 与 E3，再固定本轮版本。默认以 E3 为完整兼容集
 - [ ] M4.1：以官方 NM 流程复验扫描、已保存网络、密码错误、无线开关与断开；API 不支持的隐藏网络／802.1X 保留明确限制，不做假连接按钮。
 - [ ] M4.2：接入 btd／duck-ble 的配对与认证状态，和 configd 的普通蓝牙管理区分；仅支持官方流程允许的配对类型，PIN／确认扩展须有真实后端。
 - [ ] M4.3：设置中接板端持久名称、配对配置；地址／SSH 留在详情。重启等系统动作采用官方权限与显式结果，不能把本地别名保存当成改设备名成功。
-- [ ] M4.4：接入限量服务日志、版本和故障原因；固定服务名、分页／条数上限和敏感字段过滤。UI 保持普通用户交互，开发详情折叠。
+- [x] M4.4：接入限量服务日志、版本和故障原因；固定服务名、分页／条数上限和敏感字段过滤。UI 保持普通用户交互，开发详情折叠。
 
 交付：真实连接操作、身份设置和诊断。完成条件：明确区分网络链路与公网可达，切网丢失响应时显示结果待确认；密码和令牌不持久保存到前端或诊断导出。
 
@@ -222,20 +222,20 @@ M0 先比较 E2 与 E3，再固定本轮版本。默认以 E3 为完整兼容集
 
 ## 7. 当前进度主表
 
-本轮计划已写入；下面是**剩余迁移任务**初始状态，不是已有项目完成率。既有成果见第 2 节。M0 的初步只读核对已做，完整差异／冻结仍待执行。每个勾选任务必须对应一次证据记录。
+下面记录本轮任务的软件进度，不是整机硬件完成率。源码已迁入 26 成员 workspace；原生链接、板端与安装结果单独列出。每项勾选均对应下方证据。
 
 | 里程碑 | 本轮任务完成 | 当前状态 | 下一项输出 | 主要前提 |
 |---|---|---|---|---|
-| M0 版本与现状 | 0/3 | 初核完成，正式冻结待做 | M0.1 完整模块／协议差异表 | 候选与现有源码可比较 |
-| M1 剩余源码 | 0/4 | 待执行 | 依赖闭包与来源清单 | M0 |
-| M2 正式 Web 通信 | 0/4 | 待执行，已有维护链路复用 | 服务接口与路由清单 | M1 基础协议 |
-| M3 传感器与视觉 | 0/5 | 既有相机成果＋当前 ISP 改动待纳入 | 当前 ISP 差异与软件复验 | M2；硬件实测由用户执行 |
-| M4 网络／身份／诊断 | 0/4 | 既有网络界面待补完整验收 | 正式身份与服务日志接入 | M2 |
-| M5 舵机配置／反馈 | 0/4 | 既有台架基础待扩展 | 已生效配置与反馈契约 | HD 资料；动作等待实物条件 |
-| M6 输入与控制来源 | 0/4 | 待执行 | 输入观察与映射 | M2、M4；运动依赖 M5 |
-| M7 示例／训练 | 0/4 | 待执行 | 完整 Spaces 与独立来源冻结 | M1；训练仓库可读 |
-| M8 安装／更新 | 0/5 | 待执行，持久部署未完成 | 发布包路径与 hooks 差异 | M1、M2；受限操作另处理 |
-| M9 验证／交付 | 0/4 | 待执行 | 第一批无外设验收卡 | 按完成的软件能力逐批交付 |
+| M0 版本与现状 | 3/3 | 版本、保护与硬件差异已固定 | IMU 按用户决定暂缓，其余继续 | MIGRATION_BASELINE.md / .json |
+| M1 剩余源码 | 3/4 | crate / 工具已迁入并做 ARM64 类型检查 | M1.4 / M8 脚本、打包与安装链 | 26 成员与来源清单 |
+| M2 正式 Web 通信 | 3/4 | 正式共享状态供总控、关节、曲线与 3D；九个服务状态已接 | 其余写操作契约受 FT 冻结范围约束 | 保留维护认证与官方路由；未改变舵机逻辑 |
+| M3 传感器与视觉 | 0/5 | 保留 ISP；ToF、检测框与视觉工具已接；IMU 暂缓 | 模型能力 / 性能与板端验收 | 板端成像、测距、推理待用户验收 |
+| M4 网络／身份／诊断 | 1/4 | 名称保存、程序版本与限量服务日志已接；配对设置与板端网络验收待补 | BLE 认证观察与连接验收 | M2；日志成功路径待板端验收 |
+| M5 舵机配置／反馈 | 0/4 | 驱动、动作、标定冻结；只读反馈显示按请求接入 | 生效标定与实物条件验收 | 本轮不改驱动、动作、标定、配置 |
+| M6 输入与控制来源 | 0/4 | padd 原始输入观察已接 | 映射编辑、控制来源切换及动作资格仍未接入 | M2、M4；运动依赖 M5 |
+| M7 示例／训练 | 0/4 | 完整 Spaces 与两个独立训练源已迁入 | 示例启动、模型能力与仿真接入 | XL330 训练模型未适配 FT |
+| M8 安装／更新 | 0/5 | 用户选择保留现有启动方式，安装 / OTA 暂缓 | 保留源码与已审查路径，后续另行恢复此阶段 | 可复用 workflow_call 保留；未安装或发布 |
+| M9 验证／交付 | 0/4 | 本批类型、单元与浏览器检查通过 | 按决策继续分批功能交付 | 板端测试由用户执行 |
 
 进度记录模板，更新到本表并在 [PROJECT_LOG](../logs/PROJECT_LOG.md) 留摘要；不另建平行的任务状态文档：
 
@@ -257,4 +257,64 @@ M0 先比较 E2 与 E3，再固定本轮版本。默认以 E3 为完整兼容集
 
 当前不把 SLAM、自主导航、通用物体／人脸识别、未确认的固件刷写或未匹配的 FT 步态当成官方迁移自动获得的功能；若扩大范围，另列来源、任务和验收标准。新主分支的其他板型能力只迁源码，不自动启用本机不存在的设备。
 
-接下来首先交付 M0.1：固定版本差异表、完整迁入／保留／可选模块清单，以及当前 FT／ISP 改动的保留点。该结果会直接更新第 7 节，用户可以据此判断后续迁移是否按既定结构与依据推进。
+M0 差异、来源与保护清单已交付。M1.4 / M8 的发布资源路径已做部分机械适配；用户已选择保留现有启动方式，安装与 OTA 暂缓。继续不涉及启动结构的 Web 接入；IMU 暂缓，M5 舵机行为保持冻结。
+
+### 2026-10-18 执行证据：本轮非舵机源码与首批 Web 接入
+
+- **任务 / 依据**：M0.1—M0.3、M1.1—M1.3；U1—U8、E1—E13。执行前 dev 工作区干净，HEAD `6b8a110`。非舵机固定 `5323046` / API 44，FT 实现保留；M1.4、M2—M9 不因源文件存在而勾选。
+- **来源 / 保护**：主仓库 443 条逐文件来源与安装哈希见 UPSTREAM_IMPORT.json；独立训练 280 文件见 TRAINING_IMPORT.json，均已核对当前文件。95 文件升级前保护清单中 90 个完全未变，5 个经审查例外为 robotd 两处兼容 / 观察代码及三个 Web 回归测试；原始哈希保留。FT 驱动、动作、标定、映射和参数段未变。原策略 pin v5、串口库 4.10.1 保留。三个 Spaces 链接展开为原共享文件副本，记录原链接；POSIX 模式只记录来源，未声称 Windows 已设置可执行位。
+- **兼容**：robotd 只补 Health.missing、ImuState.missing、SafetyState.picked_up 默认字段；只读服务观察增加 tofd / netpadd / nfcd。API 44 不代表旧 FT 后端新增了休眠、拾起检测或 vetbook 行为。
+- **Web**：设备页观察新服务；ToF 复用 mediad 现有 WebRTC 的 tof.stream / tof.frame，按官方 ST 状态 5 / 9、255 解码。坏帧、断线或两秒过期清空读数，不回退为样例；IMU 样例来源独立。原协议未报告硬件 / fake 模式，板端帧标注模式未确认。独立于相机的统一正式会话仍待接入。
+- **软件检查**：26 成员 ARM64 `cargo check --locked --workspace --all-targets`，显式开启 mediad / configd / robotd board-runtime，通过。DOCS_RS 跳过 GStreamer 探测，libudev 使用隔离 Debian ARM64 sysroot；这是类型检查，不是板端链接或 Linux 测试执行。原协议 crate 68、参数 crate 123 项测试通过；129 项 Node 测试通过；直接引用 services.rs 的 Windows 最小 harness 3 项通过（不计完整 daemon 测试）。两个当前 Windows maintenance binary 构建通过。
+- **浏览器检查**：专用无头 Edge，明确模拟传输；检测 SVG / 原始分数不显示百分比、暂停清框、1440 / 390 宽度方格与溢出、来源独立、检测 / 测距过期清空、坏帧拒绝、离页迟到帧共 9 项通过。不代表实物图像、测距、推理或网络操作验收。
+- **检测叠加**：复用固定官方 webclient 的 onDetections 与 media.detections，添加紧凑开关；暂停、断线或过期清除框。官方 INT8 raw score 可能大于 1，不显示伪造的百分比置信度。切换显示不启停推理。
+- **未完成**：全局 robot.* 订阅 / 曲线 / 3D、模型能力 / 性能、实际 IMU、输入面板、安装 / OTA 与示例运行；未安装训练依赖、下载数据或权重、运行训练或启用新策略。官方脚本 / CI 路径与 FT 发布标识待 M8 适配，不能直接当作可用安装链。
+- **后续用户决定**：暂缓 IMU，继续其他迁移。自动审批最初拒绝 CI 行为变更；用户随后明确授权只改本轮新文件，经核对 HEAD 和导入清单后，将 6 个自动入口改为手动，原已手动的 promote 与 3 个可复用工作流保持。
+- **脚本 / 资源核对**：仅新迁入文件中适配部分 Cargo manifest、src/target、包内资源路径；保留默认轻量构建集合。三处打包定义的 105 条 include 引用均存在；未加入冻结控制端不使用的 pickup 模型。六份受影响 shell 文件通过 sh -n；117 份训练 / Spaces Python 文件通过 AST 语法检查，未执行或导入。以上不是脚本运行、CI、Docker 或安装验收。
+- **Radxa / 部署**：待用户验收 / 未安装。本轮未访问板子、改系统配置、启停系统服务、切换网络、操作舵机、写 ISP、暂存、提交或推送。
+
+### 已决定：保留现有启动方式，暂缓安装 / OTA
+
+实际依据：现有 robotd.service / mediad.service 使用 `/opt/microduck-hatchery/scripts/run-radxa.py`，读取 `/etc/robot/hatchery.env`。本轮迁入的官方 updaterd.service 与 install.sh 则使用 `/opt/robot/daemon/current/bin`，更新通过 releases 与 current 链接切换程序。两者直接混用时，更新后重启可能仍运行旧目录里的程序。
+
+| 方案 | 具体后续工作 | 影响 |
+|---|---|---|
+| 保留当前启动方式，暂缓安装 / OTA | 现有服务与前台命令继续使用源码目录；updater / hooks 仅保留源码，M8 不标完成 | 当前测试方式不变；Web 更新操作暂不接入 |
+| 迁到官方发布包方式 | 适配包内容、robotd / mediad 启动单元、Hatchery 环境 / Web 资源、hooks 和恢复步骤；先完成可审查文件与隔离验证 | 调整程序启动路径和升级来源；板端实际安装仍由用户执行 |
+
+用户于 2026-10-18 选择第一个方案。保留 `/opt/microduck-hatchery` 与现有启动器 / 服务单元，M8 安装与 OTA 暂缓；不接入 Web 更新写操作。此决定不阻塞其他服务与 Web 接入。后续若恢复 OTA，安装源与信任密钥须适配 Hatchery，不能直接安装覆盖 FT 适配的官方成品包。当前没有启用 updater、运行 hook、制作可安装发布包或修改现有服务。
+
+### 2026-10-18 执行证据：设备名称与服务诊断
+
+- **任务 / 依据**：M2.3、M4.4 软件完成；M4.3 的名称部分完成，配对配置 / 系统动作仍待接入。依据为固定 `5323046` 的 configd main / Store / logs / units 与协议 system.info、system.services、system.set_name、system.logs。沿用既有 HTTP gateway，不另写系统配置、journalctl 或持久化服务。
+- **Web / 接口**：设备名称保存到 configd，网页别名与 SSH 备注保留在浏览器；设备设置内两者分开。服务详情显示后端运行版本 / revision / exe；日志默认折叠，仅点击读取固定服务本次开机最近 100 条，以纯文本显示并过滤常见敏感字段。连接中断、过期与离页不更新旧会话；写入不自动重试。接口与现有前台命令见 DEVICE_CONNECTIONS.md。
+- **检查**：136 项 Node、6 项 mediad-maintenance Rust、14 项实际 Windows HTTP 合约、13 项 Edge 模拟交互通过；当前 Windows gateway 构建与 ARM64 gateway 类型检查通过。修正现有静态资源测试从 crate 目录查根时多退一层的问题，原拒绝断言保留。Windows 一次增量编译停滞后关闭该编译进程，使用本次命令级 CARGO_INCREMENTAL=0 复验通过，未修改用户全局配置。
+- **边界**：Windows 合约验证认证、Host、方法、参数与不可用行为；名称 / 日志的浏览器成功路径是模拟。未在 Radxa 写名称、读 journal、连接网络或部署；板端持久性、权限与真实版本等待用户验收。FT 保护清单与参数段保持；IMU、安装 / OTA 按用户决定暂缓。
+
+### 2026-10-18 · 二十分钟接入批次：正式只读状态与总控
+
+- **已接入**：现有 mediad-maintenance gateway 新增固定 GET runtime 接口，只通过官方 Request / Call / Response 类型发送 hello、robot.subscribe（5 Hz）、robot.health。全网关共用一条 robotd 订阅与最新帧缓存；浏览器共用一个只读会话，跨页保留，离开调试台停止轮询。无客户端后约 6—7 秒关闭上游订阅，不启动第二个控制进程。
+- **总控**：替换占位页，显示程序检查、控制循环、策略、状态帧年龄和后端已报告的关节数量；未知电压 / 频率保持空缺，单调时钟以字符串保留精度。原协议没有声明 fake / 实物模式，页面明确显示未声明，不把正式通道等同于真机。未知、断线、时钟回退与重连清除实时状态；未接任何动作写入。
+- **日志导航**：复用已完成的 DeviceJournal，导航中的日志页现可选择程序并显式读取，不再是占位页；不增加日志服务或后台日志轮询。
+- **本地结果**：142 项 Node、11 项维护网关 Rust、18 项实际 Windows HTTP 合约、17 项 Edge 检查通过。Rust 含真实 TCP 字节流上的官方握手 / 订阅 / 健康交互及分片通知检查；这是本地模拟服务，不是 Radxa Unix socket。浏览器含 1440 / 390 布局、跨页单会话、过期 / 重启清理、日志导航及真实 file:// 单文件离线入口。Windows 网关构建与 ARM64 网关类型检查通过。
+- **仍未完成**：曲线 / 3D 的真实关节映射和完整 M2.2、动作语义 M2.4、输入面板及视觉工具仍待后续；不为勾选任务修改冻结 FT 逻辑。板端 Unix 连接、成像、硬件与持续运行由用户验收；IMU 和安装 / OTA 继续暂缓。启动方式与源代码目录保持不变。
+
+
+### 2026-10-18 · 按用户要求暂停（当前工作未交付）
+
+- 用户要求“快点，优雅暂停”，已停止功能开发；所有改动保留在工作区，未提交、未推送、未部署。
+- 本轮已写入：runtime 缓存增加官方关节名称与 rad 单位；只读 RuntimeFeedback 将真实弧度接到曲线、3D 和关节反馈展示；新增 padd 官方 pad.input / pad.report 只读网关与设备输入面板；相机新增基于现有视频的 Canny、变化、稀疏光流和 media.video 内参工具。
+- 已通过：151 项 Node 测试（含真实 OpenCV 算法数据测试）、13 项 mediad-maintenance Rust 测试、ARM64 mediad-maintenance 类型检查。最后一轮导航与输入过期显示的小改动在这些检查之后，尚未复验。
+- 仍须完成后才能交付：浏览器交互与布局验证、真实输入字节流集成检查、暂停／断线清理复查；更新来源清单与只读前端保护例外；重新生成两个单文件入口；同步当前能力文档。OpenCV 本地资产已写入 vendor/opencv，附版本、许可与 SHA-256 说明。
+- 本轮没有改动 FT 驱动、动作、标定或舵机配置；没有执行 Radxa 实机测试。IMU、安装／OTA 继续按用户决定暂缓。
+- 本段是暂停交接记录，不将上述新增代码视为完成验收，也不据此勾选计划任务。
+
+
+### 2026-10-18 · 暂停后完成只读 Web 接入收尾
+
+- **交付范围**：完成暂停时的三个软件接入项：真实反馈曲线 / 3D、设备页手柄观察、相机视觉工具。M2.2 的共享缓存及消费已完成软件验证；M5.3 的实物标定 / 互斥验收、M6 的映射写入 / 来源切换、M3.5 的录像以及其他包含硬件条件的复合任务没有据此勾选。
+- **真实反馈**：网关声明官方 joint_names / rad；前端按名称映射 15 关节，区分显示 ID、运行位置和策略索引。3D 直接使用后端弧度，不通过样例 ticks 换算；曲线位置 / 目标 / 误差单位 rad，电流有报告才绘制。后端未提供逐关节电压、温度或完整位置数组时显示缺测。断线、重启和设备时钟回退清空缓存，包括已暂停曲线。正式页面不挂载样例动作草稿控件，静态入口保留原演示。
+- **输入设备**：现有维护网关增加认证的 GET input，沿用官方 padd 只读 tap。单个按需订阅累计官方轴 / 键事件，不注入输入、不声明控制权；丢报告或序号重启重新同步，过期清除高亮。默认 tap 与 padd 的 /run/padd/pad.sock 一致，自定义路径显式使用 HATCHERY_PAD_SOCKET。未自动启动或安装服务。
+- **视觉工具**：复用官方 filters.py 参数，通过固定本地 OpenCV.js 4.13.0 对既有 WebRTC 视频提供 Canny、画面变化、稀疏光流；最长边 640 px、最多 5 Hz。相机几何只读 media.video 的实际内参及 calibrated 标记。暂停 / 断线 / 离页清理；file:// 禁用无法独立携带的视觉运行库，不访问 CDN。未增加板端采集器或 Python API 服务。
+- **修复与检查**：修复真实模式布尔值误调用及总控读数与关节面板选择器重名；最终 151 项 Node、15 项维护网关 Rust、23 项实际 Windows HTTP 合约、27 项 Edge 页面检查通过。Rust 覆盖真实 TCP 字节流上的模拟官方订阅、分片与丢报告；Edge 分组验证只读反馈 / 输入、合成视频处理和两份真实 file:// 入口，含 1440 / 390 布局及正方形 ToF。Windows gateway 构建、ARM64 gateway 类型检查通过；不等同于 Linux 原生链接、板端 Unix socket 或真实视频验收。
+- **来源与保留**：更新逐文件来源、本地 OpenCV 许可 / 版本 / 哈希及只读前端保护例外，原始保护哈希保留。FT duck-control、动作、标定和舵机配置段未改；两个单文件入口重建。临时测试脚本 / 截图只放系统 TEMP，未暂存、提交、推送或部署。IMU、安装 / OTA 继续按用户决定暂缓。

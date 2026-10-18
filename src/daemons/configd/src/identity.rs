@@ -15,24 +15,13 @@
 //! right — an address change orphans every bond under `/var/lib/bluetooth/<address>/` and
 //! invalidates the peripheral identifier a phone saved — but it is not this module's problem.)
 //!
-//! The serial comes out of the SoC's one-time-programmable fuses by way of the bootloader, so it
-//! survives a reflash, survives swapping the radio module, and needs no provisioning step to
-//! exist — which is what makes a hand-flashed board work. It is also readable *immediately*: a
-//! plain file, no root, no D-Bus, no waiting the ~73 seconds it takes `hci0` to appear on this
-//! board.
-
-use std::path::Path;
+//! The serial comes out of the SoC's one-time-programmable fuses, so it survives a reflash,
+//! survives swapping the radio module, and needs no provisioning step to exist — which is what makes
+//! a hand-flashed board work. It is also readable *immediately*: a plain file, no root, no D-Bus, no
+//! waiting the ~73 seconds it takes `hci0` to appear on this board. Which file depends on the board,
+//! and [`robotd_params::serial`] says why.
 
 use sha2::{Digest, Sha256};
-
-/// Where the bootloader leaves the SoC serial.
-///
-/// `/proc/device-tree/serial-number` rather than `/proc/cpuinfo`: both report the same value on
-/// this board (`bb7b734a7717ac41`), but the devicetree property is a generic binding that any
-/// board populating it satisfies, while `cpuinfo`'s `Serial` line is a per-architecture quirk of
-/// how the kernel chooses to print it. A future board on a different SoC is more likely to keep
-/// the first.
-const SERIAL_PATH: &str = "/proc/device-tree/serial-number";
 
 /// The prefix every derived name carries.
 ///
@@ -46,24 +35,7 @@ const NAME_PREFIX: &str = "duck";
 /// caller falls back rather than failing: a robot with no serial must still come up with a working
 /// name.
 pub fn serial() -> Option<String> {
-    serial_at(Path::new(SERIAL_PATH))
-}
-
-/// [`serial`], against an arbitrary path so it can be tested off a board.
-pub fn serial_at(path: &Path) -> Option<String> {
-    let raw = std::fs::read(path).ok()?;
-    let text = String::from_utf8_lossy(&raw);
-
-    // Devicetree properties are NUL-terminated strings, and a property may hold several — so the
-    // first NUL ends the value rather than being trailing junk to trim.
-    let serial = text.split('\0').next()?.trim();
-
-    // A property that exists but is blank, or full of control characters, is no identity at all,
-    // and it also reaches a client verbatim through `system.info`.
-    if serial.is_empty() || !serial.chars().all(|c| c.is_ascii_graphic()) {
-        return None;
-    }
-    Some(serial.to_owned())
+    robotd_params::serial::soc_serial()
 }
 
 /// The name a robot answers to before anyone has renamed it: `duck-7f3a`.
@@ -90,37 +62,6 @@ pub fn default_name(serial: &str) -> String {
 mod tests {
     use super::*;
 
-    fn write(dir: &Path, contents: &[u8]) -> std::path::PathBuf {
-        let path = dir.join("serial-number");
-        std::fs::write(&path, contents).unwrap();
-        path
-    }
-
-    /// The real shape of the property on the board: the value, NUL-terminated.
-    #[test]
-    fn a_nul_terminated_property_reads_as_the_value() {
-        let dir = tempfile::tempdir().unwrap();
-        let path = write(dir.path(), b"bb7b734a7717ac41\0");
-        assert_eq!(serial_at(&path).as_deref(), Some("bb7b734a7717ac41"));
-    }
-
-    /// `/proc/device-tree` is absent on a laptop, and that must be a fallback rather than a panic.
-    #[test]
-    fn a_missing_property_is_no_serial() {
-        let dir = tempfile::tempdir().unwrap();
-        assert_eq!(serial_at(&dir.path().join("absent")), None);
-    }
-
-    /// A board that fills the property in with nothing has no identity, and saying so lets the
-    /// caller fall back to the hostname instead of naming every such board `duck-e3b0`.
-    #[test]
-    fn a_blank_or_unprintable_property_is_no_serial() {
-        let dir = tempfile::tempdir().unwrap();
-        for raw in [&b""[..], b"\0", b"   \0", b"\x01\x02\0"] {
-            assert_eq!(serial_at(&write(dir.path(), raw)), None, "{raw:?}");
-        }
-    }
-
     /// The name has to be stable for the life of the board: it is what a phone remembers, and a
     /// robot that renames itself is one a kid has to find again. This pins the exact output for
     /// the serial the board actually has, so a change to the derivation fails here rather than in
@@ -128,6 +69,18 @@ mod tests {
     #[test]
     fn the_name_derived_from_this_boards_serial_is_pinned() {
         assert_eq!(default_name("bb7b734a7717ac41"), "duck-c51b");
+    }
+
+    /// Two beta boards from one lot, which both came up as `duck-d041` while their name was made
+    /// from U-Boot's serial (`8b33c6e86a6a0c15` on both). The kernel's serials tell them apart.
+    #[test]
+    fn two_beta_boards_from_one_lot_get_two_names() {
+        assert_eq!(default_name("8b33c6e86a6a0c15"), "duck-d041");
+        assert_eq!(default_name("62285dd716c88f0f"), "duck-2b6d");
+        assert_ne!(
+            default_name("62285dd716c88f0f"),
+            default_name("9ed5ef3c1c5ff3f1")
+        );
     }
 
     /// Two boards must not collide, which is the entire point.

@@ -1,0 +1,436 @@
+{
+  "recorded_at": "2026-10-18",
+  "local_commit": "6b8a110bb7f138178f4122b3fd75d18b5c6cff51",
+  "upstream_base": "9136aa4ee88e81edf2bcaf3527e90b65da25f1eb",
+  "upstream_target": "53230463927095ea890f231d29089bb0a538c06f",
+  "decision": "Upgrade non-servo components; preserve FT drivers, motor control, calibration and servo configuration. Necessary protocol compatibility and requested read-only Web feedback displays are recorded as scoped exceptions.",
+  "protected_files": [
+    {
+      "path": "src/libraries/duck-control/Cargo.toml",
+      "sha256": "7d4269c5ee62d5b8d4ff3142e5411b66822285f7d3bc1ca489944d71ce83894a"
+    },
+    {
+      "path": "src/libraries/duck-control/LICENSE-FT",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "src/libraries/duck-control/LICENSE-UPSTREAM",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "src/libraries/duck-control/NOTICE-FT.md",
+      "sha256": "f86f3d31ecc626a51e5d1fa584699dba56c1e2fb3ac72072119bc4970c928281"
+    },
+    {
+      "path": "src/libraries/duck-control/README.md",
+      "sha256": "c230757fbf32c9d52141710016f340d7b23ce7309dd4036128355e373563e48b"
+    },
+    {
+      "path": "src/libraries/duck-control/examples/policy-rehearsal.rs",
+      "sha256": "b71c6d6695bf2e3f683e75f03ff287cdb4b02553363cfc0e6eef9c3d091c3cbd"
+    },
+    {
+      "path": "src/libraries/duck-control/src/bus.rs",
+      "sha256": "5731bccf96af458042d24f524f6de6ce65148167ca3e69f8be80329d0e0a77f4"
+    },
+    {
+      "path": "src/libraries/duck-control/src/bus_feetech.rs",
+      "sha256": "69f349b20849bf2b55a6fbea033afcb31b24bd638a7e79212a54287c8f1ee323"
+    },
+    {
+      "path": "src/libraries/duck-control/src/bus_feetech_wire.rs",
+      "sha256": "37eaeba49db1406333d147f4c96f14c73d140099a188bbec18ca4ef8fdcfc1d1"
+    },
+    {
+      "path": "src/libraries/duck-control/src/bus_maintenance.rs",
+      "sha256": "d0e3dabada8d1638e9e39e6644f27780992c2cd053d6ca363b3347681c4b385b"
+    },
+    {
+      "path": "src/libraries/duck-control/src/bus_select.rs",
+      "sha256": "2707137ded87ed137d4cd53b2040669ba93208fb8cd703190edbc179d805118d"
+    },
+    {
+      "path": "src/libraries/duck-control/src/fall.rs",
+      "sha256": "6560a08585884214ccd3c54e2dd54bffcf378abbf8b4da29f26da7924da51dca"
+    },
+    {
+      "path": "src/libraries/duck-control/src/imu.rs",
+      "sha256": "fa8b56fc7f7ceda56c0cd789b6338db492f6b4d4a1796e7ee699118d6f6e8f80"
+    },
+    {
+      "path": "src/libraries/duck-control/src/io.rs",
+      "sha256": "d631bd8f0df24d3e281aa52fa8ccf114f7c7943d47d79bead78fc29f231402bd"
+    },
+    {
+      "path": "src/libraries/duck-control/src/io_maintenance.rs",
+      "sha256": "06d753a0b34a5b5836b15fd742d9c157a9fb0d1367bc9bd1c8a08acda277c313"
+    },
+    {
+      "path": "src/libraries/duck-control/src/lib.rs",
+      "sha256": "2e8d3c7288fa6be99f2947ed2ca1b33d0a5aebdbce939d0963bab4c790cb8952"
+    },
+    {
+      "path": "src/libraries/duck-control/src/model.rs",
+      "sha256": "6fa45a1a335e9e17dfff8c2d739d462efc2b35d54f75afeb1a734a2264d50a4a"
+    },
+    {
+      "path": "src/libraries/duck-control/src/obs.rs",
+      "sha256": "9545dae40e6a324cea153d2dc8d79563ba105c348f96e00128fb2e55d27f26a6"
+    },
+    {
+      "path": "src/libraries/duck-control/src/policy.rs",
+      "sha256": "ffdc144a97ccec60a725ebae5a534b054af4f4e8b2f1d247f648fcf00cde8014"
+    },
+    {
+      "path": "src/libraries/duck-control/src/safety.rs",
+      "sha256": "e4c1111887d7460a3a2086822878db6af3b77a1847902b07294530799e87fc92"
+    },
+    {
+      "path": "src/libraries/duck-control/src/sim.rs",
+      "sha256": "898d835c9e06af348aab97b7cf2992d8c7ff5427adcb3bc74a890e40498392ca"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/recurrent_policy.rs",
+      "sha256": "9c57b34b3dd287ceae47944153cd050d5ac6de105ec7cdbb263646771e9bbba1"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/bad_action_count.onnx",
+      "sha256": "b0e1204240bd7d73a19ceb6c21df8c8b0e3a20285c619eee2840bf426cf64c57"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/bad_batch.onnx",
+      "sha256": "52f08b383c02b88815fc46f8ce86479798fb32a3eaae6399c41eb64da84f35d1"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/bad_rank.onnx",
+      "sha256": "eccc59cc1ca6a1e646681bbab7f3acc025e33f24d01a450d2483ddf86a5ba47a"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/bad_state_shape.onnx",
+      "sha256": "cc1d34cb26c07480adc7bc9943d36fbf4499faadc0c38616968980fbcefd913f"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/bad_width.onnx",
+      "sha256": "977bfc63a5c4e5546065a709aa5b7728cc4f92d6dc34113c1f8bc27022ae8221"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/dynamic_batch.onnx",
+      "sha256": "e71c561b6c7d865b51b70c133d988514daf8d3304b12a9da0bd7b45e9690098e"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/dynamic_hidden.onnx",
+      "sha256": "9abeb2be629b533ac6d7ec61026ca1cd9224aba126f29c000b825c5133eddc4b"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/extra_input.onnx",
+      "sha256": "b064ee4a0cb7ce4a56d57a7fe115be34d07613fff9e33fd8eb7d21e64d7047e1"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/feedforward.onnx",
+      "sha256": "35e64f991081632a6d71260e2b1d631aa6c999e8982011a630a1c72498cb6f58"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/generate.py",
+      "sha256": "fd8f328f6c293908b27ea77929f7b4704322050750ea27680922a807d8385a70"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/lstm.onnx",
+      "sha256": "f09ce3fd59ae7da7fad71a41bc5c6ef7e815693d13d596280dedf6035afaa3a3"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/lstm_changed.onnx",
+      "sha256": "c1b1dc210ec4d91b23134e5c7e4f4e305d3fe366b334b3ae205d1c1c11b0ff66"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/missing_state.onnx",
+      "sha256": "2eaa1886cf1f8888d132518520d132e5c015989ae8a850ea64a55735e0ae1da1"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/nan_state.onnx",
+      "sha256": "3e7f3ce7e3b44e5ea5ed0385c284f2d1f0418b14645a3bb993362af3b43fee2a"
+    },
+    {
+      "path": "src/libraries/duck-control/tests/fixtures/wrong_type.onnx",
+      "sha256": "ae3cace68d65a6a757e6c252fdab7275b34ea0c88eaa4cc0a9af0bd6bb1b1705"
+    },
+    {
+      "path": "src/daemons/robotd/Cargo.toml",
+      "sha256": "cd403e6c31230fb878dd29d5ef0343a39c2fc70c2ebe0b8b67e4a37692204da0"
+    },
+    {
+      "path": "src/daemons/robotd/LICENSE-UPSTREAM",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "src/daemons/robotd/README.md",
+      "sha256": "b63317d148c8a6d22338d5e61e4b578c3d3e43ebecaf91a25e0c7e3fee568c71"
+    },
+    {
+      "path": "src/daemons/robotd/src/chorale.rs",
+      "sha256": "f4b67edd128fc3d679c76261c3fb342fbd687e65c82991ca802869ada1f40110"
+    },
+    {
+      "path": "src/daemons/robotd/src/control.rs",
+      "sha256": "29770985a52c7383f07e1a60c9318fb46ddcd7a695b9192d52c73df5270eb9b4"
+    },
+    {
+      "path": "src/daemons/robotd/src/device.rs",
+      "sha256": "2c74f7efd1a284a0f85c9ad62fbbcb3d5640a4ddf842bf83e8fd1a63b9fc5bb4"
+    },
+    {
+      "path": "src/daemons/robotd/src/intents.rs",
+      "sha256": "1deeaa99378ab562aa9938f0f2c8d3073205668fea76033070ced66a2b50dce1"
+    },
+    {
+      "path": "src/daemons/robotd/src/main.rs",
+      "sha256": "9440b14f158ac5178eb7aba9ea33eb3f2161cd73de9dda5c2966c9cbc6d4cf8a"
+    },
+    {
+      "path": "src/daemons/robotd/src/maintenance.rs",
+      "sha256": "df1a7440c54d371a819f3769425bf843a26bff84ee24ea4931691fd0da5ee68b"
+    },
+    {
+      "path": "src/daemons/robotd/src/maintenance_main.rs",
+      "sha256": "c7982a3115d8f7caf5e52d2c1cc0b1fdcf8a3d2f73e8d391c4869d13df5d23a5"
+    },
+    {
+      "path": "src/daemons/robotd/src/params.rs",
+      "sha256": "386305e3ce00a409f6527d2be2048a927c2b448423ed1bb9fc63f29af0ff3064"
+    },
+    {
+      "path": "src/daemons/robotd/src/services.rs",
+      "sha256": "c9d999f39e2927e17fb51a9516ce44f13670c335c7fdadcd7bed572f2c3e4a02"
+    },
+    {
+      "path": "src/daemons/robotd/src/soc.rs",
+      "sha256": "4ec2311a5903d7fcaef5daf685d613d40d20fc228b280669902d762a7ae4bad1"
+    },
+    {
+      "path": "src/daemons/robotd/src/sound.rs",
+      "sha256": "9682c35f6242d86ae0c3a2e9182d2a9a85159bbb0ab6ecff6fe31d049f404c55"
+    },
+    {
+      "path": "src/daemons/robotd/src/theremin.rs",
+      "sha256": "498335f69f7ba185fac85bdbc2ad692db7c89d1b729b3a86e06c0254d7f24749"
+    },
+    {
+      "path": "src/daemons/robotd/systemd/robotd.service",
+      "sha256": "758e19d1b2e3a9dade07b777db0ea7f2d31b6e39a329824d90aaf39ab8e1cd79"
+    },
+    {
+      "path": "web/prototype/joint-charts.css",
+      "sha256": "68d3b5c93d4d8e4ec65726c81dc5826f2767996f0db6fd50b9b2e1b3ec2b889a"
+    },
+    {
+      "path": "web/prototype/joint-charts.js",
+      "sha256": "0aa65c55e908dd8c506c2c4c7133f8ea627a81894eb87ee948e7fcd6b014a389"
+    },
+    {
+      "path": "web/prototype/joint-console.css",
+      "sha256": "4d5054ba0b1015b8cc5ecab3184e241c30eae6ca2e442a66271bc7e00f0b2021"
+    },
+    {
+      "path": "web/prototype/joint-console.js",
+      "sha256": "f14345ddc6a7fb4375b5fda3f56f726b3cc7d70630a3c05c419ee515ff95e5fe"
+    },
+    {
+      "path": "web/prototype/joint-drafts.js",
+      "sha256": "4a640fb136b5ef6ce223fbc11a3e693fa8dc37213f5b61c52fc2e797505bbe91"
+    },
+    {
+      "path": "web/prototype/joint-feedback.css",
+      "sha256": "000c06ba6db8693784ef77850caa5c49a8c17025a03cc8b65d830a501a7b4a3b"
+    },
+    {
+      "path": "web/prototype/joint-feedback.js",
+      "sha256": "bc65cf6ec2d10ac55e24d29a21641bbb677e4adeb6dbbb5c5df3462e9891c766"
+    },
+    {
+      "path": "web/prototype/joint-session.js",
+      "sha256": "096fa850dc5a76f1d3cc20c25ece5bacfaff781a6848a2929d8afcb27c507a6f"
+    },
+    {
+      "path": "web/prototype/joint-viewer-geometry.js",
+      "sha256": "2ea818015e0ab3973d215a7011383bf00c4c5f81501b53f1e0fa57f3087bc6d0"
+    },
+    {
+      "path": "web/prototype/joint-viewer-model.js",
+      "sha256": "711a2d752cd565bad7db9e5ac5f4902496c7383be4eee2aef0ff707a76f99af1"
+    },
+    {
+      "path": "web/prototype/joint-viewer.css",
+      "sha256": "f9d29c143615ee21d6bc2e468f17bff507c5a719dbeee60cf4bcaac42d0dc388"
+    },
+    {
+      "path": "web/prototype/joint-viewer.js",
+      "sha256": "0dc82db7876c18f3e6699e98196d0934f8a6ad9818929f49c739c9742e133bd7"
+    },
+    {
+      "path": "web/prototype/servo-backend.js",
+      "sha256": "6ee30e09cf76343a2285a02423e5e7acab72c11c5c8a42da68d4b7045b18507d"
+    },
+    {
+      "path": "web/prototype/servo-device.css",
+      "sha256": "4b08acced10d11b7c7b44b53c43687b3f0bef11f0e8634e6cb0c169abc456cd5"
+    },
+    {
+      "path": "web/prototype/servo-device.js",
+      "sha256": "9b36d179d677c565895b188d5051116bd43d1608d2fe0e9707305d141bcfccaf"
+    },
+    {
+      "path": "web/prototype/servo-parameters.css",
+      "sha256": "b6adb960280601f4c0aee77e5b7fb01dd934de90d0dbe1b22fe472e5d3c50a05"
+    },
+    {
+      "path": "web/prototype/servo-parameters.js",
+      "sha256": "61736aed41d613ff7e118d22a5efb22b09b32c05cd210d29f75bd2026f4d69cc"
+    },
+    {
+      "path": "web/prototype/servo-profile.js",
+      "sha256": "8f181b6274c0a68f81e6ac4df7cf75b088e3466bc8416f0acc8f0ac4f46a3239"
+    },
+    {
+      "path": "web/prototype/single-joint-chart.css",
+      "sha256": "30614af89aff4ad9153070969544bfa890aef168b011dfbcc9e038786095c352"
+    },
+    {
+      "path": "web/prototype/single-joint-chart.js",
+      "sha256": "fb6693f76c4e84fd6ea3e2a4e4d8ee724c8440e676db91f01c7cdf8bbdf8c658"
+    },
+    {
+      "path": "web/tests/camera-parameters.test.cjs",
+      "sha256": "6b1eb8859cd85dec1c2a60158bb41d31b6e57dbe309bc29bfb4dab3ec0fbba24"
+    },
+    {
+      "path": "web/tests/camera-stream.test.cjs",
+      "sha256": "69bb7c65a738e2324b3fb27813b78146ba988cf5ec7c2ae94eed4f77bd7d70de"
+    },
+    {
+      "path": "web/tests/connections-panel.test.cjs",
+      "sha256": "f228ee256aded2e1996f458c3135f711fc7b69416f1ac7abd79cafbf66330ab8"
+    },
+    {
+      "path": "web/tests/console-routes.test.cjs",
+      "sha256": "94385e1f5bd8c630e5f22a85ebfe6a83a12d802d79e552a4ff7787a8cabccf10"
+    },
+    {
+      "path": "web/tests/device-session.test.cjs",
+      "sha256": "aae644b2a875a6ec28607ae627423a14e51dc5c8ac6e59980dfc466d50f5f60e"
+    },
+    {
+      "path": "web/tests/device-telemetry.test.cjs",
+      "sha256": "6a95bfff515ea82432d905a4c387a57dce357a39d890ccb9d1b214c10ed5ffe9"
+    },
+    {
+      "path": "web/tests/joint-charts.test.cjs",
+      "sha256": "a3112416cd938a8d7ffd93dd41ac2fb61b17062f5b47197dcdf68c1dd10e9c4b"
+    },
+    {
+      "path": "web/tests/joint-drafts.test.cjs",
+      "sha256": "a6f97883dfc24bc38ade1733266d2a7ccfab3ddf1c439b0322a43f8e9479e796"
+    },
+    {
+      "path": "web/tests/joint-feedback.test.cjs",
+      "sha256": "b60ee3ddde70d875523a63a140d985b4fd1206dda0fa87bb55292ff8f131e20d"
+    },
+    {
+      "path": "web/tests/joint-session.test.cjs",
+      "sha256": "a93178696819c0dc301dc4a5300a990d33cf2fcc29992a9dce48aeb7f997adc7"
+    },
+    {
+      "path": "web/tests/joint-viewer-geometry.test.cjs",
+      "sha256": "66e291ef9ad9d5bed082f58912ce10506baa4e7e6b0a4a3161ca3a727d936f94"
+    },
+    {
+      "path": "web/tests/joint-viewer-model.test.cjs",
+      "sha256": "c6c5206e5dc03f77ce95ee9a8c9448579adcdb7dc37c0cd012dcf3e6c732160e"
+    },
+    {
+      "path": "web/tests/servo-backend.test.cjs",
+      "sha256": "eb703a5d58ae53c8b4cd2325a43479955e526345346e2b618b2f427e40669f32"
+    },
+    {
+      "path": "web/tests/servo-parameters.test.cjs",
+      "sha256": "6b8234c3387c0764af8bd39b40c9aede33451f5b75220c232dac61bb04367647"
+    },
+    {
+      "path": "web/tests/servo-profile.test.cjs",
+      "sha256": "afe7b30e6dabecaa320dfb3f2ea1ce3815fbad4d37b2baf37ab9bd6cb4ce2afc"
+    },
+    {
+      "path": "deploy/radxa/feetech-calibration.json.example",
+      "sha256": "b4e6aa003e6243daf7c105ffb0c5d4f0215299c16fd85fde763cfd6482f86087"
+    },
+    {
+      "path": "deploy/radxa/hatchery.env.example",
+      "sha256": "c3a35bb9d746ddf90449a8198a20328dbed0203ec6333a488acfe33aed57db17"
+    },
+    {
+      "path": "deploy/radxa/robotd.toml.example",
+      "sha256": "aeb39d4da990a2ac5d6000e108423ded7a1f4a63c970c6f240944a29fdd0b4a1"
+    },
+    {
+      "path": "deploy/radxa/systemd/hatchery-maintenance.service",
+      "sha256": "cb85ca74e435e5f379bb9755963e00a565f2950e17a2ef5017344815c5b76670"
+    },
+    {
+      "path": "deploy/radxa/sysusers.d/robot.conf",
+      "sha256": "65cf873c4ffbae9b89e7a36eff4244e0a10d9e38623f90fccdf3dd94b5fc7528"
+    },
+    {
+      "path": "protocol/mappings/joints.json",
+      "sha256": "78ae90f166b4961d7fb2d5b4f2916631a6efa31d2edbe81c423429ea693ad748"
+    },
+    {
+      "path": "protocol/fixtures/sample-state.json",
+      "sha256": "64341bd299a3b32f9dd5d642525c5b1a51a080dc507e9e44d6fc4faf1f9f0c85"
+    }
+  ],
+  "review_exceptions": [
+    {
+      "path": "src/daemons/robotd/src/main.rs",
+      "reason": "Authorized API compatibility only: supply Health.missing, ImuState.missing and SafetyState.picked_up defaults; no servo execution logic changes."
+    },
+    {
+      "path": "src/daemons/robotd/src/services.rs",
+      "reason": "Read-only service observation: include tofd, netpadd and nfcd; no start/stop or hardware access."
+    },
+    {
+      "path": "web/tests/device-session.test.cjs",
+      "reason": "Validate observation of the three newly imported services."
+    },
+    {
+      "path": "web/tests/device-telemetry.test.cjs",
+      "reason": "Expect the three newly imported service cards."
+    },
+    {
+      "path": "web/tests/camera-stream.test.cjs",
+      "reason": "Read-only ToF subscription and media detection adapter regression tests; no servo logic or commands changed.",
+      "reviewed_sha256": "c5185909f9ed3ffc8fbd380f71bf826e13056ca4fe4d7679391c6b192b2fc001"
+    },
+    {
+      "path": "web/prototype/joint-charts.js",
+      "reason": "Requested read-only Web integration: consume shared robotd radians by semantic name; no FT ticks conversion, draft writes or device commands.",
+      "reviewed_sha256": "41d97389afdcedbfdd70516fc33a83b999af59cb16f053b570db83fd76cacc89"
+    },
+    {
+      "path": "web/prototype/joint-viewer-model.js",
+      "reason": "Separate read-only poseFromRuntime path consumes backend radians directly; original sample tick mapping and physical calibration remain unchanged.",
+      "reviewed_sha256": "cc9ed9cad19175c9ab5ef5ab08af824325e3dfaaead0112d55e8d7f47974391f"
+    },
+    {
+      "path": "web/prototype/joint-viewer.js",
+      "reason": "Requested read-only backend pose display and subscription cleanup; no FT control, actuation or calibration changes.",
+      "reviewed_sha256": "7a932c703d8aaa8c6f7d9125af46e37b4e211f52847a04b2df42c384ec7f53f4"
+    }
+  ],
+  "preserved_regions": [
+    {
+      "path": "src/libraries/robotd-params/src/lib.rs",
+      "start": "derive immediately preceding pub enum Mode",
+      "end": "derive immediately preceding pub enum ParamsError",
+      "sha256_lf": "2c19032929db2c12796f18677601b564f80a24fb093eca08a2a120fa2a265a02",
+      "reason": "Retain existing motor, policy, safety, bus, control and update-gate configuration."
+    }
+  ]
+}

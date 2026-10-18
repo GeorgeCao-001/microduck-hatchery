@@ -17,8 +17,13 @@
 //! test that walks [`Params`]'s own serialization, so a new section cannot be added without
 //! the registry (and therefore the editor) learning about it.
 
+pub mod board;
 pub mod edit;
 pub mod registry;
+pub mod serial;
+
+pub mod pad_axes;
+pub use pad_axes::{PadAxesParams, PadBodyParams, PadHeadParams, PadRollerParams};
 
 use std::path::{Path, PathBuf};
 
@@ -64,6 +69,8 @@ pub const DEFAULT_PATH: &str = "/etc/robot/robotd.toml";
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct Params {
+    /// Which electronic board this robot is built on. [`board`] says who reads it.
+    pub board: board::BoardParams,
     pub bus: Bus,
     pub control: Control,
     pub update_gate: UpdateGate,
@@ -71,8 +78,10 @@ pub struct Params {
     pub safety: SafetyParams,
     pub audio: AudioParams,
     pub theremin: ThereminParams,
+    pub pickup: PickupParams,
     pub head_imu: HeadImuParams,
     pub chorale: ChoraleParams,
+    pub idle: IdleParams,
     pub media: MediaParams,
     ///
     /// `[detect]` until 2026-09: in `robotctl configure` that read as "detect what?", one line
@@ -92,6 +101,17 @@ pub struct Params {
     pub pad_imu_head_control: PadImuHeadControlParams,
     /// How fast full stick deflection drives the robot. `padd` reads this as well.
     pub pad_drive: PadDriveParams,
+    /// Which stick drives which command, per D-pad mode. `padd` and `netpadd` read this, and
+    /// the three sections after it, through `pad-map`.
+    pub pad_axes: PadAxesParams,
+    /// Full-deflection head travel per joint.
+    pub pad_head: PadHeadParams,
+    /// Body + head mode's height and tilt ranges.
+    pub pad_body: PadBodyParams,
+    /// `[pad_drive]` on wheels.
+    pub pad_roller: PadRollerParams,
+    /// The pad over UDP: `netpadd` reads this, and so does `padd`, to know whether to stand down.
+    pub netpad: NetpadParams,
 }
 
 /// The pad's walking speed limits: what full stick deflection asks for, per axis and per
@@ -100,7 +120,7 @@ pub struct Params {
 /// Each axis has a bound per direction, signed in the robot's own frame — `vx` forward, `vy` to
 /// the left, `vyaw` counter-clockwise seen from above — so a `_min` is the bound in the negative
 /// direction and is itself negative (or zero, to forbid that direction). The stick is linear
-/// between centre and either bound. Walk mode only: roller mode keeps its own shaping.
+/// between centre and either bound. Walk mode only: on wheels it is `[pad_roller]`.
 ///
 /// This is what the *pad* asks for, not a limit on the robot. A `robot.move` from anywhere else
 /// is not bounded by it, and the policy only follows commands inside the range it was trained
@@ -123,16 +143,17 @@ pub struct PadDriveParams {
 }
 
 impl Default for PadDriveParams {
-    /// The prototype's alpha defaults, which were `padd`'s command-line defaults until they
-    /// moved here.
+    /// Started as the prototype's alpha defaults (`padd`'s old command-line defaults). Since the
+    /// v8 velstand, which tracks yaw commands, forward/back is 0.4 m/s and turning 1.0 rad/s —
+    /// what that policy follows well on the robot.
     fn default() -> Self {
         Self {
-            vx_max: 0.3,
-            vx_min: -0.3,
+            vx_max: 0.4,
+            vx_min: -0.4,
             vy_max: 0.3,
             vy_min: -0.3,
-            vyaw_max: 1.5,
-            vyaw_min: -1.5,
+            vyaw_max: 1.0,
+            vyaw_min: -1.0,
         }
     }
 }
@@ -158,21 +179,59 @@ impl PadDriveParams {
     }
 }
 
+/// A gamepad over UDP, from a program on the LAN — `netpadd`. `docs/robot/udp-pad.md` owns it.
+///
+/// `enabled` is the switch between the two pad daemons, not a feature flag on one: both units ask
+/// it in `ExecCondition=`, so exactly one of `padd` and `netpadd` runs, and an update's restart of
+/// every shipped unit reaches the same answer as a boot does.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct NetpadParams {
+    /// UDP is the pad source; `padd` stands down.
+    pub enabled: bool,
+    /// The UDP port, bound on IPv4 0.0.0.0.
+    pub port: u16,
+    /// At most this many intent frames a second reach robotd. A change is sent at once when the
+    /// last send is at least one interval old, otherwise at the next slot — never queued.
+    pub max_hz: u32,
+    /// Nothing new for this long and the robot is stopped where it stands, the client kept: a blip
+    /// on Wi-Fi costs a stop, not the session. Also how late a datagram may be delivered and still
+    /// drive. Below `[safety] deadman_ms`, or a stalled client's last stick would keep the deadman
+    /// fed.
+    pub stale_ms: u64,
+    /// Silence after which the client counts as gone: the lock released, holds reset, and a second
+    /// later the robot sits.
+    pub timeout_ms: u64,
+}
+
+impl Default for NetpadParams {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            port: 4210,
+            max_hz: 30,
+            stale_ms: 300,
+            timeout_ms: 1000,
+        }
+    }
+}
+
 /// Controller-IMU head control: pose the head by tilting the pad.
 ///
 /// Some pads carry an inertial unit — the "Pro Controller" Switch clones do; an Xbox pad does not.
-/// With this on and such a pad connected, **Y** stops meaning "the sticks pose the head" and
-/// means "the pad's tilt poses the head": the sticks keep driving, and turning the pad in your
-/// hands turns the robot's head. Press Y again and the head holds where it is, still driving.
-/// Press it a third time and the pad drives the head again **from where the pad is now** — the
-/// pad's yaw comes from a gyro and drifts, and re-centring on every re-entry is how a person
-/// beats the drift without a magnetometer.
+/// With this on and such a pad connected, head + move mode (**D-pad right**) stops meaning "the
+/// right stick poses the head" and means "the pad's tilt poses the head": the sticks keep the
+/// whole drive mapping, and turning the pad in your hands turns the robot's head. Press D-pad
+/// right again and the pad drives the head **from where the pad is now** — the pad's yaw comes
+/// from a gyro and drifts, and re-centring on every press is how a person beats the drift
+/// without a magnetometer.
 ///
-/// Off, or on a pad with no IMU, Y is what it always was. Nothing else about the pad changes.
+/// Off, or on a pad with no IMU, the right stick poses the head in that mode. Nothing else about
+/// the pad changes.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct PadImuHeadControlParams {
-    /// Whether Y engages IMU head control on a pad that has an IMU.
+    /// Whether head + move mode follows the pad's IMU on a pad that has one.
     pub enabled: bool,
     /// Head radians per pad radian. One is "the head turns as far as the pad did"; more makes a
     /// small wrist movement a large head movement. The head's own travel limit still applies.
@@ -190,16 +249,16 @@ impl Default for PadImuHeadControlParams {
 
 /// Which pad button runs which skill.
 ///
-/// **The five one-shot buttons, and only those.** `Start` toggles the policy, `Y` and `B` switch
-/// what the sticks mean, held `Select` powers the robot off and held `D-pad up` changes drive
-/// mode — none of those is a `robot.do`, and turning them into a general button-to-action
-/// vocabulary is a larger thing than binding a skill needs. It would also put "the button that
-/// stops the robot" behind a config key, which is the one binding worth not being able to lose.
+/// **The six one-shot buttons, and only those:** the four face buttons and the two bumpers.
+/// `Start` stands the robot up and toggles the policy, the D-pad picks what the sticks mean, and
+/// held `Select` cuts torque and then powers the robot off — none of those is a `robot.do`, and
+/// turning them into a general button-to-action vocabulary is a larger thing than binding a skill
+/// needs. It would also put "the button that stops the robot" behind a config key, which is the
+/// one binding worth not being able to lose.
 ///
-/// Empty means the mapping the prototype had and muscle memory expects. A named button is
-/// rebound; the rest stay as they were. The pad is full — every face button already does
-/// something — so binding a new skill nearly always means taking a button from an old one, which
-/// is why every one of the five is nameable rather than only the free ones.
+/// The defaults keep the pad sparse on purpose: A sits or stands, B picks up, and X, Y and the
+/// bumpers do nothing until somebody puts a skill there (the kicks are still in the set, unbound). A named button is rebound; the rest
+/// stay as they were.
 ///
 /// A name here is not checked against anything at parse time: which skills exist is a property of
 /// the robot, and `padd` learns it from `robot.subscribe`. An unknown name is refused by `robotd`
@@ -207,43 +266,48 @@ impl Default for PadImuHeadControlParams {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct PadParams {
-    /// A (South). The ground pick, by default.
+    /// A (South). Sit ↔ stand, by default.
     pub a: String,
-    /// B (East) is body-pose mode and is not bindable; X (West) is the roulade.
+    /// B (East). The ground pick, by default.
+    pub b: String,
+    /// X (West). Free by default. Held, it is re-sent every tick, so a chaining skill such as
+    /// the roulade keeps going for as long as it is held.
     pub x: String,
+    /// Y (North). Free by default.
+    pub y: String,
     /// The left bumper — `LeftTrigger` in gilrs, which names the *analog* trigger
     /// `LeftTrigger2`. Getting that backwards binds a skill to a control nobody presses.
     pub lb: String,
     /// The right bumper, likewise.
     pub rb: String,
-    /// D-pad down. The sit toggle, by default.
-    pub dpad_down: String,
 }
 
 impl Default for PadParams {
     fn default() -> Self {
         Self {
-            a: "ground_pick".to_owned(),
-            x: "roulade".to_owned(),
-            lb: "kick_left".to_owned(),
-            rb: "kick_right".to_owned(),
-            dpad_down: "sit_toggle".to_owned(),
+            a: "sit_toggle".to_owned(),
+            b: "ground_pick".to_owned(),
+            x: String::new(),
+            y: String::new(),
+            lb: String::new(),
+            rb: String::new(),
         }
     }
 }
 
 impl PadParams {
     /// The bindable buttons, in the order a listing should print them.
-    pub const BUTTONS: [&'static str; 5] = ["a", "x", "lb", "rb", "dpad_down"];
+    pub const BUTTONS: [&'static str; 6] = ["a", "b", "x", "y", "lb", "rb"];
 
     /// What a button runs, or `None` for a name this build has no button for.
     pub fn skill(&self, button: &str) -> Option<&str> {
         Some(match button {
             "a" => &self.a,
+            "b" => &self.b,
             "x" => &self.x,
+            "y" => &self.y,
             "lb" => &self.lb,
             "rb" => &self.rb,
-            "dpad_down" => &self.dpad_down,
             _ => return None,
         })
     }
@@ -252,10 +316,11 @@ impl PadParams {
     pub fn bind(&mut self, button: &str, skill: &str) -> bool {
         let slot = match button {
             "a" => &mut self.a,
+            "b" => &mut self.b,
             "x" => &mut self.x,
+            "y" => &mut self.y,
             "lb" => &mut self.lb,
             "rb" => &mut self.rb,
-            "dpad_down" => &mut self.dpad_down,
             _ => return false,
         };
         *slot = skill.to_owned();
@@ -458,6 +523,79 @@ impl MediaSource {
     }
 }
 
+/// A head camera sensor this project builds robots with — the substring its driver puts in the
+/// media graph's entity name (`m00_b_gc2093 2-0037`).
+///
+/// Which one a robot has is its board's ([`board::Board::camera_sensor`]), unless `[media] sensor`
+/// forces another. `mediad` keeps one profile per variant, matched exhaustively, so a sensor added
+/// here does not build until it has one.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum CameraSensor {
+    /// Sony's, on the Zero 3W robots.
+    Imx219,
+    /// GalaxyCore's, on the beta board.
+    Gc2093,
+}
+
+impl CameraSensor {
+    /// The name this sensor has in the file and in the media graph.
+    pub fn label(self) -> &'static str {
+        match self {
+            CameraSensor::Imx219 => "imx219",
+            CameraSensor::Gc2093 => "gc2093",
+        }
+    }
+}
+
+/// Which sensor the head camera must be: the board's, or one forced by name.
+///
+/// **`board` is the default and the normal case.** A camera and its board go together, so a
+/// robot whose media graph holds another sensor is refused — that is a robot assembled with the
+/// wrong module, or one declaring the wrong board. Naming a sensor here is for the exception: a
+/// board fitted with another camera on purpose, on a bench.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum MediaSensor {
+    #[default]
+    Board,
+    Imx219,
+    Gc2093,
+}
+
+/// Every choice, in the order an editor cycles them — and the strings the file uses.
+/// [`tests::every_media_sensor_label_round_trips`] pins it to the enum in both directions.
+pub const MEDIA_SENSOR_LABELS: &[&str] = &["board", "imx219", "gc2093"];
+
+impl MediaSensor {
+    /// The choices, in [`MEDIA_SENSOR_LABELS`] order.
+    pub const ALL: [MediaSensor; 3] =
+        [MediaSensor::Board, MediaSensor::Imx219, MediaSensor::Gc2093];
+
+    /// The name this choice has in the file.
+    pub fn label(self) -> &'static str {
+        match self {
+            MediaSensor::Board => "board",
+            MediaSensor::Imx219 => "imx219",
+            MediaSensor::Gc2093 => "gc2093",
+        }
+    }
+
+    /// The sensor a forced choice names, or `None` for `board`.
+    pub fn forced(self) -> Option<CameraSensor> {
+        match self {
+            MediaSensor::Board => None,
+            MediaSensor::Imx219 => Some(CameraSensor::Imx219),
+            MediaSensor::Gc2093 => Some(CameraSensor::Gc2093),
+        }
+    }
+
+    /// The sensor the head camera must be on `board`.
+    pub fn resolve(self, board: board::Board) -> CameraSensor {
+        self.forced().unwrap_or_else(|| board.camera_sensor())
+    }
+}
+
 /// What a test pattern runs at, whatever `[media] quality` says — width, height, frames a second.
 ///
 /// **A test pattern is not video anybody watches.** It exists so a board with no camera still has
@@ -517,6 +655,9 @@ pub struct MediaParams {
     /// [`CameraIntrinsics`].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub intrinsics: Option<CameraIntrinsics>,
+    /// Which sensor the head camera must be. `board`, the default, is the declared board's — see
+    /// [`MediaSensor`] for why anything else is the exception.
+    pub sensor: MediaSensor,
 }
 
 /// A camera calibration, as OpenCV's `calibrateCamera` produces one.
@@ -593,6 +734,8 @@ impl Default for MediaParams {
             // to is a fact about a plugin we ship from a pinned release, and the day it changes
             // should not be the day every robot's send rate changes with it.
             congestion_control: CongestionControl::default(),
+            // The board's camera: a sensor named here is a deliberate exception.
+            sensor: MediaSensor::Board,
         }
     }
 }
@@ -713,6 +856,197 @@ pub struct ChoraleParams {
     pub accept: bool,
 }
 
+/// `[idle]` — the robot looking around while nothing is happening (`robotd/src/idle_head.rs`).
+///
+/// After `after_s` with no motion asked for and nobody steering the head, it glances somewhere,
+/// holds the look while shifting its gaze a little around it, and picks somewhere new; a slow
+/// drift and a breath ride on top, and the longer it is left alone the calmer it gets. Every
+/// number here is a tuning knob for how alive that reads, nothing more: none of them can move
+/// the head further than `glance_yaw` + `nudge_yaw` + `drift` from where it was asked to be, or
+/// pitch it further than `yawn_pitch` beyond that.
+///
+/// Angles are radians, durations seconds. Read once at startup.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct IdleParams {
+    /// Master switch.
+    pub enabled: bool,
+    /// Still for this long before it starts.
+    pub after_s: f64,
+    /// How long it takes to fade in, and out.
+    pub fade_s: f64,
+    /// How far a glance turns the head left or right at most.
+    pub glance_yaw: f64,
+    /// How far a glance tips it up or down at most.
+    pub glance_pitch: f64,
+    /// How far a glance leans the neck forward or back at most — posture under the look, so
+    /// the whole head shifts rather than only the face turning.
+    pub glance_neck: f64,
+    /// How far a look opens the beak at most, 0..1 — eased with the glance, so the mouth moves
+    /// a little as the robot looks about; each look opens it between half and all of this.
+    /// Below about 0.15 it does not visibly open: closed is held a few degrees past shut.
+    /// Zero keeps it shut but for the yawns.
+    pub glance_mouth: f64,
+    /// The curious sideways tilt a glance sometimes comes with.
+    pub tilt_roll: f64,
+    /// How often a glance comes with the tilt, 0..1.
+    pub tilt_chance: f64,
+    /// How often a glance goes back to the middle rather than somewhere new, 0..1.
+    pub centre_chance: f64,
+    /// How far a new look is from the last one at least, yaw and pitch together — so a glance
+    /// never lands where the head already is and reads as dithering.
+    pub glance_min: f64,
+    /// How long one look lasts before it picks somewhere new, at full energy; dozing stretches
+    /// it.
+    pub hold_min_s: f64,
+    pub hold_max_s: f64,
+    /// How long a move takes: this much, plus `move_s_per_rad` for every radian it travels.
+    pub move_min_s: f64,
+    pub move_s_per_rad: f64,
+    /// While holding a look, the gaze shifts this far around it, yaw and pitch — the small
+    /// re-fixations that keep a held look from reading as frozen. Zero turns them off.
+    pub nudge_yaw: f64,
+    pub nudge_pitch: f64,
+    /// How long between those shifts.
+    pub nudge_every_min_s: f64,
+    pub nudge_every_max_s: f64,
+    /// The slow drift on every head axis, radians, and its frequency in Hz.
+    pub drift: f64,
+    pub drift_hz: f64,
+    /// The breath: metres of body height, and seconds per breath. Standing network only.
+    pub breath_m: f64,
+    pub breath_period_s: f64,
+    /// Dozing: seconds until it is mostly calmed down, and how calm it gets, 0..1 — 1 never
+    /// dozes.
+    pub doze_tau_s: f64,
+    pub doze_floor: f64,
+    /// Yawning, once it has been idle `yawn_after_s`: about every `yawn_every_s` (0 never), for
+    /// `yawn_s`, the mouth opens to `yawn_open` (0..1) and the head tips by `yawn_pitch`.
+    /// `yawn_pitch` is signed; negative is up, as far as `robot.look` says.
+    pub yawn_after_s: f64,
+    pub yawn_every_s: f64,
+    pub yawn_s: f64,
+    pub yawn_open: f64,
+    pub yawn_pitch: f64,
+}
+
+impl Default for IdleParams {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            after_s: 2.0,
+            fade_s: 1.5,
+            glance_yaw: 0.6,
+            glance_pitch: 0.2,
+            glance_neck: 0.15,
+            glance_mouth: 0.4,
+            tilt_roll: 0.3,
+            tilt_chance: 0.25,
+            centre_chance: 0.25,
+            glance_min: 0.2,
+            hold_min_s: 1.0,
+            hold_max_s: 3.0,
+            move_min_s: 0.3,
+            move_s_per_rad: 1.0,
+            nudge_yaw: 0.08,
+            nudge_pitch: 0.05,
+            nudge_every_min_s: 0.4,
+            nudge_every_max_s: 1.2,
+            drift: 0.04,
+            drift_hz: 0.15,
+            breath_m: 0.001,
+            breath_period_s: 3.6,
+            doze_tau_s: 90.0,
+            doze_floor: 0.5,
+            yawn_after_s: 45.0,
+            yawn_every_s: 90.0,
+            yawn_s: 3.0,
+            yawn_open: 0.6,
+            yawn_pitch: -0.15,
+        }
+    }
+}
+
+impl IdleParams {
+    /// What is wrong with these values, if anything, as (key, reason).
+    fn invalid(&self) -> Option<(&'static str, &'static str)> {
+        let finite = [
+            ("after_s", self.after_s),
+            ("fade_s", self.fade_s),
+            ("glance_yaw", self.glance_yaw),
+            ("glance_pitch", self.glance_pitch),
+            ("glance_neck", self.glance_neck),
+            ("glance_mouth", self.glance_mouth),
+            ("tilt_roll", self.tilt_roll),
+            ("tilt_chance", self.tilt_chance),
+            ("centre_chance", self.centre_chance),
+            ("glance_min", self.glance_min),
+            ("hold_min_s", self.hold_min_s),
+            ("hold_max_s", self.hold_max_s),
+            ("move_min_s", self.move_min_s),
+            ("move_s_per_rad", self.move_s_per_rad),
+            ("nudge_yaw", self.nudge_yaw),
+            ("nudge_pitch", self.nudge_pitch),
+            ("nudge_every_min_s", self.nudge_every_min_s),
+            ("nudge_every_max_s", self.nudge_every_max_s),
+            ("drift", self.drift),
+            ("drift_hz", self.drift_hz),
+            ("breath_m", self.breath_m),
+            ("breath_period_s", self.breath_period_s),
+            ("doze_tau_s", self.doze_tau_s),
+            ("doze_floor", self.doze_floor),
+            ("yawn_after_s", self.yawn_after_s),
+            ("yawn_every_s", self.yawn_every_s),
+            ("yawn_s", self.yawn_s),
+            ("yawn_open", self.yawn_open),
+        ];
+        if let Some((key, _)) = finite.iter().find(|(_, v)| !(v.is_finite() && *v >= 0.0)) {
+            return Some((key, "must be finite and nonnegative"));
+        }
+        if !self.yawn_pitch.is_finite() {
+            return Some(("yawn_pitch", "must be finite"));
+        }
+        // Each of these is divided by, or is what keeps a tick's motion from being a jump.
+        for (key, value) in [
+            ("fade_s", self.fade_s),
+            ("move_min_s", self.move_min_s),
+            ("breath_period_s", self.breath_period_s),
+            ("doze_tau_s", self.doze_tau_s),
+            ("doze_floor", self.doze_floor),
+            ("yawn_s", self.yawn_s),
+        ] {
+            if value == 0.0 {
+                return Some((key, "must be above zero"));
+            }
+        }
+        if self.tilt_chance > 1.0 {
+            return Some(("tilt_chance", "is a probability, 0 to 1"));
+        }
+        if self.centre_chance > 1.0 {
+            return Some(("centre_chance", "is a probability, 0 to 1"));
+        }
+        if self.doze_floor > 1.0 {
+            return Some(("doze_floor", "must be at most 1 — 1 never dozes"));
+        }
+        if self.glance_mouth > 1.0 {
+            return Some(("glance_mouth", "is a mouth opening, 0 to 1"));
+        }
+        if self.yawn_open > 1.0 {
+            return Some(("yawn_open", "is a mouth opening, 0 to 1"));
+        }
+        if self.hold_min_s > self.hold_max_s {
+            return Some(("hold_min_s", "must not be above idle.hold_max_s"));
+        }
+        if self.nudge_every_min_s > self.nudge_every_max_s {
+            return Some((
+                "nudge_every_min_s",
+                "must not be above idle.nudge_every_max_s",
+            ));
+        }
+        None
+    }
+}
+
 /// `[theremin]` — the ToF theremin: what counts as a hand, and where the depth frames come
 /// from.
 ///
@@ -761,6 +1095,50 @@ impl Default for ThereminParams {
     }
 }
 
+/// `[pickup]`: pause the policy while somebody holds the robot, resume when it is put down.
+///
+/// A classifier over the last second of what the loop already reads (`duck_control::pickup`,
+/// `docs/design/robotd-design.md` §2.4.2). **On by default** since the v2 model held up on the
+/// robot in every way it was handled (lifted by the body or the head, turned upside down, spun).
+/// Turned off, nothing is loaded and nothing runs — the loop is exactly what it was.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct PickupParams {
+    /// Master switch.
+    pub enabled: bool,
+    /// The classifier. Absent means the release's copy; the literal `"none"` disables it.
+    pub model: Option<PathBuf>,
+    /// Pause once p(held) has stayed above this for 100 ms.
+    pub pause_threshold: f32,
+    /// Resume once p(held) has stayed below this for 80 ms (and the pause is 300 ms old).
+    /// Higher resumes sooner after a put-down — which is what keeps a paused robot, holding a
+    /// fixed pose, from tipping before the policy has it back — at the price of more false
+    /// resumes in the hand.
+    pub resume_threshold: f32,
+}
+
+impl Default for PickupParams {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            model: None,
+            pause_threshold: 0.8,
+            resume_threshold: 0.35,
+        }
+    }
+}
+
+impl PickupParams {
+    /// The classifier path, or `None` when disabled with the `"none"` sentinel.
+    pub fn model_resolved(&self) -> Option<PathBuf> {
+        match &self.model {
+            Some(p) if is_none_sentinel(p) => None,
+            Some(p) => Some(p.clone()),
+            None => Some(PathBuf::from(RELEASE_DIR).join("models/pickup_detector.onnx")),
+        }
+    }
+}
+
 impl ThereminParams {
     /// The hand-detection config these params describe.
     pub fn hand(&self) -> kinematics::hand::Config {
@@ -774,25 +1152,75 @@ impl ThereminParams {
     }
 }
 
-/// `[head_imu]` — the BMI088 on the head module, read by `tofd` and served as
-/// `head_imu.stream`.
+/// `[head_imu]` — the IMU in the robot's head, served as `head_imu.stream`. Which chip, and
+/// which daemon reads it, is the board's:
 ///
-/// **One switch, and it is off.** Reading this chip at 100 Hz costs ~3.5–4.5% of a core on an
-/// RK3566, and a bench that isolates the parts says none of it is fixable in the loop: being
-/// woken a hundred times a second is 0.7 points of it, the Madgwick fusion 0.3, and the rest is
-/// the two I²C transactions a sample takes. Fewer bytes is not on offer — a gyro and an
-/// accelerometer sample *is* twelve bytes — so what is left is not reading it, which is this
-/// key, or reading it less often, which is `tofd --imu-hz`.
-///
-/// It stays off until something subscribes to the stream, because for now nothing does: it was
-/// added for the mapping work, and a duck that is not mapping was paying for it from boot.
-/// `docs/project/tof-on-demand.md` is the measurement and the reasoning.
+/// - **`zero3`**: the BMI088 on the HAT, read by `tofd` (it shares the HAT's I²C bus with the
+///   ToF) with a Madgwick fusion on the CPU. Reading it at 100 Hz costs ~3.5–4.5% of a core on
+///   an RK3566, and a bench that isolates the parts says none of it is fixable in the loop:
+///   being woken a hundred times a second is 0.7 points of it, the fusion 0.3, and the rest is
+///   the two I²C transactions a sample takes. So it is **off** unless asked for —
+///   `docs/project/tof-on-demand.md` is the measurement and the reasoning.
+/// - **`beta`**: an LSM6DSV16X on the face board's own bus, read by `robotd`. The chip fuses
+///   orientation itself (SFLP) and batches gyro, accelerometer and quaternion into its FIFO,
+///   so a burst of several samples is one transaction and there is no fusion on the CPU. That
+///   removes what made the BMI088 expensive, so it is **on** unless switched off.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct HeadImuParams {
-    /// Read the head IMU at all. `false` — and derived rather than written out, so the default
-    /// cannot be changed by editing one word. `tofd --imu` overrides it for a session.
-    pub enabled: bool,
+    /// Read the head IMU at all. Absent means the board's default ([`Self::enabled_on`]):
+    /// off on `zero3`, on on `beta`. `tofd --imu` overrides it for a session on `zero3`.
+    pub enabled: Option<bool>,
+}
+
+impl HeadImuParams {
+    /// Whether the head IMU is read on `board`: the file's word if it has one, otherwise the
+    /// board's default — off for the BMI088 a `zero3` reads on the CPU, on for the `beta`'s
+    /// self-fusing LSM6DSV16X.
+    pub fn enabled_on(&self, board: board::Board) -> bool {
+        self.enabled.unwrap_or(match board {
+            board::Board::Zero3 => false,
+            board::Board::Beta => true,
+        })
+    }
+
+    /// The daemon that reads the head IMU on `board`, and so the one to restart when this
+    /// section changes.
+    pub fn reader(board: board::Board) -> &'static str {
+        match board {
+            board::Board::Zero3 => "tofd",
+            board::Board::Beta => "robotd",
+        }
+    }
+}
+
+#[cfg(test)]
+mod head_imu_tests {
+    use super::*;
+    use board::Board;
+
+    /// Off on `zero3`, where reading the BMI088 costs ~4% of a core on the CPU; on on `beta`,
+    /// where the chip fuses and batches itself. An explicit word in the file wins on both.
+    #[test]
+    fn the_default_is_the_boards_and_the_file_wins() {
+        let unset = HeadImuParams::default();
+        assert!(!unset.enabled_on(Board::Zero3));
+        assert!(unset.enabled_on(Board::Beta));
+        let off = HeadImuParams {
+            enabled: Some(false),
+        };
+        assert!(!off.enabled_on(Board::Beta));
+        let on = HeadImuParams {
+            enabled: Some(true),
+        };
+        assert!(on.enabled_on(Board::Zero3));
+    }
+
+    #[test]
+    fn each_board_names_the_daemon_that_reads_it() {
+        assert_eq!(HeadImuParams::reader(Board::Zero3), "tofd");
+        assert_eq!(HeadImuParams::reader(Board::Beta), "robotd");
+    }
 }
 
 /// `[audio]` — the voice and the microphone. All optional equipment: a robot without a
@@ -803,7 +1231,8 @@ pub struct HeadImuParams {
 pub struct AudioParams {
     /// Master switch: no sounds, no mic worker.
     pub enabled: bool,
-    /// ALSA playback device — the TLV320AIC3104 codec.
+    /// ALSA playback device — the TLV320AIC3104 codec. When it names a card this board does
+    /// not have, [`AudioParams::resolve_devices`] falls back to ALSA's `default`.
     pub device: String,
     /// Where the per-robot voice bank lives. The release's postinstall renders it there
     /// (`sounds ensure-bank`), seeded from the SoC serial.
@@ -859,6 +1288,34 @@ impl AudioParams {
             self.device.clone()
         } else {
             format!("{},0", self.device)
+        }
+    }
+
+    /// The playback and capture devices to use on a board whose ALSA cards are `cards` (the
+    /// ids in `/proc/asound/cards`, see [`alsa_card_ids`]).
+    ///
+    /// The configured device, unless it names a card that is not there — then ALSA's
+    /// `default` for both. The default device names the Zero 3W's HAT codec (`aic3104`), and a
+    /// board without it used to be silent and deaf with nothing in the journal above debug,
+    /// even when it has a perfectly good codec of its own. With the fallback, a board routes
+    /// `default` through its own ALSA configuration — the beta board's image points it at its
+    /// RK809 for playback and its face-board microphone for capture, two different cards,
+    /// which is why capture falls back to `default` too rather than to `default,0`.
+    ///
+    /// A device that names no card (`default`, a PCM from an asound.conf, a numeric card) is
+    /// used as written: there is nothing to check it against.
+    pub fn resolve_devices(&self, cards: &[String]) -> ResolvedAudio {
+        match named_card(&self.device) {
+            Some(card) if !cards.iter().any(|c| c == card) => ResolvedAudio {
+                playback: "default".to_owned(),
+                capture: "default".to_owned(),
+                missing_card: Some(card.to_owned()),
+            },
+            _ => ResolvedAudio {
+                playback: self.device.clone(),
+                capture: self.capture_device(),
+                missing_card: None,
+            },
         }
     }
 
@@ -1997,6 +2454,12 @@ pub enum ParamsError {
     },
     #[error("{path}: control.hz must be between 1 and 1000, got {got}")]
     Rate { path: String, got: u32 },
+    #[error("{path}: invalid controller setting {key}: {reason}")]
+    PadSetting {
+        path: String,
+        key: String,
+        reason: &'static str,
+    },
     #[error(
         "{path}: media.bitrate must be between {min} and {max} bits per second, got {got} — \
          the unit is bits, so 2 Mb/s is 2000000"
@@ -2007,6 +2470,8 @@ pub enum ParamsError {
         min: u32,
         max: u32,
     },
+    #[error("{path}: {reason}")]
+    Netpad { path: String, reason: String },
     #[error(
         "{path}: pad_drive.{axis}_min must be zero or negative and pad_drive.{axis}_max zero or \
          positive, got {min} and {max} — the bounds are signed, so full stick back at 0.2 m/s is \
@@ -2017,6 +2482,21 @@ pub enum ParamsError {
         axis: &'static str,
         min: f64,
         max: f64,
+    },
+    #[error("{path}: idle.{key} {reason}")]
+    Idle {
+        path: String,
+        key: &'static str,
+        reason: &'static str,
+    },
+    #[error(
+        "{path}: pickup.resume_threshold ({resume}) must be below pickup.pause_threshold \
+         ({pause}), and both between 0 and 1 — they are a hysteresis band on a probability"
+    )]
+    Pickup {
+        path: String,
+        pause: f32,
+        resume: f32,
     },
 }
 
@@ -2120,12 +2600,132 @@ impl Params {
                 });
             }
         }
+        if let Some((key, reason)) = self.idle.invalid() {
+            return Err(ParamsError::Idle {
+                path: path.display().to_string(),
+                key,
+                reason,
+            });
+        }
+        // Refused rather than clamped, like `control.hz`: the editor should say which value it
+        // was not going to guess at. The floor is 10 because netpadd's 100 ms fallback tick must
+        // not be faster than the cap, and below a few Hz a held stick would outrun robotd's deadman.
+        if !(10..=100).contains(&self.netpad.max_hz) {
+            return Err(ParamsError::Netpad {
+                path: path.display().to_string(),
+                reason: format!("netpad.max_hz ({}) must be 10–100", self.netpad.max_hz),
+            });
+        }
+        // Gated on `enabled` because robotd loads this file too: a board not using netpad must
+        // never fail to load over a section it does not read.
+        if self.netpad.enabled {
+            let n = &self.netpad;
+            let reason = if n.stale_ms == 0 || n.stale_ms >= self.safety.deadman_ms {
+                Some(format!(
+                    "netpad.stale_ms ({}) must be above 0 and below safety.deadman_ms ({}) — \
+                     past the deadman it would keep a stalled client's last stick going",
+                    n.stale_ms, self.safety.deadman_ms
+                ))
+            } else if n.timeout_ms < n.stale_ms {
+                Some(format!(
+                    "netpad.timeout_ms ({}) must be at least netpad.stale_ms ({}) — the client is \
+                     stopped before it counts as gone",
+                    n.timeout_ms, n.stale_ms
+                ))
+            } else {
+                None
+            };
+            if let Some(reason) = reason {
+                return Err(ParamsError::Netpad {
+                    path: path.display().to_string(),
+                    reason,
+                });
+            }
+        }
+        let invalid = |key: &str, reason| ParamsError::PadSetting {
+            path: path.display().to_string(),
+            key: key.to_owned(),
+            reason,
+        };
+        if !(self.pad_axes.deadzone.is_finite() && (0.0..1.0).contains(&self.pad_axes.deadzone)) {
+            return Err(invalid("pad_axes.deadzone", "must be finite and in [0, 1)"));
+        }
+        for (key, binding) in self.pad_axes.bindings() {
+            if !(binding.gain.is_finite() && binding.gain >= 0.0) {
+                return Err(invalid(
+                    &format!("{key}.gain"),
+                    "must be finite and nonnegative",
+                ));
+            }
+        }
+        for (key, value) in [
+            ("pad_head.neck_pitch_max", self.pad_head.neck_pitch_max),
+            ("pad_head.head_pitch_max", self.pad_head.head_pitch_max),
+            ("pad_head.head_yaw_max", self.pad_head.head_yaw_max),
+            ("pad_head.head_roll_max", self.pad_head.head_roll_max),
+            ("pad_body.pitch_max", self.pad_body.pitch_max),
+            ("pad_body.roll_max", self.pad_body.roll_max),
+        ] {
+            if !(value.is_finite() && value >= 0.0) {
+                return Err(invalid(key, "must be finite and nonnegative"));
+            }
+        }
+        for (key, min, max) in std::iter::once((
+            "pad_body.z".to_owned(),
+            self.pad_body.z_min,
+            self.pad_body.z_max,
+        ))
+        .chain(
+            self.pad_roller
+                .limits()
+                .axes()
+                .into_iter()
+                .map(|(axis, min, max)| (format!("pad_roller.{axis}"), min, max)),
+        ) {
+            if !(min.is_finite() && max.is_finite() && min <= 0.0 && max >= 0.0) {
+                return Err(invalid(
+                    &key,
+                    "min must be finite and nonpositive; max finite and nonnegative",
+                ));
+            }
+        }
+        // An inverted band would pause and resume on the same probability, every tick.
+        let (pause, resume) = (self.pickup.pause_threshold, self.pickup.resume_threshold);
+        if !(0.0 < resume && resume < pause && pause < 1.0) {
+            return Err(ParamsError::Pickup {
+                path: path.display().to_string(),
+                pause,
+                resume,
+            });
+        }
         Ok(())
     }
 
     pub fn period(&self) -> std::time::Duration {
         std::time::Duration::from_secs_f64(1.0 / self.control.hz as f64)
     }
+}
+
+/// Drops every key under `prefix` the registry does not know, recursing into tables that hold
+/// registry keys — `[pad_axes.drive.vyaw]` is three levels down — and naming each one dropped.
+fn prune_fields(prefix: &str, fields: &mut toml::Table, ignored: &mut Vec<String>) {
+    fields.retain(|key, value| {
+        let path = format!("{prefix}.{key}");
+        if registry::entry_for(&path).is_some() {
+            return true;
+        }
+        if registry::REGISTRY
+            .iter()
+            .any(|entry| entry.key.starts_with(&format!("{path}.")))
+        {
+            if let Some(children) = value.as_table_mut() {
+                prune_fields(&path, children, ignored);
+            }
+            return true;
+        }
+        ignored.push(path);
+        false
+    });
 }
 
 /// Re-parse a file that `deny_unknown_fields` rejected, dropping the keys this build has no
@@ -2174,14 +2774,7 @@ fn without_unknown_keys(text: &str) -> Option<(Result<Params, toml::de::Error>, 
             ignored.push(format!("[{section}]"));
             return false;
         }
-        fields.retain(|key, _| {
-            if registry::entry_for(&format!("{section}.{key}")).is_some() {
-                true
-            } else {
-                ignored.push(format!("{section}.{key}"));
-                false
-            }
-        });
+        prune_fields(section, fields, &mut ignored);
         true
     });
 
@@ -2192,6 +2785,49 @@ fn without_unknown_keys(text: &str) -> Option<(Result<Params, toml::de::Error>, 
     }
     ignored.sort();
     Some((toml::Value::Table(table).try_into::<Params>(), ignored))
+}
+
+/// What [`AudioParams::resolve_devices`] decided.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ResolvedAudio {
+    pub playback: String,
+    pub capture: String,
+    /// The card the configured device named and this board lacks, when the fallback was taken.
+    pub missing_card: Option<String>,
+}
+
+/// The card id an ALSA device string names, when it names one by id: `plughw:aic3104`,
+/// `hw:aic3104,0`, `plughw:CARD=aic3104,DEV=0`. `None` for anything else.
+fn named_card(device: &str) -> Option<&str> {
+    let (plugin, args) = device.split_once(':')?;
+    if plugin != "hw" && plugin != "plughw" {
+        return None;
+    }
+    let first = args.split(',').next()?;
+    let card = first.strip_prefix("CARD=").unwrap_or(first);
+    // A numeric card is an index, not an id: nothing to match against /proc/asound/cards.
+    (!card.is_empty() && !card.bytes().all(|b| b.is_ascii_digit())).then_some(card)
+}
+
+/// The card ids in the text of `/proc/asound/cards`, whose card lines read
+/// ` 0 [rockchiprk809  ]: simple-card - rockchip-rk809` (each followed by a description line).
+pub fn alsa_card_ids(proc_asound_cards: &str) -> Vec<String> {
+    proc_asound_cards
+        .lines()
+        .filter_map(|line| {
+            let (index, rest) = line.trim_start().split_once(' ')?;
+            if index.is_empty() || !index.bytes().all(|b| b.is_ascii_digit()) {
+                return None;
+            }
+            let id = rest
+                .trim_start()
+                .strip_prefix('[')?
+                .split(']')
+                .next()?
+                .trim();
+            (!id.is_empty()).then(|| id.to_owned())
+        })
+        .collect()
 }
 
 #[cfg(test)]
@@ -2217,6 +2853,45 @@ mod tests {
                 crate::registry::Kind::OptionalPath,
                 "{key} must be a path slot"
             );
+        }
+    }
+
+    /// A partial binding keeps the rest of its mode's default, an unknown nested key is dropped
+    /// rather than taking the bindings with it, and every out-of-range value is refused.
+    #[test]
+    fn controller_partial_overrides_and_invalid_values() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("robotd.toml");
+        std::fs::write(&path, "[pad_axes.drive.vyaw]\ngain = 0.5\n").unwrap();
+        let params = Params::load(&path, true).unwrap();
+        assert_eq!(params.pad_axes.drive.vyaw.gain, 0.5);
+        assert!(params.pad_axes.drive.vyaw.invert);
+        assert_eq!(
+            params.pad_axes.drive.vyaw.source,
+            pad_axes::AxisSource::RightX
+        );
+        // An unrelated future setting must not erase the recognized nested bindings.
+        std::fs::write(
+            &path,
+            "[pad_axes.drive.vyaw]\ngain = 0.5\nfuture_setting = true\n",
+        )
+        .unwrap();
+        assert_eq!(
+            Params::load(&path, true).unwrap().pad_axes.drive.vyaw.gain,
+            0.5
+        );
+        for text in [
+            "[pad_axes]\ndeadzone = 1.0",
+            "[pad_axes]\ndeadzone = nan",
+            "[pad_axes.drive.vx]\ngain = -1.0",
+            "[pad_axes.drive.vx]\ngain = inf",
+            "[pad_axes.drive.vx]\nsource = 'typo'",
+            "[pad_head]\nhead_yaw_max = -1.0",
+            "[pad_body]\nz_min = 0.01",
+            "[pad_roller]\nvx_max = -0.2",
+        ] {
+            std::fs::write(&path, text).unwrap();
+            assert!(Params::load(&path, true).is_err(), "accepted {text}");
         }
     }
 
@@ -2500,35 +3175,44 @@ mod tests {
         );
     }
 
-    /// **A robot with no `[pad]` behaves exactly as it always has.** The mapping is the
-    /// prototype's and muscle memory depends on it, so the defaults are not a fresh choice.
+    /// The shipped mapping: A sits, B picks up, X, Y and the bumpers are free.
     #[test]
-    fn the_default_bindings_are_the_prototypes() {
+    fn the_default_bindings() {
         let pad = super::PadParams::default();
-        assert_eq!(pad.a, "ground_pick");
-        assert_eq!(pad.x, "roulade");
-        assert_eq!(pad.lb, "kick_left");
-        assert_eq!(pad.rb, "kick_right");
-        assert_eq!(pad.dpad_down, "sit_toggle");
+        assert_eq!(pad.a, "sit_toggle");
+        assert_eq!(pad.b, "ground_pick");
+        assert_eq!(pad.x, "");
+        assert_eq!(pad.y, "");
+        assert_eq!(pad.lb, "");
+        assert_eq!(pad.rb, "");
+    }
+
+    /// **The D-pad stopped being bindable, and a robot still carrying the old key boots.** It is
+    /// an unknown key now, so it is ignored and named rather than refusing the whole file.
+    #[test]
+    fn the_retired_dpad_down_binding_is_ignored_and_named() {
+        let (_, ignored) =
+            super::without_unknown_keys("[pad]\ndpad_down = \"sit_toggle\"\n").unwrap();
+        assert_eq!(ignored, ["pad.dpad_down"]);
     }
 
     /// Binding one button leaves the rest alone — the file is a list of decisions, and rebinding
-    /// X must not silently take the kicks off the bumpers.
+    /// X must not silently take the ground pick off B.
     #[test]
     fn binding_one_button_leaves_the_others() {
         let params: super::Params =
             toml::from_str("[pad]\nx = \"polite-bow\"\n").expect("a pad section");
         assert_eq!(params.pad.x, "polite-bow");
-        assert_eq!(params.pad.lb, "kick_left", "untouched");
-        assert_eq!(params.pad.a, "ground_pick", "untouched");
+        assert_eq!(params.pad.b, "ground_pick", "untouched");
+        assert_eq!(params.pad.a, "sit_toggle", "untouched");
     }
 
     /// An empty binding is a button switched off on purpose, which is different from a button
     /// bound to something that does not exist — `padd` sends nothing rather than a bad name.
     #[test]
     fn an_empty_binding_is_a_button_switched_off() {
-        let params: super::Params = toml::from_str("[pad]\ndpad_down = \"\"\n").unwrap();
-        assert_eq!(params.pad.skill("dpad_down"), Some(""));
+        let params: super::Params = toml::from_str("[pad]\nb = \"\"\n").unwrap();
+        assert_eq!(params.pad.skill("b"), Some(""));
         assert_eq!(params.pad.skill("nonsense"), None, "not a button at all");
     }
 
@@ -2938,6 +3622,43 @@ mod tests {
         assert_eq!(spelled_out.capture_device(), "plughw:aic3104,0");
     }
 
+    /// A board without the configured card plays and records on ALSA's `default`, which the
+    /// board's own ALSA configuration routes; one with it is untouched.
+    #[test]
+    fn a_missing_audio_card_falls_back_to_the_alsa_default() {
+        let beta = alsa_card_ids(concat!(
+            " 0 [rockchiprk809  ]: simple-card - rockchip-rk809\n",
+            "                      rockchip-rk809\n",
+            " 1 [facemic        ]: simple-card - face-mic\n",
+            "                      face-mic\n",
+        ));
+        assert_eq!(beta, ["rockchiprk809", "facemic"]);
+
+        let params = AudioParams::default();
+        let resolved = params.resolve_devices(&beta);
+        assert_eq!(resolved.playback, "default");
+        assert_eq!(resolved.capture, "default");
+        assert_eq!(resolved.missing_card.as_deref(), Some("aic3104"));
+
+        let zero3 = alsa_card_ids(" 0 [aic3104        ]: simple-card - aic3104\n");
+        let resolved = params.resolve_devices(&zero3);
+        assert_eq!(resolved.playback, "plughw:aic3104");
+        assert_eq!(resolved.capture, "plughw:aic3104,0");
+        assert_eq!(resolved.missing_card, None);
+
+        // Spellings that name a card are checked; ones that do not are used as written.
+        assert_eq!(named_card("plughw:CARD=aic3104,DEV=0"), Some("aic3104"));
+        assert_eq!(named_card("hw:aic3104,0"), Some("aic3104"));
+        assert_eq!(named_card("hw:1,0"), None);
+        assert_eq!(named_card("default"), None);
+        assert_eq!(named_card("dmix:aic3104"), None);
+        let custom = AudioParams {
+            device: "speaker".to_owned(),
+            ..AudioParams::default()
+        };
+        assert_eq!(custom.resolve_devices(&[]).playback, "speaker");
+    }
+
     /// An unprovisioned board must still come up. A daemon that refuses to start because a
     /// config file is absent is far harder to diagnose on a robot than one running on
     /// documented defaults.
@@ -3022,6 +3743,44 @@ mod tests {
                 toml::from_str(&format!("[media]\nsource = \"{label}\"\n")).expect("parses");
             assert_eq!(parsed.media.source, source);
         }
+    }
+
+    #[test]
+    fn every_media_sensor_label_round_trips() {
+        assert_eq!(MEDIA_SENSOR_LABELS.len(), MediaSensor::ALL.len());
+        for (label, sensor) in MEDIA_SENSOR_LABELS.iter().zip(MediaSensor::ALL) {
+            assert_eq!(*label, sensor.label());
+            let parsed: Params =
+                toml::from_str(&format!("[media]\nsensor = \"{label}\"\n")).expect("parses");
+            assert_eq!(parsed.media.sensor, sensor);
+            if let Some(forced) = sensor.forced() {
+                assert_eq!(
+                    forced.label(),
+                    *label,
+                    "a forced choice is the sensor's own name"
+                );
+            }
+        }
+    }
+
+    /// The board decides unless a sensor is named, and an unset key is `board`.
+    #[test]
+    fn the_head_camera_is_the_boards_unless_forced() {
+        use board::Board;
+        let unset: Params = toml::from_str("").unwrap();
+        assert_eq!(unset.media.sensor, MediaSensor::Board);
+        assert_eq!(
+            MediaSensor::Board.resolve(Board::Zero3),
+            CameraSensor::Imx219
+        );
+        assert_eq!(
+            MediaSensor::Board.resolve(Board::Beta),
+            CameraSensor::Gc2093
+        );
+        assert_eq!(
+            MediaSensor::Imx219.resolve(Board::Beta),
+            CameraSensor::Imx219
+        );
     }
 
     /// **The key that was replaced must not come back as a silent default.** A robot carrying the
@@ -3150,6 +3909,130 @@ mod tests {
         assert_eq!(params.pad_drive.vy_min, -0.1);
     }
 
+    /// The cap is a divisor and a promise about latency: zero divides by it, and a rate above
+    /// what a pad link carries only spends the robot's socket.
+    #[test]
+    fn netpad_max_hz_outside_ten_to_a_hundred_is_refused() {
+        let dir = tempfile::tempdir().unwrap();
+        for bad in ["0", "9", "101"] {
+            let path = write(dir.path(), &format!("[netpad]\nmax_hz = {bad}\n"));
+            let error = Params::load(&path, true).expect_err("refused").to_string();
+            assert!(error.contains("netpad.max_hz"), "{error}");
+        }
+        for good in [10, 100] {
+            let path = write(dir.path(), &format!("[netpad]\nmax_hz = {good}\n"));
+            assert_eq!(
+                Params::load(&path, true).expect("valid").netpad.max_hz,
+                good
+            );
+        }
+    }
+
+    /// A stale limit at or past the deadman would keep re-sending a stalled client's last stick
+    /// until robotd stops the robot anyway — it would protect nothing. The client counts as gone
+    /// no sooner than it is stopped. Only checked when netpad is on: robotd loads this file too,
+    /// and a board that does not use netpad must never fail to load over it.
+    #[test]
+    fn netpad_stale_must_be_below_the_deadman_and_the_timeout_not_below_it() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = write(dir.path(), "[netpad]\nenabled = true\nstale_ms = 500\n");
+        let error = Params::load(&path, true).expect_err("refused").to_string();
+        assert!(error.contains("netpad.stale_ms"), "{error}");
+        assert!(error.contains("safety.deadman_ms"), "{error}");
+
+        let path = write(dir.path(), "[netpad]\nenabled = true\nstale_ms = 0\n");
+        assert!(Params::load(&path, true).is_err(), "zero is always stale");
+
+        let path = write(
+            dir.path(),
+            "[netpad]\nenabled = true\nstale_ms = 300\ntimeout_ms = 200\n",
+        );
+        let error = Params::load(&path, true).expect_err("refused").to_string();
+        assert!(error.contains("netpad.timeout_ms"), "{error}");
+
+        let path = write(
+            dir.path(),
+            "[netpad]\nenabled = true\nstale_ms = 500\ntimeout_ms = 5000\n[safety]\ndeadman_ms = 800\n",
+        );
+        let n = Params::load(&path, true).expect("valid").netpad;
+        assert_eq!((n.stale_ms, n.timeout_ms), (500, 5000));
+
+        let path = write(dir.path(), "[netpad]\nenabled = false\nstale_ms = 500\n");
+        assert_eq!(
+            Params::load(&path, true)
+                .expect("off is not checked")
+                .netpad
+                .stale_ms,
+            500
+        );
+    }
+
+    #[test]
+    fn netpad_defaults_are_off_on_4210_at_30_hz() {
+        let n = NetpadParams::default();
+        assert_eq!(
+            (n.enabled, n.port, n.max_hz, n.stale_ms, n.timeout_ms),
+            (false, 4210, 30, 300, 1000)
+        );
+    }
+
+    /// On by default, from the release's own copy of the model — a robot nobody configured stops
+    /// thrashing in the hand. `"none"` is the way to keep the switch on and load nothing.
+    #[test]
+    fn pickup_detection_ships_on_and_resolves_the_releases_model() {
+        let pickup = Params::default().pickup;
+        assert!(pickup.enabled);
+        assert_eq!(
+            pickup.model_resolved(),
+            Some(PathBuf::from(RELEASE_DIR).join("models/pickup_detector.onnx"))
+        );
+        let none = PickupParams {
+            model: Some(PathBuf::from("none")),
+            ..pickup
+        };
+        assert_eq!(none.model_resolved(), None);
+    }
+
+    /// The two thresholds are a hysteresis band. Inverted, the latch would pause and resume on
+    /// the same probability — refused, so `robotctl configure` cannot write it.
+    /// `[idle]` values the look-around would divide by, or that put a range backwards, are
+    /// refused by name; an ordinary retune loads.
+    #[test]
+    fn a_broken_idle_tuning_is_refused() {
+        let dir = tempfile::tempdir().unwrap();
+        for (text, key) in [
+            ("[idle]\nfade_s = 0.0\n", "idle.fade_s"),
+            ("[idle]\nhold_min_s = 4.0\n", "idle.hold_min_s"),
+            ("[idle]\ntilt_chance = 2.0\n", "idle.tilt_chance"),
+            ("[idle]\nnudge_yaw = -0.1\n", "idle.nudge_yaw"),
+        ] {
+            let path = write(dir.path(), text);
+            let error = Params::load(&path, true).unwrap_err().to_string();
+            assert!(error.contains(key), "{error}");
+        }
+        let path = write(dir.path(), "[idle]\nhold_max_s = 1.5\nnudge_yaw = 0.0\n");
+        let idle = Params::load(&path, true).unwrap().idle;
+        assert_eq!((idle.hold_max_s, idle.nudge_yaw), (1.5, 0.0));
+    }
+
+    #[test]
+    fn an_inverted_pickup_band_is_refused() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = write(
+            dir.path(),
+            "[pickup]\npause_threshold = 0.3\nresume_threshold = 0.5\n",
+        );
+        let error = Params::load(&path, true).expect_err("refused").to_string();
+        assert!(error.contains("pickup.resume_threshold"), "{error}");
+        let path = write(dir.path(), "[pickup]\npause_threshold = 1.0\n");
+        assert!(Params::load(&path, true).is_err());
+        let path = write(
+            dir.path(),
+            "[pickup]\nenabled = true\nresume_threshold = 0.5\n",
+        );
+        assert!(Params::load(&path, true).unwrap().pickup.enabled);
+    }
+
     /// Each side of centre scales onto its own bound.
     #[test]
     fn pad_drive_scales_each_direction_onto_its_own_bound() {
@@ -3212,6 +4095,8 @@ mod tests {
         );
         assert_eq!(from_file.policy.resolved(), built_in.policy.resolved());
         assert_eq!(from_file.safety.limp_fall, built_in.safety.limp_fall);
+        assert_eq!(from_file.pickup, built_in.pickup);
+        assert_eq!(from_file.idle, built_in.idle);
         assert_eq!(
             from_file.safety.battery_empty_shutdown,
             built_in.safety.battery_empty_shutdown

@@ -9,6 +9,7 @@
   // Owns sensor display only. Samples and media frames have independent sources.
   let host = null, timer = null, state = 'example', startedAt = 0;
   let history = [], frozen = null, paused = false;
+  let tofLink = null;
   let zoneIndex = 27, unit = 'mm', channel = 'gravity';
   const finite = value => typeof value === 'number' && Number.isFinite(value);
   const number = (value, digits = 2) => finite(value) ? value.toFixed(digits) : '—';
@@ -23,8 +24,8 @@
         <section class="panel sensor-card sensor-camera" aria-labelledby="sensor-camera-title">
           <header class="sensor-card-header"><div><span class="sensor-number">01</span><h3 id="sensor-camera-title">摄像头</h3></div><span class="badge draft" data-camera-source>尚无画面</span></header>
           <div class="sensor-camera-layout" data-sensor-camera>
-            <div class="sensor-camera-stage"><video data-camera-video autoplay muted playsinline hidden aria-label="板端实时视频"></video><img data-camera-image hidden alt="板端媒体服务最近一次快照"><div class="sensor-camera-empty" data-camera-empty><svg viewBox="0 0 240 130" aria-hidden="true"><path d="M32 46V24h34m108 0h34v22m0 38v22h-34m-108 0H32V84" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="120" cy="65" r="24" fill="none" stroke="currentColor"/><path d="M120 31v14m0 40v14M86 65h14m40 0h14" stroke="currentColor"/></svg><strong>相机未连接</strong><p>连接板端媒体服务查看画面。</p></div></div>
-            <div class="sensor-camera-controls"><label for="sensor-camera-address">媒体服务</label><div class="camera-address-row"><input id="sensor-camera-address" data-camera-address type="url" placeholder="http://&lt;Radxa地址&gt;:8080" autocomplete="off" spellcheck="false"><button type="button" class="button primary" data-camera-connect>连接</button></div><div class="sensor-camera-actions"><button type="button" class="button secondary" data-camera-pause disabled>暂停</button><button type="button" class="button secondary" data-camera-capture disabled>快照</button></div><p class="sensor-camera-status" data-camera-status role="status">相机未连接</p><div class="camera-capture-info" aria-label="采集信息，只读"><span data-camera-fps title="配置的采集帧率，非浏览器刷新率">— FPS</span><span data-camera-capture-size>— × —</span><span data-camera-mode>—</span></div><div data-camera-tuning>${root.CameraParameters?.render()||''}</div></div>
+            <div class="sensor-camera-stage"><video data-camera-video autoplay muted playsinline hidden aria-label="板端实时视频"></video><canvas class="camera-vision-output" data-vision-canvas hidden aria-label="当前视频的视觉处理结果"></canvas><svg class="camera-detections" data-camera-boxes hidden aria-label="小鸭检测框" preserveAspectRatio="xMidYMid meet"></svg><img data-camera-image hidden alt="板端媒体服务最近一次快照"><div class="sensor-camera-empty" data-camera-empty><svg viewBox="0 0 240 130" aria-hidden="true"><path d="M32 46V24h34m108 0h34v22m0 38v22h-34m-108 0H32V84" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="120" cy="65" r="24" fill="none" stroke="currentColor"/><path d="M120 31v14m0 40v14M86 65h14m40 0h14" stroke="currentColor"/></svg><strong>相机未连接</strong><p>连接板端媒体服务查看画面。</p></div></div>
+            <div class="sensor-camera-controls"><label for="sensor-camera-address">媒体服务</label><div class="camera-address-row"><input id="sensor-camera-address" data-camera-address type="url" placeholder="http://&lt;Radxa地址&gt;:8080" autocomplete="off" spellcheck="false"><button type="button" class="button primary" data-camera-connect>连接</button></div><div class="sensor-camera-actions"><button type="button" class="button secondary" data-camera-pause disabled>暂停</button><button type="button" class="button secondary" data-camera-capture disabled>快照</button><label class="camera-detection-toggle"><input type="checkbox" data-camera-detections><span data-camera-detection-label>检测框</span></label></div><p class="sensor-camera-status" data-camera-status role="status">相机未连接</p><div class="camera-capture-info" aria-label="采集信息，只读"><span data-camera-fps title="配置的采集帧率，非浏览器刷新率">— FPS</span><span data-camera-capture-size>— × —</span><span data-camera-mode>—</span></div><details class="camera-vision-tools"><summary>视觉工具</summary><label>画面 <select data-vision-mode><option value="raw">原始视频</option><option value="edges">边缘 · Canny</option><option value="motion">画面变化</option><option value="flow">稀疏光流</option><option value="geometry">相机几何</option></select></label><small data-vision-status></small></details><div data-camera-tuning>${root.CameraParameters?.render()||''}</div></div>
           </div>
         </section>
         <div class="sensor-telemetry">
@@ -38,7 +39,7 @@
           </div><footer class="sensor-card-footer">选型 LSM6DSV16X · 真实 IMU 尚未接入；安装方向读取后续确认的配置。</footer>
         </section>
         <section class="panel sensor-card sensor-tof" aria-labelledby="sensor-tof-title">
-          <header class="sensor-card-header"><div><span class="sensor-number">03</span><h3 id="sensor-tof-title">ToF · 距离分区</h3></div><span class="badge example" data-sensor-source>浏览器样例</span></header>
+          <header class="sensor-card-header"><div><span class="sensor-number">03</span><h3 id="sensor-tof-title">ToF · 距离分区</h3></div><span class="badge example" data-sensor-source data-sensor-tof-source>浏览器样例</span></header>
           <div class="sensor-card-body">
             <div class="sensor-distance-summary"><div><span>最近有效距离</span><strong class="mono" data-sensor-nearest>—</strong><small data-sensor-unit>${unit}</small></div><div><span>中心有效均值</span><strong class="mono" data-sensor-center>—</strong><small data-sensor-unit>${unit}</small></div><div><span>有效分区</span><strong class="mono" data-sensor-valid>—</strong></div></div>
             <div class="sensor-tof-field">
@@ -47,7 +48,7 @@
             <div class="sensor-depth-scale"><span>近 · 0 m</span><i></i><span>远 · 4 m</span></div>
             </div>
             <div class="sensor-zone-detail"><strong data-sensor-zone-title>分区 —</strong><span class="mono" data-sensor-zone-distance>—</span><span data-sensor-zone-state>尚无数据</span><small class="mono" data-sensor-zone-raw>status raw —</small></div>
-          </div><footer class="sensor-card-footer">选型 VL53L5X · 无效与无回波分区保留缺测；网格尺寸、距离及状态以未来板端帧为准。</footer>
+          </div><footer class="sensor-card-footer">选型 VL53L5CX · 连接相机后接收 tofd；板端采集模式待确认。</footer>
         </section>
         </div>
       </div>
@@ -82,7 +83,27 @@
     return `<svg viewBox="0 0 592 132" preserveAspectRatio="none" role="img" aria-label="${channel === 'gyro' ? 'Gyro rad/s' : 'Gravity 单位向量'} XYZ 样例曲线">${grid}${paths}<text x="48" y="128">${number(start, 0)} s</text><text x="568" y="128" text-anchor="end">${number(end, 0)} s</text></svg>`;
   }
 
+  function receiveTof(message) {
+    if(!host)return;
+    if(message.kind==='frame'){
+      const frame=root.SensorData.decodeTof(message.frame);
+      if(!frame){tofLink={frame:null,received:0,label:'数据无效'};paint();return;}
+      tofLink={frame,received:root.performance.now(),label:'板端 · 模式未确认'};
+    } else if(message.kind==='waiting')tofLink={frame:null,received:0,label:'等待测距'};
+    else if(message.kind==='closed'){if(tofLink)tofLink={frame:null,received:0,label:'连接已断开'};}
+    else if(message.kind==='status'){
+      const info=message.status;
+      if(message.error||info?.accepted!==true||info.unavailable)tofLink={frame:null,received:0,label:info?.unavailable?'传感器不可用':'测距服务不可用'};
+    }
+    paint();
+  }
+
   function paintTof(tof) {
+    const board=tofLink!==null, fresh=board&&tofLink.frame&&root.performance.now()-tofLink.received<=2000;
+    if(board)tof=fresh?tofLink.frame:null;
+    const source=host.querySelector('[data-sensor-tof-source]');
+    if(board){source.textContent=tofLink.frame&&!fresh?'测距已过期':tofLink.label;source.className='badge '+(fresh?'draft':'stale');}
+    const suffix=board?'板端':'样例';
     const grid = host.querySelector('[data-sensor-grid]');
     grid.dataset.displayUnit = unit;
     const rows = tof?.rows || 8, cols = tof?.cols || 8, count = rows * cols;
@@ -94,7 +115,7 @@
     const summary = root.SensorData.tofSummary(tof);
     put('nearest', root.SensorData.distance(summary.nearest, unit)); put('center', root.SensorData.distance(summary.center, unit));
     put('valid', tof ? `${summary.valid} / ${summary.total}` : '—');
-    put('geometry', tof ? `${rows} × ${cols} 样例 · 帧 ${tof.seq}` : '尚无距离帧 · 8 × 8 占位');
+    put('geometry', tof ? `${rows} × ${cols} ${suffix} · 帧 ${tof.seq}` : '尚无距离帧 · 8 × 8 占位');
     host.querySelectorAll('[data-sensor-unit]').forEach(node => { node.textContent = unit; });
     host.querySelectorAll('[data-sensor-unit-choice]').forEach(node => node.setAttribute('aria-pressed', node.dataset.sensorUnitChoice === unit));
     Array.from(grid.children).forEach((button, i) => {
@@ -108,7 +129,7 @@
     const selected = tof?.zones[zoneIndex], valid = selected?.kind === 'valid' && finite(selected.distanceMm) && selected.distanceMm >= 0;
     put('zone-title', `R${Math.floor(zoneIndex / cols) + 1} · C${zoneIndex % cols + 1}`);
     put('zone-distance', valid ? `${root.SensorData.distance(selected.distanceMm, unit)} ${unit}` : '—');
-    put('zone-state', !selected ? '尚无数据' : valid ? '有效 · 样例' : selected.kind === 'no-return' ? '无回波 · 样例' : '无效 · 样例');
+    put('zone-state', !selected ? '尚无数据' : valid ? `有效 · ${suffix}` : selected.kind === 'no-return' ? `无回波 · ${suffix}` : `无效 · ${suffix}`);
     put('zone-raw', `status raw ${selected?.statusRaw ?? '—'}`);
   }
 
@@ -140,12 +161,13 @@
   function mount(options) {
     unmount(); host = options?.container; if (!host) return false;
     initialize(options.state); host.addEventListener('click', click); host.addEventListener('change', change);
-    root.SensorCamera.mount({ container: host }); paint();
+    root.SensorCamera.mount({ container: host, onTelemetry:receiveTof }); paint();
     timer = root.setInterval(() => {
-      if (!sampleState()) return;
-      history.push(root.SensorData.sample(20 + (root.performance.now() - startedAt) / 1000));
-      if (history.length > 121) history.shift();
-      if (!paused) paint();
+      if (sampleState()) {
+        history.push(root.SensorData.sample(20 + (root.performance.now() - startedAt) / 1000));
+        if (history.length > 121) history.shift();
+      }
+      if (!paused || tofLink) paint();
     }, 500);
     return true;
   }
@@ -156,7 +178,7 @@
   function unmount() {
     if (timer !== null) root.clearInterval(timer); timer = null;
     root.SensorCamera.unmount(); host?.removeEventListener('click', click); host?.removeEventListener('change', change);
-    host = null; history = []; frozen = null; paused = false;
+    host = null; history = []; frozen = null; paused = false; tofLink = null;
   }
   return Object.freeze({ render, mount, setContext, unmount, snapshot: () => ({ mounted: !!host, state, paused, zoneIndex, unit, channel, historyLength: history.length, displayTime: frame()?.t ?? null }) });
 });

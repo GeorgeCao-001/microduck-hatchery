@@ -1,5 +1,13 @@
 # duckctl
 
-桌面机器人客户端的预留位置。未来保留来源 crate 名与内部结构，遵守统一控制协议与设备端裁定。
+Talk to a [Microduck](https://github.com/pollen-robotics/microduck) robot from a laptop, over
+Bluetooth LE — no network, no ssh. Linux, macOS and Windows.
 
-当前仅此说明文件，未导入源码，无 `Cargo.toml` 或 binary，未部署。
+```bash
+uvx duckctl scan
+uvx duckctl --name <robot-name> info
+```
+
+Or install it once with `uv tool install duckctl` (or `pipx install duckctl`) and drop the `uvx`.
+
+Every command is in [`docs/robot/duckctl.md`](https://github.com/pollen-robotics/microduck/blob/main/docs/robot/duckctl.md).

@@ -1,14 +1,14 @@
 # 开发与运维工具
 
-按 [v2 架构](../docs/microduck-hatchery-architecture-v2.md)预留官方工具的原模块名。`robotctl/`、`duckctl/`、`xtask/`、`test-support/`、`duck-ether/` 当前只有占位说明，不包含官方 Rust 源码或可运行 crate，不参与 Cargo 构建。
+按 [v2 架构](../docs/microduck-hatchery-architecture-v2.md)保留官方工具的完整 crate，归属 `src/Cargo.toml` workspace。来源与当前限制见 [迁移基线](../docs/MIGRATION_BASELINE.md)。桌面工具不在板端默认构建集合内。
 
 | 位置 | 用途与当前状态 |
 |---|---|
-| `robotctl/` | 后续整机命令行工具；当前占位。 |
-| `duckctl/` | 后续桌面控制/诊断工具；当前占位。 |
-| `xtask/` | 后续仓库构建、发布与运维任务；当前占位。 |
-| `test-support/` | 后续跨模块测试支持；当前占位。 |
-| `duck-ether/` | 后续相应官方通信工具；当前占位。 |
+| `robotctl/` | 板端 Unix RPC 命令行工具。 |
+| `duckctl/` | 桌面 BLE / 网络控制与诊断客户端。 |
+| `xtask/` | 官方打包、签名与发布工具；发布链与 CI 尚未验收。 |
+| `test-support/` | 官方跨模块测试支持库。 |
+| `duck-ether/` | 模拟设备间无线广播的离线工具。 |
 | [hatchery-shell/](hatchery-shell/README.md) | 现有只读 Python 样例工具，独立于正式设备架构。 |
 | `check_shell.py` | 启动并关闭临时样例服务，检查本地 HTTP/WS 和静态资源。 |
 

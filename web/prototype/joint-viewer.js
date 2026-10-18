@@ -6,9 +6,11 @@
   const assetRoot = 'assets/microduck-reference/';
   let assetPromise = null, enginePromise = null, active = null;
   let mode = 'draft', savedCamera = null, renders = 0;
+  const runtime = () => root.HATCHERY_BACKEND?.apiBase === '/api/v1/maintenance';
 
   function render() {
-    return `<section class="panel joint-viewer-panel" aria-labelledby="joint-viewer-title"><div class="joint-viewer-heading"><div><h2 id="joint-viewer-title">3D 姿态</h2><span class="badge example">参考模型 · 样例映射</span></div><label>显示 <select data-viewer-mode aria-label="3D 姿态来源"><option value="draft" ${mode === 'draft' ? 'selected' : ''}>目标草稿</option><option value="feedback" ${mode === 'feedback' ? 'selected' : ''}>样例反馈</option></select></label></div><div class="joint-viewer-stage" data-viewer-stage><p class="joint-viewer-message" data-viewer-message role="status">正在加载本地 3D 资源…</p></div><div class="joint-viewer-tools"><button type="button" data-viewer-reset>复位视角</button><button type="button" data-viewer-zoom="in" aria-label="放大模型">＋</button><button type="button" data-viewer-zoom="out" aria-label="缩小模型">−</button><span>拖动旋转 · 滚轮缩放 · 点击关节选中</span></div><p class="joint-viewer-source" data-viewer-source role="status">只读姿态展示；没有实机命令。</p><details class="joint-viewer-missing" data-viewer-missing hidden><summary>缺测与参考姿态</summary><ul></ul></details><details class="joint-viewer-notes"><summary>模型与映射说明</summary><p>参考外形来自 Pollen Microduck，经 microduck_rl 与复刻仓库转换；嘴部 #34 的铰链位置为估计。它未匹配本机 Radxa / FT 装配。当前 ticks 仅按 UI 样例范围映射演示角度，不表示真实校准或运动限位。</p><p>模型：CC BY-NC-SA 4.0。<a href="https://github.com/fanhao375/microduck-replica/tree/b5381d86b68d2e4f4606170d54d1f3f46d249ffc/tools/servo-web/model" target="_blank" rel="noopener">来源与署名</a></p></details></section>`;
+    if (runtime()) mode = 'runtime';
+    return `<section class="panel joint-viewer-panel" aria-labelledby="joint-viewer-title"><div class="joint-viewer-heading"><div><h2 id="joint-viewer-title">3D 姿态</h2><span class="badge example">${runtime() ? "后端弧度 · 参考外形" : "参考模型 · 样例映射"}</span></div><label>显示 <select data-viewer-mode aria-label="3D 姿态来源" ${runtime() ? "disabled" : ""}>${runtime() ? '<option value="runtime">后端反馈</option>' : ""}<option value="draft" ${mode === 'draft' ? 'selected' : ''}>目标草稿</option><option value="feedback" ${mode === 'feedback' ? 'selected' : ''}>样例反馈</option></select></label></div><div class="joint-viewer-stage" data-viewer-stage><p class="joint-viewer-message" data-viewer-message role="status">正在加载本地 3D 资源…</p></div><div class="joint-viewer-tools"><button type="button" data-viewer-reset>复位视角</button><button type="button" data-viewer-zoom="in" aria-label="放大模型">＋</button><button type="button" data-viewer-zoom="out" aria-label="缩小模型">−</button><span>拖动旋转 · 滚轮缩放 · 点击关节选中</span></div><p class="joint-viewer-source" data-viewer-source role="status">只读姿态展示；没有实机命令。</p><details class="joint-viewer-missing" data-viewer-missing hidden><summary>缺测与参考姿态</summary><ul></ul></details><details class="joint-viewer-notes"><summary>模型与映射说明</summary><p>参考外形来自 Pollen Microduck，经 microduck_rl 与复刻仓库转换；嘴部 #34 的铰链位置为估计。它未匹配本机 Radxa / FT 装配。${runtime() ? "使用 robotd 已发布的关节弧度，按关节名称对应模型铰链；不推算 FT 编码器或装机校准。" : "当前 ticks 仅按 UI 样例范围映射演示角度，不表示真实校准或运动限位。"}</p><p>模型：CC BY-NC-SA 4.0。<a href="https://github.com/fanhao375/microduck-replica/tree/b5381d86b68d2e4f4606170d54d1f3f46d249ffc/tools/servo-web/model" target="_blank" rel="noopener">来源与署名</a></p></details></section>`;
   }
 
   function embeddedAssets() { return root.HatcheryStandaloneViewer || null; }
@@ -76,7 +78,7 @@
 
   function update(instance = active) {
     if (!instance || instance.disposed || !instance.nodes) return;
-    const pose = root.JointViewerModel.poseFromStore(instance.options.store, mode, instance.options.state);
+    const pose = mode === 'runtime' ? root.JointViewerModel.poseFromRuntime(root.RuntimeFeedback.snapshot()) : root.JointViewerModel.poseFromStore(instance.options.store, mode, instance.options.state);
     const signature = JSON.stringify([mode, instance.options.state, instance.options.jointId, pose.joints.map(joint => [joint.angle, joint.available, joint.stale, joint.value, joint.reason])]);
     if (signature === instance.signature) return;
     instance.signature = signature;
@@ -97,8 +99,9 @@
     const detail = instance.container.querySelector('[data-viewer-missing]');
     detail.hidden = missing.length === 0;
     detail.querySelector('summary').textContent = `缺测 ${pose.summary.missing} · 陈旧 ${pose.summary.stale} / 15`;
-    detail.querySelector('ul').innerHTML = missing.map(joint => `<li>#${root.ServoParameters?.mappingFor(joint.id)?.deviceId ?? joint.id} ${escape(joint.name)}：${escape(joint.reason)}</li>`).join('');
+    detail.querySelector('ul').innerHTML = missing.map(joint => `<li>${mode === "runtime" ? escape(joint.raw) : "#" + (root.ServoParameters?.mappingFor(joint.id)?.deviceId ?? joint.id)} ${escape(joint.name)}：${escape(joint.reason)}</li>`).join('');
     instance.container.querySelector('[data-viewer-source]').textContent = `${mode === 'draft' ? '目标草稿' : '样例反馈'} · 可显示 ${pose.summary.available} / 15${pose.summary.stale ? ' · 含陈旧样例' : ''}；灰色透明关节保留中性参考姿态，不代表实测。当前配置 ID #${root.ServoParameters?.mappingFor(instance.options.jointId)?.deviceId ?? instance.options.jointId}。`;
+    if(mode === 'runtime') instance.container.querySelector('[data-viewer-source]').textContent = `robotd 弧度反馈 · 可显示 ${pose.summary.available} / 15；灰色关节缺测。外形为参考模型，关节角度来自后端。`;
     instance.pose = pose;
     schedule(instance);
   }
@@ -207,6 +210,7 @@
     instance.resizeObserver = new ResizeObserver(() => resize(instance)); instance.resizeObserver.observe(instance.stage);
     if (root.IntersectionObserver) { instance.intersectionObserver = new IntersectionObserver(entries => { instance.visible = entries[0].isIntersecting; if (instance.visible) { resize(instance); schedule(instance); } }); instance.intersectionObserver.observe(instance.stage); }
     root.addEventListener('joint-draft-change', () => update(instance), { signal: instance.abort.signal });
+    if(runtime()) {root.RuntimeFeedback.start();instance.unsubscribeRuntime=root.RuntimeFeedback.subscribe(()=>update(instance));}
     document.addEventListener('visibilitychange', () => { if (!document.hidden) schedule(instance); }, { signal: instance.abort.signal });
   }
 
@@ -230,6 +234,7 @@
   }
 
   function disposeGraphics(instance) {
+    instance.unsubscribeRuntime?.();
     instance.resizeObserver?.disconnect(); instance.intersectionObserver?.disconnect();
     instance.abort.abort();
     if (instance.frame) cancelAnimationFrame(instance.frame);

@@ -66,3 +66,12 @@ test('optional daemon reports preserve old backends and reject malformed running
     const bad=hostStatus();bad.services=[{...daemon}];edit(bad);assert.equal(session.validate(bad),null);
   }
 });
+
+test('new board services remain observations rather than hardware readiness claims',()=>{
+  const input=hostStatus();
+  input.services=['tofd','netpadd','nfcd'].map((name,i)=>({name,unit:name+'.service',state:i===0?'active':i===1?'inactive':'absent',sub_state:null,main_pid:i===0?42:null,process_pid:i===0?42:null}));
+  const checked=session.validate(input);
+  assert.deepEqual(checked.services.map(row=>row.state),['active','inactive','absent']);
+  input.services.push({...input.services[0],name:'otherd',unit:'otherd.service'});
+  assert.equal(session.validate(input),null);
+});

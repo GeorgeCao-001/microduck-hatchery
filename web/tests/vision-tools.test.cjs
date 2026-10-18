@@ -1,0 +1,8 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const tools=require('../prototype/vision-tools.js');
+const ready=new Promise(resolve=>require('../prototype/vendor/opencv/opencv.js').then(cv=>resolve({cv})));
+function picture(shift=0){const width=160,height=120,data=new Uint8ClampedArray(width*height*4);for(let y=0;y<height;y++)for(let x=0;x<width;x++){const i=(y*width+x)*4,v=x>=30+shift&&x<70+shift&&y>=30&&y<70?255:0;data[i]=data[i+1]=data[i+2]=v;data[i+3]=255;}return {width,height,data};}
+test('official OpenCV Canny draws edges and produces opaque output',async()=>{const {cv}=await ready,p=tools.createProcessor(cv),r=p.process(picture(),'edges');assert.equal(r.data.length,160*120*4);assert.ok(r.data.some((v,i)=>i%4===0&&v===255&&r.data[i+1]===220));assert.ok(r.data.every((v,i)=>i%4!==3||v===255));p.destroy();});
+test('motion compares actual preceding frame and reset removes old-frame influence',async()=>{const {cv}=await ready,p=tools.createProcessor(cv);p.process(picture(),'motion');const changed=p.process(picture(6),'motion');assert.ok(changed.data.some((v,i)=>i%4===0&&v>100&&changed.data[i+1]<100));p.reset();const first=p.process(picture(6),'motion');assert.deepEqual(first.data,picture(6).data);p.destroy();});
+test('Lucas–Kanade draws moved feature vectors; dimension changes remain valid',async()=>{const {cv}=await ready,p=tools.createProcessor(cv);p.process(picture(),'flow');const r=p.process(picture(6),'flow');assert.ok(r.data.some((v,i)=>i%4===0&&v===60&&r.data[i+1]===220&&r.data[i+2]===255));const small={width:16,height:16,data:new Uint8ClampedArray(16*16*4).fill(255)};assert.equal(p.process(small,'flow').width,16);p.destroy();});

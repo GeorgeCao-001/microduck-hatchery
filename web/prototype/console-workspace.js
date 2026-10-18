@@ -28,7 +28,7 @@
     const link = (href, name, active, extra = '') => `<a href="${href}" class="${active ? 'active' : ''} ${extra}" ${active ? 'aria-current="page"' : ''}>${name}</a>`;
     const servos = servoViews.includes(view);
     return `<nav class="console-navigation" aria-label="调试台导航">
-      ${link('#console/overview', '总控 <small>待实现</small>', view === 'overview')}
+      ${link('#console/overview', '总控', view === 'overview')}
       ${link('#console/device', '设备', view === 'device')}
       <div class="console-nav-group ${servos ? 'active-group' : ''}"><a href="#console/servos" class="console-nav-parent" ${servos ? 'aria-current="true"' : ''}>舵机</a><div class="console-nav-children">
         ${link('#console/servos/joint', '关节联调', view === 'joint')}
@@ -39,7 +39,7 @@
       ${link('#console/sensors', '传感器', view === 'sensors')}
       ${link('#console/logs', '日志', view === 'logs')}
       <hr class="divider">${link('#records', '实验记录', false)}${link('#learn', '教程', false)}
-      <p>${view === 'device' ? '查看当前设备的连接与运行情况。' : view === 'parameters' ? '扫描和选择实际舵机 ID；关联关节、调节、参数与标定在同一页。' : view === 'sensors' ? '观察 IMU、ToF 与相机画面；各项独立标明数据来源。' : '真实舵机调试位于参数与标定；其他页面仍使用浏览器样例。'}</p>
+      <p>${view === 'device' ? '查看当前设备的连接与运行情况。' : view === 'parameters' ? '扫描和选择实际舵机 ID；关联关节、调节、参数与标定在同一页。' : view === 'sensors' ? '观察 IMU、ToF 与相机画面；各项独立标明数据来源。' : '曲线与 3D 读取后端反馈；参数修改在参数与标定中进行。'}</p>
     </nav>`;
   }
 
@@ -47,6 +47,7 @@
     const { state, jointId } = options;
     const isMaintenance = options.view === 'parameters';
     const isDevice = options.view === 'device';
+    const isRuntime = options.view === 'overview' || root.HATCHERY_BACKEND?.apiBase === '/api/v1/maintenance' && ['joint','single','charts'].includes(options.view);
     const model = root.JointDrafts;
     const joint = model.metadata.find(item => item.id === jointId) || model.metadata[0];
     const store = root.JointConsole.store;
@@ -58,7 +59,7 @@
       const f = store.getFeedback(item.id, state);
       return `<tr class="${item.id === joint.id ? 'selected' : ''}"><td><button class="joint-select" data-joint="${item.id}" aria-pressed="${item.id === joint.id}"><strong>${escape(item.name)}</strong><span>#${root.ServoParameters?.boundId(item.id) ?? item.id} · ${escape(item.raw)}</span></button></td><td class="mono">${f.available ? numberText(f.value) : '—'}</td><td class="mono">${f.available ? numberText(f.temp) : '—'}</td><td class="joint-status">${f.available ? (f.stale ? '陈旧' : '样例') : '缺测'}</td></tr>`;
     }).join('')).join('');
-    return `<div class="console-wrap"><section class="console-heading"><div><span class="eyebrow">${isDevice ? 'MY MICRODUCK' : 'DEVICE WORKSPACE'}</span><h1>${isDevice ? '我的设备' : '调试台'}</h1><p>${isDevice ? '认识你的小鸭，随时了解它的状态。' : '先核对设备与反馈，再进行台架操作。'}</p></div><div>${isMaintenance || isDevice ? '' : `<label for="state-select" class="small muted">预览状态</label><select id="state-select" class="design-state-select">${Object.keys(stateNames).map(value => `<option value="${value}" ${value === state ? 'selected' : ''}>${stateNames[value]}</option>`).join('')}</select>`}${isDevice ? `<button type="button" class="button secondary" data-device-refresh>${root.DeviceOverview.icon('refresh')}刷新</button><button type="button" class="button secondary" data-device-settings>${root.DeviceOverview.icon('edit')}显示设置</button>` : ''}<button class="button secondary" data-connect-open ${isMaintenance ? 'data-connect-default="maintenance"' : ''}>连接说明</button></div></section>
+    return `<div class="console-wrap"><section class="console-heading"><div><span class="eyebrow">${isDevice ? 'MY MICRODUCK' : 'DEVICE WORKSPACE'}</span><h1>${isDevice ? '我的设备' : '调试台'}</h1><p>${isDevice ? '认识你的小鸭，随时了解它的状态。' : '先核对设备与反馈，再进行台架操作。'}</p></div><div>${isMaintenance || isDevice || isRuntime ? '' : `<label for="state-select" class="small muted">预览状态</label><select id="state-select" class="design-state-select">${Object.keys(stateNames).map(value => `<option value="${value}" ${value === state ? 'selected' : ''}>${stateNames[value]}</option>`).join('')}</select>`}${isDevice ? `<button type="button" class="button secondary" data-device-refresh>${root.DeviceOverview.icon('refresh')}刷新</button><button type="button" class="button secondary" data-device-settings>${root.DeviceOverview.icon('edit')}显示设置</button>` : ''}<button class="button secondary" data-connect-open ${isMaintenance ? 'data-connect-default="maintenance"' : ''}>连接说明</button></div></section>
       ${isDevice ? '' : root.DeviceWorkspace.headerMarkup() + '<div class="status-banner" data-device-banner>正在核对设备身份与后端状态…</div>'}
       <div class="console-grid"><aside class="console-sidebar"></aside>
         <section class="panel joint-panel"><div class="panel-title"><h2>单舵机调试</h2><span class="small muted">配置 15 个关节</span></div><div class="joint-list-scroll" tabindex="0" role="region" aria-label="关节列表，可滚动"><table class="joint-table"><thead><tr><th>名称 / ID</th><th>位置 ticks</th><th>温度 °C</th><th>状态</th></tr></thead><tbody>${rows}</tbody></table></div><p class="joint-note">完整列出 15 个关节；ID 读取参数与标定的关联草稿；实机校准仍待核对。</p></section>
@@ -77,12 +78,14 @@
 
   function render(options) {
     const view = options.view || 'joint';
+    const runtime = root.HATCHERY_BACKEND?.apiBase === '/api/v1/maintenance';
     const markup = root.JointConsole.render(baseMarkup(options), { ...options, view: view === 'single' ? 'single' : 'joint' });
     const template = root.document.createElement('template');
     template.innerHTML = markup;
     const wrap = template.content.querySelector('.console-wrap');
     if (view === 'parameters') template.content.querySelector('.console-navigation-tools span').textContent = '参数与标定 · 按实际总线 ID 调试';
     if (view === 'device') template.content.querySelector('.console-navigation-tools span').textContent = '我的设备 · 连接与运行状态';
+    if (runtime && ['joint','single','charts','overview'].includes(view)) template.content.querySelector('.console-navigation-tools span').textContent = 'robotd 反馈 · 只读';
     if (view === 'sensors') template.content.querySelector('.console-navigation-tools span').textContent = '只读观察 · IMU / ToF 样例 · 相机独立来源';
     wrap.dataset.consolePage = view;
     wrap.classList.add('wide-console', 'console-layout');
@@ -99,10 +102,12 @@
       viewer.id = 'joint-viewer';
       viewer.innerHTML = root.JointViewer.render();
       workspace.append(viewer, grid.querySelector('.joint-panel'));
+      if(runtime) {workspace.querySelector('.joint-panel').remove();workspace.insertAdjacentHTML('beforeend',root.RuntimeJoints.render());}
       content.append(workspace);
       const feedback = root.document.createElement('div');
       feedback.id = 'joint-feedback';
       feedback.innerHTML = root.JointFeedback.render({ ...options, store: root.JointConsole.store });
+      if(runtime) feedback.innerHTML = '';
       content.append(feedback);
       grid.append(content);
     }
@@ -112,6 +117,7 @@
       content.className = 'console-page-content single-workspace';
       content.innerHTML = `<div id="joint-feedback">${root.JointFeedback.render({ ...options, store: root.JointConsole.store })}</div><div class="single-detail-grid"><div id="single-joint-chart">${root.SingleJointChart.render(options)}</div><section class="panel single-workbench" id="joint-workbench">${root.JointConsole.detailControls(options.jointId, options.state)}</section></div>`;
       grid.append(content);
+      if(runtime) content.innerHTML = `${root.RuntimeJoints.render()}<div id="joint-charts">${root.JointCharts.render({...options,onlyJoint:true})}</div>`;
     }
     if (view !== 'joint' && view !== 'single') {
       grid.querySelectorAll('.joint-panel,.console-detail,.coordination-workspace').forEach(element => element.remove());
@@ -126,6 +132,11 @@
         content.innerHTML = `<div id="device-workspace">${root.DeviceWorkspace.render(options)}</div>`;
       } else if (view === 'sensors') {
         content.innerHTML = `<div id="sensor-workspace">${root.SensorWorkspace.render(options)}</div>`;
+      } else if (view === 'overview') {
+        content.innerHTML = `<div id="robot-overview">${root.RobotOverview.render()}</div>`;
+      } else if (view === 'logs') {
+        content.innerHTML = `<section class="panel" id="runtime-journal"><div class="panel-title"><h2>程序日志</h2><span class="small muted">当前设备 · 只读</span></div>${root.DeviceJournal.render()}</section>`;
+        content.querySelector('[data-device-journal]').open = true;
       }
       else content.innerHTML = placeholder(view);
       grid.append(content);
@@ -140,7 +151,11 @@
   }
 
   function mount(options) {
+    root.RobotOverview.unmount();
+    root.RobotSession.start();
+    root.RuntimeFeedback.start();
     root.JointCharts.unmount();
+    root.RuntimeJoints.unmount();
     root.JointViewer.unmount();
     root.JointFeedback.unmount();
     root.SingleJointChart.unmount();
@@ -149,13 +164,15 @@
     root.SensorWorkspace.unmount();
     root.DeviceWorkspace.unmount();
     context = { ...options };
-    root.JointSession.start({ state: context.state, onFrame: onSampleFrame });
+    if(root.HATCHERY_BACKEND?.apiBase !== '/api/v1/maintenance')root.JointSession.start({ state: context.state, onFrame: onSampleFrame });else root.JointSession.stop();
     const container = root.document.querySelector('#joint-charts');
-    if (context.view === 'charts' && container) root.JointCharts.mount({ container, state: context.state, jointId: context.jointId });
+    if (container) root.JointCharts.mount({ container, state: context.state, jointId: context.jointId, onlyJoint:context.view==='single' });
+    root.RuntimeJoints.mount(root.document.querySelector('.runtime-joint-panel'),context.onSelect);
+    root.RuntimeJoints.setSelected(context.jointId);
     const viewer = root.document.querySelector('#joint-viewer');
     if (context.view === 'joint' && viewer) root.JointViewer.mount({ container: viewer, store: root.JointConsole.store, state: context.state, jointId: context.jointId, onSelect: context.onSelect });
     const feedback = root.document.querySelector('#joint-feedback');
-    if (feedback) root.JointFeedback.mount({ container: feedback, store: root.JointConsole.store, state: context.state, jointId: context.jointId, onSelect: context.onSelect });
+    if (feedback?.childElementCount) root.JointFeedback.mount({ container: feedback, store: root.JointConsole.store, state: context.state, jointId: context.jointId, onSelect: context.onSelect });
     const singleChart = root.document.querySelector('#single-joint-chart');
     if (context.view === 'single' && singleChart) root.SingleJointChart.mount({ container: singleChart, state: context.state, jointId: context.jointId });
     const parameters = root.document.querySelector('#servo-parameters');
@@ -164,14 +181,17 @@
     const sensors = root.document.querySelector('#sensor-workspace');
     if (context.view === 'sensors' && sensors) root.SensorWorkspace.mount({ container:sensors, state:context.state });
     root.DeviceWorkspace.mount({ container:root.document.querySelector('#main'), view:context.view });
+    root.RobotOverview.mount(root.document.querySelector('#robot-overview'));
+    if (context.view === 'logs') root.DeviceJournal.mount(root.document.querySelector('#runtime-journal [data-device-journal]'));
     root.JointConsole.restoreScroll();
   }
 
   function setContext(options) {
     if (!context) return;
     context = { ...context, ...options };
+    root.RuntimeJoints.setSelected(context.jointId);
     root.JointSession.setState(context.state);
-    root.JointCharts.setContext({ state: context.state, jointId: context.jointId });
+    root.JointCharts.setContext({ state: context.state, jointId: context.jointId, onlyJoint:context.view==='single' });
     root.JointViewer.setContext({ state: context.state, jointId: context.jointId });
     root.JointFeedback.setContext({ state: context.state, jointId: context.jointId });
     root.SingleJointChart.setContext({ state: context.state, jointId: context.jointId });
@@ -184,12 +204,14 @@
     if (workbench) workbench.innerHTML = root.JointConsole.detailControls(options.jointId, options.state);
   }
 
-  function unmountView() { root.JointCharts.unmount(); root.JointViewer.unmount(); root.JointFeedback.unmount(); root.SingleJointChart.unmount(); root.ServoParameters.unmount(); root.ServoBackend.unmount(); root.SensorWorkspace.unmount(); root.DeviceWorkspace.unmount(); }
+  function unmountView() { root.RuntimeJoints.unmount(); root.RobotOverview.unmount(); root.JointCharts.unmount(); root.JointViewer.unmount(); root.JointFeedback.unmount(); root.SingleJointChart.unmount(); root.ServoParameters.unmount(); root.ServoBackend.unmount(); root.SensorWorkspace.unmount(); root.DeviceWorkspace.unmount(); }
 
   function leave() {
     unmountView();
     root.JointSession.stop();
     root.DeviceSession.stop();
+    root.RuntimeFeedback.stop();
+    root.RobotSession.stop();
     context = null;
   }
 

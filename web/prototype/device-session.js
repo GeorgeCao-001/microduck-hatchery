@@ -25,7 +25,7 @@
     if (v.bluetooth !== null && (!Array.isArray(v.bluetooth) || v.bluetooth.length > 16 || v.bluetooth.some(n => !plain(n) || !text(n.name) || !optionalText(n.address) || (n.blocked !== null && typeof n.blocked !== 'boolean')))) return null;
     // Optional for older backends. Never accept an unvalidated running claim.
     if (v.services != null) {
-      const names=['robotd','mediad','configd','btd','padd','updaterd','robotd-maintenance','mediad-maintenance'];
+      const names=['robotd','mediad','configd','btd','padd','updaterd','tofd','netpadd','nfcd','robotd-maintenance','mediad-maintenance'];
       const pid=n=>n===null || (Number.isInteger(n) && n>0 && n<=4294967295);
       if (!Array.isArray(v.services) || v.services.length>names.length || v.services.some(n=>!plain(n) || !names.includes(n.name) || (n.unit!==null && n.unit!==n.name+'.service') || !['active','restarting','failed','inactive','absent','unknown'].includes(n.state) || !optionalText(n.sub_state) || !pid(n.main_pid) || !pid(n.process_pid)) || new Set(v.services.map(n=>n.name)).size!==v.services.length) return null;
     }

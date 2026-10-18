@@ -771,11 +771,15 @@ impl RobotState {
                 bus: proto::BusHealth {
                     consecutive_errors: self.consecutive_errors.load(Ordering::Relaxed),
                     startup_failures: self.startup_bus_failures.load(Ordering::Relaxed),
+                    // API 38: the retained FT backend does not publish a servo census.
+                    missing: Vec::new(),
                 },
                 imu: Some(proto::ImuHealth {
                     ready: self.imu_ready.load(Ordering::Relaxed),
                     stale_blocks: self.imu_stale_blocks.load(Ordering::Relaxed),
                     consecutive_stale_blocks: self.imu_stale_run.load(Ordering::Relaxed),
+                    // API 41: no IMU-board census is provided by this backend.
+                    missing: false,
                 }),
             };
 
@@ -3334,6 +3338,8 @@ async fn control_loop<T: RobotIo>(
                     limp: matches!(limp_fall, LimpFall::Limp { .. }),
                     gravity: sensors.imu.gravity,
                     gain: safety.gain(),
+                    // API 44 compatibility: this retained backend has no pick-up detector.
+                    picked_up: false,
                 },
                 control_loop: proto::LoopState {
                     hz: f64::from_bits(state.achieved_hz.load(Ordering::Relaxed)),

@@ -27,12 +27,17 @@ pub mod camera_controls;
 mod rkaiq;
 mod rkaiq_control;
 pub mod config;
+/// The camera LED: lit while the picture is leaving the robot. `architecture.md` §3.2 and §7.
+pub mod indicator;
 /// The account credential `updaterd` writes, read by the two things here that need it.
 pub mod producer;
 /// The outward connection to the rendezvous service — what makes a duck reachable from off its
 /// own LAN. `docs/design/remote-access-design.md` §3.
 pub mod relay;
 pub mod route;
+/// Which camera sensor the robot has, found in the media graph, and the units and optics that go
+/// with it.
+pub mod sensor;
 pub mod session;
 mod snapshot;
 pub mod stream;
@@ -40,6 +45,7 @@ pub mod stream;
 /// hole to it. `docs/design/remote-access-design.md` §6.
 pub mod turn;
 pub mod upstream;
+pub mod vetbook;
 pub mod web;
 
 /// The GStreamer pipeline and the datachannel.

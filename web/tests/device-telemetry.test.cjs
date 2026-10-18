@@ -70,7 +70,7 @@ test('only observed runtime services count as started and disconnected states be
     {name:'configd',state:'inactive',process_pid:null}
   ];
   const rows=telemetry.services(input);
-  assert.deepEqual(rows.map(row=>row.name),['robotd','mediad','configd','btd','padd','updaterd']);
+  assert.deepEqual(rows.map(row=>row.name),['robotd','mediad','configd','btd','padd','updaterd','tofd','netpadd','nfcd']);
   assert.equal(rows[0].label,'未知');assert.equal(rows[0].running,false);
   assert.equal(rows[1].running,true);assert.equal(rows[2].label,'已停止');
   input.fresh=false;

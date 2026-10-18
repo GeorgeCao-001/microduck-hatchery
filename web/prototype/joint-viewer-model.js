@@ -101,5 +101,18 @@
     };
   }
 
-  return Object.freeze({ mapping: mapping, poseFromStore: poseFromStore });
+  function poseFromRuntime(snapshot) {
+    const latest = snapshot?.fresh ? snapshot.latest : null;
+    const joints = JointDrafts.metadata.map(joint => {
+      const value = latest?.joints.find(row => row.raw === joint.raw)?.actual;
+      const available = typeof value === 'number' && Number.isFinite(value);
+      return {id:joint.id,raw:joint.raw,name:joint.name,source:'robotd',sampleOnly:false,
+        mode:'runtime',angle:available?value:null,value:available?value:null,available,stale:false,
+        referenceAngle:0,referenceOnly:!available,reason:available?'':'后端未提供有效关节弧度，显示参考姿态'};
+    });
+    return {mode:'runtime',source:'robotd',sampleOnly:false,unit:'radians',inputUnit:'rad',
+      mappingVersion:'robotd-joint-names/1',calibrationVersion:null,joints,
+      summary:{total:joints.length,available:joints.filter(j=>j.available).length,missing:joints.filter(j=>!j.available).length,stale:0}};
+  }
+  return Object.freeze({ mapping: mapping, poseFromStore: poseFromStore, poseFromRuntime: poseFromRuntime });
 });

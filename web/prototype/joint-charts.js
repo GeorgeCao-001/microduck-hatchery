@@ -28,7 +28,10 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
     });
   };
-  const deviceId = id => root.ServoParameters?.mappingFor(id)?.deviceId ?? id;
+  const runtime = () => root.HATCHERY_BACKEND?.apiBase === '/api/v1/maintenance';
+  const deviceId = id => runtime() ? model.metadata.find(j => j.id === id)?.raw : root.ServoParameters?.mappingFor(id)?.deviceId ?? id;
+  const jointLabel = id => (runtime() ? '' : '#') + deviceId(id);
+  const channelFor = key => runtime() ? ({position:{...channels.position,unit:'rad'},error:{...channels.error,unit:'rad'},load:{title:'关节电流',unit:'mA',height:300,keys:['current']},volt:channels.volt,temp:channels.temp}[key]) : channels[key];
   const colorFor = function (id) { return colors[joints.findIndex(function (joint) { return joint.id === id; })] || colors[0]; };
   const numberText = function (value) { return finite(value) ? Number(value.toFixed(2)).toString() : '—'; };
 
@@ -65,12 +68,13 @@
     if (!values.length) return null;
     let min = Math.min.apply(null, values), max = Math.max.apply(null, values);
     if (key === 'error') { min = Math.min(min, 0); max = Math.max(max, 0); }
-    const minimumSpan = key === 'volt' ? 0.4 : key === 'temp' ? 2 : 2;
+    const minimumSpan = key === 'volt' ? 0.4 : key === 'temp' ? 2 : runtime() ? 0.02 : 2;
     const padding = Math.max((max - min) * 0.12, minimumSpan / 2);
     return [min - padding, max + padding];
   }
 
-  const history = session.history;
+  const history = {frames:()=>runtime()?root.RuntimeFeedback.history.frames():session.history.frames(),latestTime:()=>runtime()?root.RuntimeFeedback.history.latestTime():session.history.latestTime()};
+  let runtimeEpoch = null;
   let context = { jointId: 23, state: 'example' };
   let visibleJointIds = new Set([23]);
   let visibleChannels = new Set(['position', 'error']);
@@ -81,11 +85,11 @@
   function selectionMarkup() {
     return `<details class="chart-selection-tools" ${selectionExpanded ? 'open' : ''}><summary data-chart-selection-summary>${selectionSummary()}</summary><div class="chart-picker-row"><fieldset class="chart-joint-picker"><legend>显示关节 <span>独立于草稿应用范围</span></legend><div class="chart-joint-groups">${['左腿', '右腿', '头颈'].map(function (group) {
       return `<div class="chart-joint-group"><strong>${group === '头颈' ? '头颈与嘴部' : group}</strong>${joints.filter(function (joint) { return joint.group === group; }).map(function (joint) {
-        return `<label><input type="checkbox" data-chart-joint="${joint.id}" ${visibleJointIds.has(joint.id) ? 'checked' : ''}><i style="--joint-chart-color:${colorFor(joint.id)}" aria-hidden="true"></i>${escape(joint.name)} <small title="参数与标定关联草稿">#${deviceId(joint.id)}</small></label>`;
+        return `<label><input type="checkbox" data-chart-joint="${joint.id}" ${visibleJointIds.has(joint.id) ? 'checked' : ''}><i style="--joint-chart-color:${colorFor(joint.id)}" aria-hidden="true"></i>${escape(joint.name)} <small title="${runtime() ? "后端关节名称" : "参数与标定关联草稿"}">${jointLabel(joint.id)}</small></label>`;
       }).join('')}</div>`;
     }).join('')}</div><div class="chart-picker-actions"><button type="button" data-chart-all-joints>显示全部</button><button type="button" data-chart-clear-joints>清空显示</button><span data-chart-count>已选 ${visibleJointIds.size} / 15</span></div></fieldset><fieldset class="chart-channel-picker"><legend>显示数据</legend>${Object.keys(channels).map(function (key) {
-      const label = { position: '目标回读 / 实测位置', error: '跟踪误差', load: 'raw load', volt: '电压', temp: '温度' }[key];
-      return `<label><input type="checkbox" data-chart-channel="${key}" ${visibleChannels.has(key) ? 'checked' : ''}>${label} <small>${channels[key].unit}</small></label>`;
+      const label = { position: '目标回读 / 实测位置', error: '跟踪误差', load: runtime() ? '关节电流' : 'raw load', volt: '电压', temp: '温度' }[key];
+      return `<label><input type="checkbox" data-chart-channel="${key}" ${visibleChannels.has(key) ? 'checked' : ''}>${label} <small>${channelFor(key).unit}</small></label>`;
     }).join('')}<p>按单位分别绘图；目标草稿不会代替目标回读。</p></fieldset></div></details>`;
   }
 
@@ -94,6 +98,7 @@
   }
 
   function contextText() {
+    if (runtime()) return root.RuntimeFeedback.snapshot().fresh ? 'robotd · 只读订阅 · 后端关节弧度 · 设备单调时间' : '等待 robotd 有效反馈 · 未标定或未连接的关节保留缺测';
     if (context.state === 'offline') return '离线状态预览 · 写入缺测间隙，未连接设备';
     if (context.state === 'stale') return '反馈陈旧状态预览 · 写入缺测间隙，未延续旧测量';
     if (!['example', 'readonly', 'read-only'].includes(context.state)) return '当前状态无可用样例 · 未连接设备';
@@ -102,10 +107,11 @@
 
   function render(options) {
     if (options) setContext(options);
-    return `<section class="panel large-chart-panel" aria-labelledby="large-chart-title"><div class="large-chart-heading"><div><h2 id="large-chart-title">实时曲线</h2><p>选择要一起观察的关节和数据；切换舵机页面后继续采集。</p></div><span class="badge example">只读样例</span></div>${selectionMarkup()}<div class="large-chart-toolbar"><label>时间窗 <select data-chart-window aria-label="曲线时间窗"><option value="10" ${windowSeconds === 10 ? 'selected' : ''}>最近 10 秒</option><option value="30" ${windowSeconds === 30 ? 'selected' : ''}>最近 30 秒</option></select></label><button type="button" data-chart-pause>${paused ? '恢复显示' : '暂停显示'}</button><span data-chart-follow>${paused ? '显示已暂停，样例继续采集' : '跟随最新样例'}</span><output data-chart-relative-time>${displayTime().toFixed(1)} s</output></div><p class="chart-source-status" data-chart-source-status>${contextText()}</p><div data-chart-plots>${plotsMarkup()}</div><p class="large-chart-footnote">仅左膝 #23 有生成的位置样例；温度 32 °C、电压 7.8 V 为常量样例。其他 14 个关节没有反馈，raw load 尚无数据。横轴是本调试台样例会话的单调相对时间，不是设备 Unix 时间；暂停仅暂停显示，不执行任何控制。</p></section>`;
+    return `<section class="panel large-chart-panel" aria-labelledby="large-chart-title"><div class="large-chart-heading"><div><h2 id="large-chart-title">实时曲线</h2><p>选择要一起观察的关节和数据；切换舵机页面后继续采集。</p></div><span class="badge example">${runtime() ? "后端反馈 · 只读" : "只读样例"}</span></div>${selectionMarkup()}<div class="large-chart-toolbar"><label>时间窗 <select data-chart-window aria-label="曲线时间窗"><option value="10" ${windowSeconds === 10 ? 'selected' : ''}>最近 10 秒</option><option value="30" ${windowSeconds === 30 ? 'selected' : ''}>最近 30 秒</option></select></label><button type="button" data-chart-pause>${paused ? '恢复显示' : '暂停显示'}</button><span data-chart-follow>${paused ? '显示已暂停，继续采集' : runtime() ? '跟随最新反馈' : '跟随最新样例'}</span><output data-chart-relative-time>${displayTime().toFixed(1)} s</output></div><p class="chart-source-status" data-chart-source-status>${contextText()}</p><div data-chart-plots>${plotsMarkup()}</div><p class="large-chart-footnote">${runtime() ? "按后端关节名称映射；实测、目标均使用 robotd 弧度值。未提供的逐关节电压、温度保留缺测。断线或会话重启清空旧反馈。" : "仅左膝 #23 有生成的位置样例；温度 32 °C、电压 7.8 V 为常量样例。其他 14 个关节没有反馈，raw load 尚无数据。横轴是本调试台样例会话的单调相对时间，不是设备 Unix 时间；暂停仅暂停显示，不执行任何控制。"}</p></section>`;
   }
 
   function plotsMarkup() {
+    if(runtime() && runtimeEpoch !== root.RuntimeFeedback.snapshot().epoch) frozenFrames=null;
     if (!visibleJointIds.size) return '<div class="chart-empty"><strong>尚未选择显示关节</strong><p>勾选关节后，可在同一个曲线面板观察。</p></div>';
     if (!visibleChannels.size) return '<div class="chart-empty"><strong>尚未选择显示数据</strong><p>勾选位置、误差或其他数据。</p></div>';
     const frames = paused && frozenFrames ? frozenFrames : history.frames();
@@ -119,7 +125,7 @@
   }
 
   function plotMarkup(key, frames, start, end, axisStart, axisEnd) {
-    const channel = channels[key], series = [];
+    const channel = channelFor(key), series = [];
     const selectedJoints = joints.filter(function (joint) { return visibleJointIds.has(joint.id); });
     selectedJoints.forEach(function (joint) {
       channel.keys.forEach(function (measurement) {
@@ -133,10 +139,10 @@
         return item.joint.id === joint.id && item.points.some(function (point) { return finite(point.value); });
       });
     });
-    const missingMarkup = missing.length ? `<p class="chart-missing" data-chart-missing="${key}">${missing.map(function (joint) { return escape(joint.name) + ' #' + deviceId(joint.id); }).join('、')}：无${key === 'load' ? ' raw load' : ''}数据</p>` : '';
+    const missingMarkup = missing.length ? `<p class="chart-missing" data-chart-missing="${key}">${missing.map(function (joint) { return escape(joint.name) + ' ' + jointLabel(joint.id); }).join('、')}：无${key === 'load' ? ' raw load' : ''}数据</p>` : '';
     const legend = `<div class="large-chart-legend">${series.map(function (item, index) {
       const suffix = item.key === 'goal' ? '目标回读' : item.key === 'actual' ? '实测' : '';
-      return `<span data-chart-legend-joint="${item.joint.id}"><i class="${item.key === 'goal' ? 'goal' : ''}" style="--joint-chart-color:${colorFor(item.joint.id)}" aria-hidden="true"></i>${escape(item.joint.name)} #${deviceId(item.joint.id)}${suffix ? ' · ' + suffix : ''}<b>${numberText(latestValues[index])}</b></span>`;
+      return `<span data-chart-legend-joint="${item.joint.id}"><i class="${item.key === 'goal' ? 'goal' : ''}" style="--joint-chart-color:${colorFor(item.joint.id)}" aria-hidden="true"></i>${escape(item.joint.name)} ${jointLabel(item.joint.id)}${suffix ? ' · ' + suffix : ''}<b>${numberText(latestValues[index])}</b></span>`;
     }).join('')}</div>`;
     if (!extent) return `<section class="large-chart-track chart-${key}" data-chart-track="${key}"><div class="chart-track-heading"><h3>${channel.title}</h3><span>${channel.unit}</span></div><div class="chart-empty chart-empty-track" style="--chart-height:${channel.height}px"><strong>暂无可绘制数据</strong><p>缺测保留为空，不生成替代值。</p></div>${legend}${missingMarkup}</section>`;
     const plotElement = container && container.querySelector('[data-chart-plots]');
@@ -160,8 +166,8 @@
       const dot = only.length === 1 ? `<circle cx="${x(only[0].t)}" cy="${y(only[0].value)}" r="3" fill="${colorFor(item.joint.id)}"/>` : '';
       return `<path data-chart-line-joint="${item.joint.id}" data-chart-measurement="${item.key}" d="${path}" fill="none" stroke="${colorFor(item.joint.id)}" stroke-width="2.5" ${item.key === 'goal' ? 'stroke-dasharray="7 5"' : ''} vector-effect="non-scaling-stroke"/>${dot}`;
     }).join('');
-    const notCurrent = context.state === 'offline' || context.state === 'stale';
-    return `<section class="large-chart-track chart-${key}" data-chart-track="${key}"><div class="chart-track-heading"><h3>${channel.title}</h3><span>${channel.unit}${notCurrent ? ' · 当前缺测，仅保留历史样例' : ''}</span></div><svg class="large-chart-svg" style="--chart-height:${height}px" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escape(channel.title)}，${selectedJoints.map(function (joint) { return escape(joint.name); }).join('、')}，浏览器生成的只读样例"><text x="${left}" y="12">${channel.unit}</text>${grid}${paths}</svg>${legend}${missingMarkup}</section>`;
+    const notCurrent = runtime() ? !root.RuntimeFeedback.snapshot().fresh : context.state === 'offline' || context.state === 'stale';
+    return `<section class="large-chart-track chart-${key}" data-chart-track="${key}"><div class="chart-track-heading"><h3>${channel.title}</h3><span>${channel.unit}${notCurrent ? ' · 当前缺测，仅保留历史样例' : ''}</span></div><svg class="large-chart-svg" style="--chart-height:${height}px" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escape(channel.title)}，${selectedJoints.map(function (joint) { return escape(joint.name); }).join('、')}，${runtime() ? 'robotd 只读反馈' : '浏览器生成的只读样例'}"><text x="${left}" y="12">${channel.unit}</text>${grid}${paths}</svg>${legend}${missingMarkup}</section>`;
   }
 
   function paint() {
@@ -181,7 +187,8 @@
 
   function handleFrame() {
     if (!container || !container.isConnected) { unmount(); return; }
-    context.state = session.snapshot().state;
+    if (runtime()) { const epoch=root.RuntimeFeedback.snapshot().epoch; if(epoch!==runtimeEpoch){frozenFrames=null;runtimeEpoch=epoch;const plots=container.querySelector('[data-chart-plots]');if(plots)plots.innerHTML=plotsMarkup();} }
+    else context.state = session.snapshot().state;
     paint();
   }
 
@@ -206,7 +213,7 @@
       frozenFrames = paused ? history.frames() : null;
       button.textContent = paused ? '恢复显示' : '暂停显示';
       const follow = container.querySelector('[data-chart-follow]');
-      if (follow) follow.textContent = paused ? '显示已暂停，样例继续采集' : '跟随最新样例';
+      if (follow) follow.textContent = paused ? '显示已暂停，继续采集' : runtime() ? '跟随最新反馈' : '跟随最新样例';
       updateSelectionControls();
     }
   }
@@ -238,6 +245,8 @@
   function setContext(options) {
     options = options || {};
     if (jointIds.has(options.jointId)) context.jointId = options.jointId;
+    if (options.onlyJoint && jointIds.has(options.jointId)) visibleJointIds = new Set([options.jointId]);
+    if (options.onlyJoint) updateSelectionControls();
     if (typeof options.state === 'string') context.state = options.state;
     // Focus changes intentionally leave the user's curve selection unchanged.
     paint();
@@ -255,7 +264,7 @@
       container.addEventListener('change', handleChange);
       container.addEventListener('toggle', handleToggle, true);
     }
-    if (!unsubscribe) unsubscribe = session.subscribe(handleFrame);
+    if (!unsubscribe) { if(runtime()){root.RuntimeFeedback.start();unsubscribe=root.RuntimeFeedback.subscribe(handleFrame);}else unsubscribe = session.subscribe(handleFrame); }
     paint();
     return true;
   }

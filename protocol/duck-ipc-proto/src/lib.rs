@@ -425,7 +425,54 @@ pub const JSONRPC_VERSION: &str = "2.0";
 /// an `updaterd` that has not run its first check yet — every board for the minute after it
 /// starts, including the one right after the update that brought v35 in. Both warned. The attempt
 /// tells them apart, and its error is what the warning was pointing at the journal for.
-pub const API_VERSION: u32 = 37;
+///
+/// # v38 — which servos are missing, while the bus is coming up
+///
+/// [`BusHealth::missing`]: the servo IDs that did not answer the last ping round while `robotd`
+/// waits for the bus. A robot with three servos unplugged reported "no robot on the motor bus",
+/// which is the wording for servo power being off, while the daemon's own log named the three.
+/// Additive: absent from an older `robotd`, and an empty list reads as "not told", which is what
+/// the old wording assumed anyway.
+///
+/// # v39 — `robot.rest`
+///
+/// [`method::ROBOT_REST`]: `robot.shutdown`'s sit and rest pose, ending in torque off and a servo
+/// reboot instead of a power-off. The pad's held Select, released before the power-off threshold.
+/// A new route: a `robotd` predating it answers METHOD_NOT_FOUND, by name.
+///
+/// # v40 — `robot.flashlight`
+///
+/// [`method::ROBOT_FLASHLIGHT`]: the beta board's RGB LED as a flashlight, on, off or toggled, in
+/// one of the seven colours three on/off channels make. The pad's Home button toggles it. A new
+/// route: a `robotd` predating it answers METHOD_NOT_FOUND, by name.
+///
+/// # v41 — an IMU board that does not answer, while the bus is coming up
+///
+/// [`ImuHealth::missing`]: every servo answered and the IMU board did not. The first combined read
+/// then failed on every attempt, and `robot.health` said "no robot on the motor bus" — the wording
+/// for servo power being off — about a robot whose fifteen servos had just answered their pings.
+/// Additive: absent from an older `robotd`, and `false` reads as "not told", which is what the old
+/// wording assumed anyway.
+///
+/// # v42 — the vet book
+///
+/// [`method::ROBOT_VETBOOK`] and [`method::ROBOT_VETBOOK_NOTE`]: the robot's lifetime record —
+/// hours on, distance walked, falls and pickups, every servo `robotd` has adopted and how long
+/// the one before it lasted, and dated notes ([`vetbook`]). New routes: a `robotd` predating them answers METHOD_NOT_FOUND, by name.
+///
+/// # v43 — sharing the vet book
+///
+/// [`method::VETBOOK_SHARE`]: `updaterd` publishes the vet book to a public dataset on the signed-in
+/// Hugging Face account, `<user>/<robot name>-vetbook`, and answers with the link to its card
+/// ([`VetbookShareResult`]). A new route: an `updaterd` predating it answers METHOD_NOT_FOUND.
+///
+/// # v44 — records from every sensor
+///
+/// [`method::ROBOT_VETBOOK_TALLY`]: another daemon's counts and personal records — photos taken,
+/// laser sweep, nearest object — merged into the vet book by `robotd`, which owns it. The book
+/// gains three maps for them ([`vetbook::Life::tallies`], `highs`, `lows`), additive: an older
+/// book loads with them empty. A new route: a `robotd` predating it answers METHOD_NOT_FOUND.
+pub const API_VERSION: u32 = 44;
 
 /// The observation width every policy this robot family runs is built against.
 ///
@@ -459,6 +506,9 @@ pub const ROBOT_MODEL: &str = "microduck";
 pub const UPDATE_MAX_SILENCE_SECONDS: u64 = 600;
 
 pub const DEFAULT_SOCKET: &str = "/run/updaterd.sock";
+
+pub mod led;
+pub mod vetbook;
 
 /// Where each service listens by default.
 ///
@@ -538,6 +588,26 @@ pub const JOINT_NAMES: [&str; 15] = [
     "right_knee",
     "right_ankle",
 ];
+
+/// Each joint's Dynamixel ID, indexed as [`JOINT_NAMES`].
+///
+/// Protocol for the same reason the names are: [`BusHealth::missing`] carries IDs, because the ID
+/// is what is printed on the servo a person has to go and find, and a client has to be able to
+/// say which joint that is. `duck-control` re-exports it, so the IDs the bus is driven with and
+/// the ones a client names are one table.
+pub const JOINT_IDS: [u8; 15] = [
+    20, 21, 22, 23, 24, // left leg
+    30, 31, 32, 33, 34, // neck, head, mouth
+    10, 11, 12, 13, 14, // right leg
+];
+
+/// The joint a Dynamixel ID drives, if it is one of [`JOINT_IDS`].
+pub fn joint_of(id: u8) -> Option<&'static str> {
+    JOINT_IDS
+        .iter()
+        .position(|&known| known == id)
+        .map(|index| JOINT_NAMES[index])
+}
 
 /// Method names, as they go on the wire. Namespaced so a new namespace cannot collide
 /// with `update.*`. [`Call`] is the typed form.
@@ -637,6 +707,12 @@ pub mod method {
     /// or `robot.enable` brings it up from a known state. Discrete; send as a request.
     pub const ROBOT_REBOOT_MOTORS: &str = "robot.rebootMotors";
 
+    /// Put the robot down for a rest: [`ROBOT_SHUTDOWN`]'s sequence without the power-off. A
+    /// driving robot sits with the sitstand policy, eases into the rest pose, then has torque cut
+    /// and every servo rebooted ([`ROBOT_REBOOT_MOTORS`]); a robot that cannot sit is rebooted
+    /// where it is. Ends limp, ready for `robot.init`. Discrete; send as a request.
+    pub const ROBOT_REST: &str = "robot.rest";
+
     // ── skills ───────────────────────────────────────────────────────────────
     //
     // One-shot scripted moves, ported from `microduck_runtime`. Each swaps a dedicated
@@ -666,6 +742,9 @@ pub mod method {
     /// is diagnostics, not danger), but "accepted" from a robot that cannot make a sound
     /// would make `robotctl quack` lie about which duck answered.
     pub const ROBOT_SOUND: &str = "robot.sound";
+    /// Switch the flashlight — the face's RGB LED — on, off, or over, in a colour. Discrete; send
+    /// as a request. Refused, with a reason, by a board without one (the Zero 3W, the simulator).
+    pub const ROBOT_FLASHLIGHT: &str = "robot.flashlight";
     /// Pick the ToF theremin up, or put it down: the head's depth sensor becomes an
     /// instrument, and the distance of a hand in front of the beak is the pitch — and the
     /// mouth opening, which rises with it, so the note is visible as well as audible.
@@ -718,6 +797,14 @@ pub mod method {
     /// The static geometry [`RobotState::frames`] and [`TofFrame`] are stated in — see
     /// [`ModelResult`]. A read; asked once per session.
     pub const ROBOT_MODEL: &str = "robot.model";
+
+    /// The vet book: the robot's lifetime record — see [`crate::vetbook`]. A read.
+    pub const ROBOT_VETBOOK: &str = "robot.vetbook";
+    /// A dated line of free text in the vet book. Kept for the life of the robot.
+    pub const ROBOT_VETBOOK_NOTE: &str = "robot.vetbookNote";
+    /// Another daemon's counts and records since its last report, for the vet book — see
+    /// [`crate::vetbook::VetbookTallyParams`]. Local daemons only.
+    pub const ROBOT_VETBOOK_TALLY: &str = "robot.vetbookTally";
 
     /// Put a different `.onnx` in one slot, or drop an override and go back to the default.
     ///
@@ -779,6 +866,11 @@ pub mod method {
     pub const ACCOUNT_STATUS: &str = "account.status";
     /// Forget the account. The robot stops being reachable from outside the LAN.
     pub const ACCOUNT_LOGOUT: &str = "account.logout";
+
+    /// Publish the vet book to the signed-in account, as a public dataset, and answer with the
+    /// link to its card — see [`crate::VetbookShareResult`]. Served by `updaterd`, which holds the
+    /// account and the network stack; the book itself comes from `robotd`.
+    pub const VETBOOK_SHARE: &str = "vetbook.share";
 
     /// Turn the connection into a stream of [`ROBOT_STATE`] notifications.
     pub const ROBOT_SUBSCRIBE: &str = "robot.subscribe";
@@ -895,8 +987,10 @@ pub mod method {
     /// One 8×8 depth frame, pushed after [`TOF_STREAM`].
     pub const TOF_FRAME: &str = "tof.frame";
 
-    /// Subscribe to the head IMU (BMI088 on the HAT, same I²C bus as the ToF). The answer
-    /// describes the sensor, then [`HEAD_IMU_FRAME`] notifications arrive until the connection closes.
+    /// Subscribe to the head IMU. Served by `tofd` on `zero3` (the BMI088 on the HAT, same I²C
+    /// bus as the ToF) and by `robotd` on `beta` (the face board's LSM6DSV16X); the other daemon
+    /// answers with `unavailable` naming the right one. The answer describes the sensor, then
+    /// [`HEAD_IMU_FRAME`] notifications arrive until the connection closes.
     pub const HEAD_IMU_STREAM: &str = "head_imu.stream";
 
     /// One head-IMU sample, pushed after [`HEAD_IMU_STREAM`].
@@ -1002,6 +1096,8 @@ pub enum Call {
     RobotRelax,
     /// Reboot servos (all of them, or the ids named), then limp. See [`method::ROBOT_REBOOT_MOTORS`].
     RobotRebootMotors(RebootMotorsParams),
+    /// Sit, ease into the rest pose, then torque off and reboot. See [`method::ROBOT_REST`].
+    RobotRest,
     /// Run a one-shot skill, or toggle sit↔stand.
     RobotDo(DoParams),
     /// Standing body pose. Continuous. Send as a notification.
@@ -1010,6 +1106,8 @@ pub enum Call {
     RobotMouth(MouthParams),
     /// Play a voice-bank sound.
     RobotSound(SoundParams),
+    /// Switch the flashlight. See [`method::ROBOT_FLASHLIGHT`].
+    RobotFlashlight(FlashlightParams),
     /// Pick the ToF theremin up or put it down. Discrete; the answer is [`ThereminResult`].
     RobotTheremin(ThereminParams),
     /// Start or stop looking for other ducks to sing with. Discrete; the answer is
@@ -1032,6 +1130,12 @@ pub enum Call {
     RobotPolicies,
     /// Static robot geometry for a mapper; see [`method::ROBOT_MODEL`].
     RobotModel,
+    /// The lifetime record; see [`method::ROBOT_VETBOOK`].
+    RobotVetbook,
+    /// Write a note in it; see [`method::ROBOT_VETBOOK_NOTE`].
+    RobotVetbookNote(vetbook::VetbookNoteParams),
+    /// Add another daemon's counts to it; see [`method::ROBOT_VETBOOK_TALLY`].
+    RobotVetbookTally(vetbook::VetbookTallyParams),
     /// Load one slot, or reset it; see [`method::ROBOT_LOAD_POLICY`].
     RobotLoadPolicy(LoadPolicyParams),
     /// Re-read every slot from disk; see [`method::ROBOT_RELOAD_POLICIES`].
@@ -1060,6 +1164,8 @@ pub enum Call {
     AccountStatus,
     /// Forget the account; see [`method::ACCOUNT_LOGOUT`].
     AccountLogout,
+    /// Publish the vet book; see [`method::VETBOOK_SHARE`].
+    VetbookShare,
     RobotSubscribe(SubscribeParams),
     // ── net.* ────────────────────────────────────────────────────────────────
     NetStatus,
@@ -1103,7 +1209,8 @@ pub enum Call {
     PadInput,
     /// Subscribe to the ToF depth stream. Answered by `tofd`.
     TofStream,
-    /// Subscribe to the head IMU (BMI088 on the HAT); see [`method::HEAD_IMU_STREAM`].
+    /// Subscribe to the head IMU (`tofd` on zero3, `robotd` on beta); see
+    /// [`method::HEAD_IMU_STREAM`].
     HeadImuStream,
 }
 
@@ -1184,10 +1291,12 @@ impl Call {
             Call::RobotInit => method::ROBOT_INIT,
             Call::RobotRelax => method::ROBOT_RELAX,
             Call::RobotRebootMotors(_) => method::ROBOT_REBOOT_MOTORS,
+            Call::RobotRest => method::ROBOT_REST,
             Call::RobotDo(_) => method::ROBOT_DO,
             Call::RobotPose(_) => method::ROBOT_POSE,
             Call::RobotMouth(_) => method::ROBOT_MOUTH,
             Call::RobotSound(_) => method::ROBOT_SOUND,
+            Call::RobotFlashlight(_) => method::ROBOT_FLASHLIGHT,
             Call::RobotTheremin(_) => method::ROBOT_THEREMIN,
             Call::RobotChorale(_) => method::ROBOT_CHORALE,
             Call::ChoraleSubscribe => method::CHORALE_SUBSCRIBE,
@@ -1198,6 +1307,9 @@ impl Call {
             Call::RobotSetMode(_) => method::ROBOT_SET_MODE,
             Call::RobotPolicies => method::ROBOT_POLICIES,
             Call::RobotModel => method::ROBOT_MODEL,
+            Call::RobotVetbook => method::ROBOT_VETBOOK,
+            Call::RobotVetbookNote(_) => method::ROBOT_VETBOOK_NOTE,
+            Call::RobotVetbookTally(_) => method::ROBOT_VETBOOK_TALLY,
             Call::RobotLoadPolicy(_) => method::ROBOT_LOAD_POLICY,
             Call::RobotReloadPolicies => method::ROBOT_RELOAD_POLICIES,
             Call::PolicyCheck => method::POLICY_CHECK,
@@ -1209,6 +1321,7 @@ impl Call {
             Call::AccountLogin(_) => method::ACCOUNT_LOGIN,
             Call::AccountStatus => method::ACCOUNT_STATUS,
             Call::AccountLogout => method::ACCOUNT_LOGOUT,
+            Call::VetbookShare => method::VETBOOK_SHARE,
             Call::RobotSubscribe(_) => method::ROBOT_SUBSCRIBE,
             Call::NetStatus => method::NET_STATUS,
             Call::NetScan => method::NET_SCAN,
@@ -1280,7 +1393,10 @@ impl Call {
                 // `account.status` is a read and stays ungated — a support engineer should be
                 // able to ask which account a robot thinks it belongs to.
                 | Call::AccountLogin(_)
-                | Call::AccountLogout
+                | Call::AccountLogout // Not `vetbook.share`. It changes nothing on the robot, and it publishes under an
+                                      // account root already signed in — with a token the `robot` group can read, so
+                                      // this gate would protect nothing and only put `sudo` in front of a share button.
+                                      // Which transports may carry it is the route tables' decision, not this one.
         )
     }
 
@@ -1346,6 +1462,9 @@ impl Call {
             // Both read or write local state only. `status` is asked on a poll while a login is
             // in flight, so it must not queue behind anything.
             Call::AccountStatus | Call::AccountLogout => (Updater, Prompt),
+            // Three or four round trips to Hugging Face: a repo create and a commit, plus a read
+            // of the book from `robotd` and of the name from `configd`.
+            Call::VetbookShare => (Updater, Slow),
             // Owns its connection until the peer goes away and never reads another request.
             Call::Subscribe => (Updater, Stream),
 
@@ -1356,7 +1475,12 @@ impl Call {
             | Call::RobotRemoteSessionActive
             | Call::RobotPolicies
             | Call::RobotModel
+            | Call::RobotVetbook
             | Call::RobotMode => (Robot, Prompt),
+            // A small write to a file `robotd` already owns, done on the IPC side.
+            Call::RobotVetbookNote(_) => (Robot, Prompt),
+            // A merge into the book under its lock, and nothing else.
+            Call::RobotVetbookTally(_) => (Robot, Prompt),
             // Intents and one-shot skills. All fast: they store a value the control loop reads on
             // its next tick, and none of them waits for the robot to finish anything.
             Call::RobotMove(_)
@@ -1367,10 +1491,12 @@ impl Call {
             | Call::RobotInit
             | Call::RobotRelax
             | Call::RobotRebootMotors(_)
+            | Call::RobotRest
             | Call::RobotDo(_)
             | Call::RobotPose(_)
             | Call::RobotMouth(_)
             | Call::RobotSound(_)
+            | Call::RobotFlashlight(_)
             | Call::RobotTheremin(_)
             | Call::RobotChorale(_)
             | Call::RobotSetMode(_)
@@ -1487,6 +1613,9 @@ impl Call {
             Call::PolicySearch(p) => encode(p),
             Call::AccountLogin(p) => encode(p),
             Call::RobotSound(p) => encode(p),
+            Call::RobotFlashlight(p) => encode(p),
+            Call::RobotVetbookNote(p) => encode(p),
+            Call::RobotVetbookTally(p) => encode(p),
             Call::RobotTheremin(p) => encode(p),
             Call::RobotChorale(p) => encode(p),
             Call::ChoraleBeaconSet(p) => encode(p),
@@ -1512,14 +1641,17 @@ impl Call {
             | Call::RobotStop
             | Call::RobotInit
             | Call::RobotRelax
+            | Call::RobotRest
             | Call::RobotShutdown
             | Call::RobotPolicies
             | Call::RobotModel
+            | Call::RobotVetbook
             | Call::RobotReloadPolicies
             | Call::PolicyCheck
             | Call::DetectorCheck
             | Call::AccountStatus
             | Call::AccountLogout
+            | Call::VetbookShare
             | Call::RobotMode => Value::Object(serde_json::Map::new()),
             Call::NetStatus
             | Call::NetScan
@@ -1573,10 +1705,12 @@ impl Call {
             method::ROBOT_INIT => Call::RobotInit,
             method::ROBOT_RELAX => Call::RobotRelax,
             method::ROBOT_REBOOT_MOTORS => Call::RobotRebootMotors(decode(params)?),
+            method::ROBOT_REST => Call::RobotRest,
             method::ROBOT_DO => Call::RobotDo(decode(params)?),
             method::ROBOT_POSE => Call::RobotPose(decode(params)?),
             method::ROBOT_MOUTH => Call::RobotMouth(decode(params)?),
             method::ROBOT_SOUND => Call::RobotSound(decode(params)?),
+            method::ROBOT_FLASHLIGHT => Call::RobotFlashlight(decode(params)?),
             method::ROBOT_THEREMIN => Call::RobotTheremin(decode(params)?),
             method::ROBOT_CHORALE => Call::RobotChorale(decode(params)?),
             method::CHORALE_SUBSCRIBE => Call::ChoraleSubscribe,
@@ -1587,6 +1721,9 @@ impl Call {
             method::ROBOT_SET_MODE => Call::RobotSetMode(decode(params)?),
             method::ROBOT_POLICIES => Call::RobotPolicies,
             method::ROBOT_MODEL => Call::RobotModel,
+            method::ROBOT_VETBOOK => Call::RobotVetbook,
+            method::ROBOT_VETBOOK_NOTE => Call::RobotVetbookNote(decode(params)?),
+            method::ROBOT_VETBOOK_TALLY => Call::RobotVetbookTally(decode(params)?),
             method::ROBOT_LOAD_POLICY => Call::RobotLoadPolicy(decode(params)?),
             method::ROBOT_RELOAD_POLICIES => Call::RobotReloadPolicies,
             method::POLICY_CHECK => Call::PolicyCheck,
@@ -1598,6 +1735,7 @@ impl Call {
             method::ACCOUNT_LOGIN => Call::AccountLogin(decode(params)?),
             method::ACCOUNT_STATUS => Call::AccountStatus,
             method::ACCOUNT_LOGOUT => Call::AccountLogout,
+            method::VETBOOK_SHARE => Call::VetbookShare,
             method::ROBOT_SUBSCRIBE => Call::RobotSubscribe(decode(params)?),
             method::NET_STATUS => Call::NetStatus,
             method::NET_SCAN => Call::NetScan,
@@ -1726,6 +1864,7 @@ pub mod test_support {
             Call::RobotInit,
             Call::RobotRelax,
             Call::RobotRebootMotors(RebootMotorsParams { ids: vec![3, 11] }),
+            Call::RobotRest,
             Call::RobotDo(DoParams {
                 skill: "ground_pick".into(),
             }),
@@ -1740,10 +1879,23 @@ pub mod test_support {
                 tag: SoundTag::Chirp,
                 hold: None,
             }),
+            Call::RobotFlashlight(FlashlightParams {
+                on: true,
+                toggle: false,
+                color: FlashlightColor::Cyan,
+            }),
             Call::RobotShutdown,
             Call::RobotMode,
             Call::RobotPolicies,
             Call::RobotModel,
+            Call::RobotVetbook,
+            Call::RobotVetbookNote(vetbook::VetbookNoteParams {
+                text: "reglued the beak".into(),
+            }),
+            Call::RobotVetbookTally(vetbook::VetbookTallyParams {
+                tallies: [(vetbook::key::PHOTOS.to_owned(), 1.0)].into(),
+                ..Default::default()
+            }),
             Call::RobotReloadPolicies,
             Call::PolicyCheck,
             Call::PolicyInstall(PolicyInstallParams {
@@ -1764,6 +1916,7 @@ pub mod test_support {
             Call::AccountLogin(AccountLoginParams { force: false }),
             Call::AccountStatus,
             Call::AccountLogout,
+            Call::VetbookShare,
             Call::RobotLoadPolicy(LoadPolicyParams {
                 slot: Some("walk".into()),
                 path: Some("/var/lib/robot/policies/bouncy.onnx".into()),
@@ -2205,6 +2358,46 @@ pub struct SoundParams {
     /// so a client that dies mid-ride does not leave the robot going "wheee" forever.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub hold: Option<bool>,
+}
+
+/// What the flashlight shows: the seven colours its three on/off channels make.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum FlashlightColor {
+    #[default]
+    White,
+    Red,
+    Green,
+    Blue,
+    Yellow,
+    Cyan,
+    Magenta,
+}
+
+impl FlashlightColor {
+    /// Which of the red, green and blue channels are lit.
+    pub fn channels(self) -> [bool; 3] {
+        match self {
+            FlashlightColor::White => [true, true, true],
+            FlashlightColor::Red => [true, false, false],
+            FlashlightColor::Green => [false, true, false],
+            FlashlightColor::Blue => [false, false, true],
+            FlashlightColor::Yellow => [true, true, false],
+            FlashlightColor::Cyan => [false, true, true],
+            FlashlightColor::Magenta => [true, false, true],
+        }
+    }
+}
+
+/// See [`method::ROBOT_FLASHLIGHT`]. Shaped like [`EnableParams`]: `toggle` wins over `on`, so a
+/// button that does not know the light's state can still flip it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct FlashlightParams {
+    pub on: bool,
+    pub toggle: bool,
+    /// The colour it lights in. Ignored when the call switches it off.
+    pub color: FlashlightColor,
 }
 
 /// See [`method::ROBOT_THEREMIN`].
@@ -2668,6 +2861,22 @@ pub struct Account {
     /// Whether a refresh token is stored, so an expiring access token can be renewed without
     /// anybody signing in again.
     pub refreshable: bool,
+}
+
+/// Answer to [`Call::VetbookShare`]: where the book went, and the link to show people.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct VetbookShareResult {
+    /// The page to share: the card, with buttons to post it. Its preview image is the card, so the
+    /// link unfurls as the card wherever it is pasted.
+    pub url: String,
+    /// The card alone, as a PNG.
+    pub image: String,
+    /// The dataset the book was published to, `<user>/<robot name>-vetbook`.
+    pub dataset: String,
+    /// Which of the cards this share drew, as the Space names it: `notebook`, `purikura`,
+    /// `profile`, `receipt`, `passport`, `gameboy`, `polaroid` or `fifa`.
+    pub card: String,
 }
 
 /// Answer to [`Call::AccountLogout`].
@@ -3526,7 +3735,7 @@ pub struct LoopHealth {
 /// `#[serde(default)]` for the reason spelled out on [`ImuHealth`], and it applies here even more
 /// plainly: these are failure counters whose zero the doc comments below already call meaningful.
 /// An older `robotd` that omits one is saying "no failures", not "unknown".
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct BusHealth {
     /// Consecutive failed reads; any success resets it. One is ordinary on a serial bus,
@@ -3536,6 +3745,32 @@ pub struct BusHealth {
     /// commanded anything and is still waiting for a robot to answer — the signature of
     /// servo power being off.
     pub startup_failures: u32,
+    /// While waiting: the expected servo IDs ([`JOINT_IDS`]) that did not answer the last ping
+    /// round, in that table's order. Empty once the bus is up, before the first round, and when
+    /// the port itself would not open. All fifteen is servo power off; some of them is servos
+    /// unplugged, and naming them is the point.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub missing: Vec<u8>,
+}
+
+impl BusHealth {
+    /// Whether some servos answer and these do not — a robot that is there, with parts of it
+    /// missing, as opposed to no robot at all.
+    pub fn partly_missing(&self) -> bool {
+        !self.missing.is_empty() && self.missing.len() < JOINT_IDS.len()
+    }
+
+    /// The missing servos as people read them: `32 head_yaw, 33 head_roll`.
+    pub fn describe_missing(&self) -> String {
+        self.missing
+            .iter()
+            .map(|&id| match joint_of(id) {
+                Some(joint) => format!("{id} {joint}"),
+                None => id.to_string(),
+            })
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
 }
 
 /// The IMU board, which rides the motor bus.
@@ -3573,6 +3808,12 @@ pub struct ImuHealth {
     /// `sync_read` — so the bus reports no error and `ready` stays true — and repeats itself on
     /// every tick, which makes the run climb without bound. See [`ImuHealth::frozen`].
     pub consecutive_stale_blocks: u64,
+    /// While the bus is coming up: every servo answered its ping and the IMU board did not.
+    /// `robotd` waits rather than run without orientation, so this is also why it is not
+    /// ticking. Cleared once the bus is up; never set at runtime, where a board that stops
+    /// answering shows as consecutive bus read failures instead.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub missing: bool,
 }
 
 impl ImuHealth {
@@ -3656,6 +3897,17 @@ pub struct MotorThermal {
 pub struct Battery {
     pub volts: f64,
     pub percent: f64,
+}
+
+impl Battery {
+    /// The percentages a reading is coloured at, by every client that shows one.
+    ///
+    /// Not display taste: 0% is `duck_control::model::BATTERY_EMPTY_V`, which is the voltage at
+    /// which `robotd` sits the robot down and cuts power. The percentage is a countdown to that,
+    /// so the last fifth of it is worth seeing from across a room. Here rather than in a client,
+    /// so `robotctl monitor` and `duckctl udp-pad` cannot disagree about the same pack.
+    pub const LOW_PCT: f64 = 30.0;
+    pub const CRITICAL_PCT: f64 = 15.0;
 }
 
 /// Answer to a discrete intent — [`Call::RobotStop`], [`Call::RobotEnable`].
@@ -3829,9 +4081,13 @@ pub struct PoseState {
 pub struct FramesState {
     pub camera: PoseState,
     pub tof: PoseState,
-    /// The head IMU (BMI088) in the trunk frame. The `head_imu.stream` samples are in the IMU's
-    /// own tilted axes; this pose (sensor→trunk, from the same head FK) is how a consumer rotates
+    /// The head IMU in the trunk frame. The `head_imu.stream` samples are in the IMU's own
+    /// tilted axes; this pose (sensor→trunk, from the same head FK) is how a consumer rotates
     /// them into the trunk/camera frame. Absent from a daemon predating it. (v24)
+    ///
+    /// **The mount is the `zero3` HAT's BMI088.** The kinematic model has no `beta` face board
+    /// yet, so on a `beta` this pose does not describe its LSM6DSV16X until the model gains that
+    /// mount.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub head_imu: Option<PoseState>,
 }
@@ -3941,6 +4197,13 @@ pub struct SafetyState {
     /// requested gain when it decides the robot has fallen, and that override was invisible.
     #[serde(default)]
     pub gain: Option<u16>,
+    /// Somebody is holding the robot: the pick-up detector (`[pickup]`) has paused the policy
+    /// and the legs hold the pause pose until it is put back down. A state of the robot, like
+    /// `fallen`, rather than a policy — while it is true `policy` reads `held`.
+    ///
+    /// Absent from a `robotd` that predates the detector, which reads as never picked up.
+    #[serde(default)]
+    pub picked_up: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -4391,7 +4654,7 @@ pub struct SkillsResult {
 #[derive(Debug, Clone, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PadBindParams {
-    /// `"a"`, `"x"`, `"lb"`, `"rb"` or `"dpad_down"`. A string for the reason a slot is one: a
+    /// `"a"`, `"b"`, `"x"`, `"y"`, `"lb"` or `"rb"`. A string for the reason a slot is one: a
     /// button this build does not have should be refused with the list of ones it does.
     pub button: String,
     /// Three states in one field, the same shape [`LoadPolicyParams`] uses for a path.
@@ -4792,7 +5055,8 @@ pub struct TofFrame {
 #[serde(default)]
 pub struct HeadImuStreamResult {
     pub accepted: bool,
-    /// The IMU that answered, e.g. `BMI088`. `None` when there is none — see `unavailable`.
+    /// The IMU that answered: `BMI088` (zero3) or `LSM6DSV16X` (beta). `None` when there is
+    /// none — see `unavailable`, which also names the daemon to ask when it is not this one.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sensor: Option<String>,
     /// Why there is no IMU: not fitted, bus unreadable, chip-id mismatch.
@@ -4804,7 +5068,9 @@ pub struct HeadImuStreamResult {
 
 /// One head-IMU sample — a [`method::HEAD_IMU_FRAME`] notification.
 ///
-/// The BMI088 on the HAT, read by `tofd` (it owns that I²C bus). All values are in the IMU's own
+/// Which chip and which daemon is the board's: on `zero3` the BMI088 on the HAT, read by `tofd`
+/// (it owns that I²C bus) with a Madgwick fusion; on `beta` the face board's LSM6DSV16X, read by
+/// `robotd`, its quaternion fused on the chip (SFLP game vector). All values are in the IMU's own
 /// axes, which are tilted relative to the head/camera — the mount is not axis-aligned. To place a
 /// sample in the trunk/camera frame, rotate it by [`FramesState::head_imu`] (the sensor→trunk
 /// pose the kinematics compute for this tick). This is the head IMU, distinct from the body IMU
@@ -4818,13 +5084,13 @@ pub struct HeadImuFrame {
     pub at_us: u64,
     /// `CLOCK_MONOTONIC` when the sample was read, ns — the clock [`RobotState::t_ns`] shares.
     pub t_ns: u64,
-    /// Angular velocity, rad/s, in the BMI088's own (tilted) sensor axes — NOT the head or
+    /// Angular velocity, rad/s, in the chip's own (tilted) sensor axes — NOT the head or
     /// camera frame. Combine with [`FramesState::head_imu`] (the sensor→trunk pose from the
     /// kinematics) to place it. See that field.
     pub gyro: [f32; 3],
-    /// Specific force, m/s², BMI088 sensor axes.
+    /// Specific force, m/s², the chip's sensor axes.
     pub accel: [f32; 3],
-    /// Madgwick orientation, scalar-first `[w, x, y, z]`, sensor→world (gravity down, yaw
+    /// Orientation, scalar-first `[w, x, y, z]`, sensor→world (gravity down, yaw
     /// arbitrary). The world here is the IMU's own; relate it to the trunk via the mount pose.
     pub quat: [f32; 4],
     /// Chip temperature, °C.
@@ -5563,7 +5829,7 @@ mod tests {
     fn every_call_covers_every_variant() {
         assert_eq!(
             every_call().len(),
-            67,
+            73,
             "a Call variant was added or removed — update every_call() and this count"
         );
     }
@@ -6278,6 +6544,7 @@ mod tests {
                 limp: false,
                 gravity: [0.0, 0.0, -1.0],
                 gain: Some(200),
+                picked_up: false,
             },
             control_loop: LoopState {
                 hz: 49.8,
@@ -6364,6 +6631,10 @@ mod tests {
         assert!(
             !imu.frozen(),
             "a default run must never look like a dead IMU"
+        );
+        assert!(
+            !imu.missing,
+            "and an older robotd never claims the board is gone"
         );
     }
 
